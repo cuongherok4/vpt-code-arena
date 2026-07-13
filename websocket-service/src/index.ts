@@ -1,7 +1,7 @@
 import express from 'express';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 const app = express();
 const httpServer = createServer(app);
