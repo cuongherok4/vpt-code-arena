@@ -1,6 +1,6 @@
 # Tech Stack
 
-> Ghi lựa chọn **chính** (default) trước, lựa chọn thay thế (nếu có) để trong ngoặc. Không liệt kê công cụ phụ không ảnh hưởng kiến trúc.
+> Ghi lựa chọn **chính** (default) trước, lựa chọn thay thế (nếu có) để trong ngoặc.
 
 ---
 
@@ -9,32 +9,62 @@
 | Hạng mục | Lựa chọn |
 |---|---|
 | Framework | React 18 + TypeScript |
-| State management | Zustand (thay thế: Redux Toolkit) |
-| UI components | Shadcn/ui (thay thế: MUI) |
+| State management | Zustand |
+| UI components | Shadcn/ui |
 | Styling | Tailwind CSS |
 | Form + validate | React Hook Form + Zod |
-| Code editor | Monaco Editor (VS Code engine) — syntax highlight nhiều ngôn ngữ |
+| Code editor | Monaco Editor (VS Code engine) |
 | Real-time | Socket.io-client |
-| Data fetching | Axios + React Query |
+| Data fetching | Axios + React Query (TanStack Query v5) |
 | Routing | React Router v6 (protected routes, lazy loading) |
 | Build tool | Vite |
 | Charts | Recharts (leaderboard, thống kê) |
 
-## Backend
+---
+
+## Backend (Main API — Java Spring Boot)
 
 | Hạng mục | Lựa chọn |
 |---|---|
-| Runtime | Node.js (LTS) + TypeScript |
-| Framework | NestJS (thay thế: Express.js) |
-| Database | PostgreSQL, ORM: Prisma |
-| Cache / session / realtime data | Redis |
-| Real-time | Socket.io (namespace theo room, broadcast events) |
-| Code execution engine | Judge0 API (thay thế: Docker sandbox tự build nếu cần kiểm soát sâu hơn) |
-| Auth | JWT (access + refresh) + Bcrypt; OAuth qua Passport.js nếu cần login Google/GitHub |
-| Task queue / scheduler | Bull (job queue) + node-cron (auto-end battle, cleanup) |
-| Email | Nodemailer + SendGrid/SMTP |
-| Testing | Jest + Supertest |
-| API docs | Swagger/OpenAPI |
+| Runtime | Java 21 (LTS) |
+| Framework | Spring Boot 3.x |
+| Build tool | Maven (thay thế: Gradle) |
+| Database ORM | Spring Data JPA + Hibernate |
+| Database | PostgreSQL 16 |
+| Cache | Redis 7 (Spring Data Redis) |
+| Auth | Spring Security + JWT (JJWT library) |
+| Social Login | Spring Security OAuth2 Client (Google, GitHub) |
+| Email | Spring Mail + SendGrid/SMTP |
+| API docs | SpringDoc OpenAPI 3 (Swagger UI tự động) |
+| Validation | Jakarta Bean Validation (Hibernate Validator) |
+| Task scheduler | Spring Scheduler (`@Scheduled`) + (thay thế: Quartz nếu cần distributed) |
+| Testing | JUnit 5 + Mockito + Spring Boot Test |
+| Migration DB | Flyway |
+
+---
+
+## WebSocket Service (Tách riêng — Node.js)
+
+> **Lý do tách riêng**: Socket.io là thư viện Node.js trưởng thành nhất cho real-time với 20 người/phòng. Spring WebSocket (STOMP) phức tạp hơn và ít ecosystem hơn. Service này nhỏ, chỉ xử lý relay events.
+
+| Hạng mục | Lựa chọn |
+|---|---|
+| Runtime | Node.js 20 LTS + TypeScript |
+| Real-time | Socket.io 4.x (namespace theo room_id) |
+| HTTP client | Axios (gọi lại Main API để validate) |
+| Cache | Redis (shared với Main API — lưu room state, timer) |
+
+---
+
+## Judge Service (Tách riêng — Node.js wrapper)
+
+| Hạng mục | Lựa chọn |
+|---|---|
+| Runtime | Node.js 20 LTS + TypeScript |
+| Engine | Judge0 API (self-hosted Docker — xem `docs/backend/judge-integration.md`) |
+| Queue | Bull (Redis-backed job queue — xử lý submission async) |
+
+---
 
 ## DevOps & Hạ tầng
 
@@ -42,20 +72,27 @@
 |---|---|
 | Containerization | Docker + Docker Compose |
 | CI/CD | GitHub Actions (test → build → deploy khi merge main) |
-| Hosting | AWS (EC2 + RDS + S3 + CloudFront) hoặc DigitalOcean/Vercel cho MVP nhỏ |
-| Reverse proxy / scaling | Nginx; Kubernetes chỉ cân nhắc khi cần auto-scale thật sự |
-| Monitoring | Sentry (error tracking) + Datadog/Prometheus+Grafana (khi cần) |
+| Hosting | AWS (EC2 + RDS + ElastiCache + S3) hoặc DigitalOcean cho MVP |
+| Reverse proxy | Nginx (route `/api` → Spring Boot, `/ws` → WebSocket Service) |
+| Monitoring | Spring Boot Actuator + Prometheus + Grafana; Sentry (FE/Node error tracking) |
 
-## Bảo mật (bắt buộc, không tùy chọn)
+---
 
-- Helmet.js (HTTP headers), express-rate-limit (chống DDoS/spam submit)
-- Input validation: Zod/Joi + parameterized queries (chống SQL injection)
+## Bảo mật (bắt buộc)
+
+- Spring Security filter chain cho tất cả endpoint
 - HTTPS/TLS bắt buộc ở production (Let's Encrypt)
-- Mã hóa dữ liệu nhạy cảm at-rest & in-transit, audit log cho hành động admin
+- Rate limiting: Bucket4j (Spring Boot) + Redis cho chống spam submit
+- Input validation: Jakarta Bean Validation + parameterized queries (JPA chống SQL injection)
+- Mã hóa password: BCrypt (Spring Security mặc định)
+- JWT: access token 15 phút + refresh token 7 ngày (rotate on use)
+- CORS config chặt chẽ theo môi trường
 
 ---
 
 ## Ghi chú lựa chọn
 
-- **Vì sao Socket.io bắt buộc**: Battle Module cần đồng bộ countdown, leaderboard, submit real-time cho tối đa 20 người/phòng — REST polling không đáp ứng đủ độ trễ thấp.
-- **Vì sao Judge0 là lựa chọn mặc định**: giảm thời gian dựng judge server riêng ở giai đoạn đầu; chuyển sang Docker sandbox tự build khi cần kiểm soát bảo mật/tài nguyên chặt hơn (xem Risk trong roadmap.md).
+- **Vì sao Spring Boot**: Yêu cầu của dự án. Spring ecosystem (Security, Data JPA, Scheduler) rất mature cho REST API.
+- **Vì sao WebSocket Service tách riêng**: Tránh đưa Socket.io dependency vào Spring Boot; service nhỏ, scale độc lập khi cần.
+- **Vì sao Judge0 self-hosted**: Tránh rate limit public API; kiểm soát bảo mật sandbox tốt hơn khi production.
+- **Vì sao Flyway**: Migration DB version-controlled, rollback được, quan trọng khi team nhiều người.

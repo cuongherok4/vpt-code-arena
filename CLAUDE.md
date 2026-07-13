@@ -30,19 +30,34 @@ Chi tiết đầy đủ từng module nằm ở `docs/features/`.
 ## 3. Bản đồ tài liệu (Doc Map)
 
 ```
-CLAUDE.md                          → Bạn đang ở đây (tổng quan)
-PROJECT_REQUIREMENTS.md            → Checklist đầy đủ mọi chức năng + độ ưu tiên
+CLAUDE.md                              → Bạn đang ở đây (tổng quan)
+PROJECT_REQUIREMENTS.md                → Checklist đầy đủ mọi chức năng + độ ưu tiên
 docs/
-├─ 01-system-design/
-│  ├─ tech-stack.md                → Công nghệ dùng cho FE/BE/DevOps
-│  └─ database-schema.md           → Danh sách bảng DB chính
+├─ project-init/
+│  ├─ README.md                        → Thứ tự đọc tài liệu
+│  ├─ env-setup.md                     → Hướng dẫn setup môi trường + .env
+│  └─ folder-structure.md              → Cấu trúc thư mục toàn bộ repo
+├─ system-design/
+│  ├─ tech-stack.md                    → Công nghệ dùng cho FE/BE/DevOps
+│  ├─ database-schema.md               → Schema DB (Flyway SQL + JPA entities)
+│  ├─ api-contracts.md                 → REST API endpoints đầy đủ
+│  └─ websocket-events.md              → Socket.io events (Battle + Messaging)
 ├─ features/
-│  ├─ learn-module.md              → Chi tiết module Học
-│  ├─ exam-module.md               → Chi tiết module Thi (Ranked Practice)
-│  ├─ battle-module.md             → Chi tiết module Thi Đấu (real-time)
-│  └─ messaging.md                 → Chat toàn cầu / riêng / trong phòng
-└─ 05-deployment/
-   └─ roadmap.md                   → Lộ trình 10 phase, tiến độ hiện tại
+│  ├─ learn-module.md                  → Chi tiết module Học
+│  ├─ exam-module.md                   → Chi tiết module Thi (Ranked Practice)
+│  ├─ battle-module.md                 → Chi tiết module Thi Đấu (real-time)
+│  └─ messaging.md                     → Chat toàn cầu / riêng / trong phòng
+├─ backend/
+│  ├─ architecture.md                  → Cấu trúc Spring Boot (packages, modules)
+│  ├─ auth-flow.md                     → Flow JWT + OAuth2 (Google/GitHub)
+│  └─ judge-integration.md             → Tích hợp Judge0 self-hosted
+├─ frontend/
+│  ├─ architecture.md                  → Cấu trúc React + Zustand + Routing
+│  └─ pages-and-components.md          → Danh sách pages/components theo module
+├─ testing/
+│  └─ test-strategy.md                 → Chiến lược test (unit/integration/E2E)
+└─ deployment/
+   └─ roadmap.md                       → Lộ trình 10 phase + checklist chi tiết
 ```
 
 ---
@@ -57,7 +72,7 @@ docs/
 | 4 | Battle Module | ⚪ Chưa bắt đầu | 0% |
 | 5–10 | Auth, Messaging, Leaderboard, Polish, QA, Deploy | ⚪ Chưa bắt đầu | 0% |
 
-Chi tiết lộ trình từng tuần: xem `docs/05-deployment/roadmap.md`.
+Chi tiết lộ trình từng tuần và checklist task: xem `docs/deployment/roadmap.md`.
 
 ---
 
@@ -74,11 +89,19 @@ Chi tiết lộ trình từng tuần: xem `docs/05-deployment/roadmap.md`.
 ## 6. Ngăn xếp công nghệ (rút gọn — xem đầy đủ ở tech-stack.md)
 
 ```
-Frontend : React 18 + TypeScript, Tailwind CSS, Monaco Editor, Socket.io-client
-Backend  : Node.js + NestJS/Express + TypeScript, PostgreSQL (Prisma), Redis
-Real-time: Socket.io
-Chấm bài : Judge0 (hoặc Docker sandbox tự build)
-Hạ tầng  : Docker, GitHub Actions CI/CD, AWS/DigitalOcean
+Frontend         : React 18 + TypeScript, Tailwind CSS, Monaco Editor, Socket.io-client
+Backend (API)    : Java 21 + Spring Boot 3.x, PostgreSQL (JPA/Hibernate + Flyway), Redis
+Auth             : Spring Security + JWT (JJWT) + OAuth2 (Google, GitHub)
+WebSocket Service: Node.js 20 + Socket.io 4.x (microservice tách riêng)
+Judge Service    : Node.js 20 + Judge0 self-hosted Docker + Bull queue
+Hạ tầng         : Docker Compose, GitHub Actions CI/CD, AWS/DigitalOcean
+```
+
+**Kiến trúc 3 service:**
+```
+[Browser] ──REST──►  [Spring Boot :8080]  ──JDBC──► [PostgreSQL]
+          ──WS──►    [Node WS :3001]      ──Redis──► [Redis :6379]
+[Spring Boot] ──HTTP──► [Judge Service :3002] ──► [Judge0 Docker]
 ```
 
 ---
@@ -86,5 +109,5 @@ Hạ tầng  : Docker, GitHub Actions CI/CD, AWS/DigitalOcean
 ## 7. Team & Sprint
 
 - Sprint 2 tuần, standup 10:00 hằng ngày, review/retro thứ Sáu 16:00.
-- Team gợi ý: 1–2 FE, 1–2 BE, 1 DevOps/Full-stack, 1 QA (từ tuần 15).
+- Team gợi ý: 1–2 FE, 1–2 BE (Java), 1 DevOps/Full-stack, 1 QA (từ tuần 15).
 - Kênh làm việc: Slack (trao đổi), GitHub Issues/PR (task & review), Jira/Trello (sprint board).
