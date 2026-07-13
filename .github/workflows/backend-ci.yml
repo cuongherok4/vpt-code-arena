@@ -22,7 +22,7 @@ jobs:
           POSTGRES_USER: vpt_user
           POSTGRES_PASSWORD: vpt_password
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -51,6 +51,8 @@ jobs:
       run: ./mvnw clean package -DskipTests
       
     - name: Run Tests
+      env:
+        DATABASE_URL: jdbc:postgresql://localhost:5433/vpt_arena
       run: ./mvnw test
       
     - name: Check Jacoco Coverage
