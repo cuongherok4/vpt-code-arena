@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: "local"
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/vpt_arena
+    username: vpt_user
+    password: vpt_password
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.vpt.arena: DEBUG
+    org.hibernate.SQL: DEBUG
