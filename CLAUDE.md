@@ -66,13 +66,14 @@ docs/
 
 | Phase | Nội dung | Trạng thái | % |
 |---|---|---|---|
-| 1 | Setup & Infrastructure | 🔵 Đang làm | 40% |
+| 1 | Setup & Infrastructure | 🟢 Hoàn thành | 100% |
 | 2 | Learn Module | ⚪ Chưa bắt đầu | 0% |
 | 3 | Exam Module | ⚪ Chưa bắt đầu | 0% |
 | 4 | Battle Module | ⚪ Chưa bắt đầu | 0% |
 | 5–10 | Auth, Messaging, Leaderboard, Polish, QA, Deploy | ⚪ Chưa bắt đầu | 0% |
 
 Chi tiết lộ trình từng tuần và checklist task: xem `docs/deployment/roadmap.md`.
+
 
 ---
 

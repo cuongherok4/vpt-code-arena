@@ -4,14 +4,14 @@ spring:
       on-profile: "local"
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/vpt_arena
+    url: jdbc:postgresql://localhost:5433/vpt_arena
     username: vpt_user
     password: vpt_password
 
   data:
     redis:
       host: localhost
-      port: 6379
+      port: 6380
 
 logging:
   level:

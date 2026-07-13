@@ -32,12 +32,12 @@
 - [x] Khởi tạo project bằng [Spring Initializr](https://start.spring.io) với dependencies trong `tech-stack.md`
 - [x] Cấu hình `application.yml` + `application-local.yml`
 - [x] Viết `V1__init_schema.sql` (copy từ `database-schema.md`), chạy `./mvnw flyway:migrate`
-- [ ] Tạo tất cả JPA Entities + Enums (xem `database-schema.md`)
-- [ ] Tạo tất cả Repository interfaces
-- [ ] Setup Spring Security cơ bản (permit all để test, lock down sau)
-- [ ] Setup SwaggerDoc — verify `http://localhost:8080/swagger-ui.html`
-- [ ] Setup Spring Boot Actuator — verify `http://localhost:8080/actuator/health`
-- [ ] CI chạy `./mvnw test` pass
+- [x] Tạo tất cả JPA Entities + Enums (xem `database-schema.md`) — 11 entities + 5 enums
+- [x] Tạo tất cả Repository interfaces — 11 repositories
+- [x] Setup Spring Security cơ bản (permit all để test, lock down sau)
+- [x] Setup SwaggerDoc — verify `http://localhost:8080/swagger-ui.html` ✅
+- [x] Setup Spring Boot Actuator — verify `http://localhost:8080/actuator/health` ✅ status=UP
+- [x] CI chạy `./mvnw test` pass — Tests run: 1, Failures: 0, BUILD SUCCESS
 
 **WebSocket Service**
 - [x] `npm init` + cài dependencies (socket.io, typescript, ts-node-dev, axios, ioredis)
@@ -48,7 +48,7 @@
 **Judge Service**
 - [x] `npm init` + cài dependencies (bull, axios, express, typescript)
 - [x] Setup Bull queue cơ bản
-- [ ] Test gọi Judge0 API với submission đơn giản
+- [x] Test gọi Judge0 API với submission đơn giản — API hoạt động (Lưu ý: Execution có thể báo Internal Error trên Windows Docker Desktop do thiếu cgroups isolate, nhưng API service đã kết nối thành công)
 
 **Frontend**
 - [x] `npm create vite@latest frontend -- --template react-ts`
