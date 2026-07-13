@@ -1,0 +1,48 @@
+spring:
+  profiles:
+    active: local
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/vpt_arena}
+    username: ${DATABASE_USERNAME:vpt_user}
+    password: ${DATABASE_PASSWORD:vpt_password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: email, profile
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: user:email
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyThatIsAtLeast64CharactersLongSoThatItWorksProperlyForDevEnvironment1234567890}
+  access-expiry-seconds: ${JWT_ACCESS_EXPIRY_SECONDS:900}
+  refresh-expiry-days: ${JWT_REFRESH_EXPIRY_DAYS:7}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

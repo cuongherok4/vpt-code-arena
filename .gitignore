@@ -1,24 +1,68 @@
-# Compiled class file
+# ─────────────────────────────────────────
+# Node.js & React (Frontend, WebSocket, Judge)
+# ─────────────────────────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+build/
+.pnp
+.pnp.js
+
+# ─────────────────────────────────────────
+# Java & Spring Boot (Backend)
+# ─────────────────────────────────────────
+target/
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
+*.nar
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# ─────────────────────────────────────────
+# Environment variables (CỰC KỲ QUAN TRỌNG)
+# ─────────────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# ─────────────────────────────────────────
+# IDEs and Editors
+# ─────────────────────────────────────────
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+
+# macOS
+.DS_Store
+
+# ─────────────────────────────────────────
+# Logs and Databases
+# ─────────────────────────────────────────
+logs/
+*.log
+*.sqlite
+*.sqlite3
+
+# Thư mục data của Docker (nếu có map ra máy host)
+infrastructure/data/
+infrastructure/postgres_data/
+infrastructure/redis_data/
