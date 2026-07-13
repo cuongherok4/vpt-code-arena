@@ -4,7 +4,7 @@
 
 | Phase | Tuần | Nội dung | Deliverable | Trạng thái | % |
 |---|---|---|---|---|---|
-| 1 | 1–2 | Setup & Infrastructure | Môi trường dev sẵn sàng, CI/CD chạy được | 🔵 Đang làm | 40% |
+| 1 | 1–2 | Setup & Infrastructure | Môi trường dev sẵn sàng, CI/CD chạy được | 🟢 Hoàn thành | 100% |
 | 2 | 3–4 | Learn Module | Learn module hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | ⚪ Chưa bắt đầu | 0% |
@@ -22,16 +22,16 @@
 ### Phase 1 — Setup & Infrastructure (Tuần 1–2)
 
 **DevOps / Infrastructure**
-- [ ] Tạo GitHub repo, branch strategy (main/develop/feature/*)
-- [ ] Tạo `infrastructure/docker-compose.dev.yml` (PostgreSQL, Redis, Judge0)
-- [ ] Verify Judge0 chạy được: `curl http://localhost:2358/system_info`
-- [ ] Setup GitHub Actions: workflow backend-ci.yml + frontend-ci.yml
-- [ ] Tạo `.gitignore` đầy đủ cho Java, Node.js, React
+- [x] Tạo GitHub repo, branch strategy (main/develop/feature/*)
+- [x] Tạo `infrastructure/docker-compose.dev.yml` (PostgreSQL, Redis, Judge0)
+- [x] Verify Judge0 chạy được: `curl http://localhost:2358/system_info`
+- [x] Setup GitHub Actions: workflow backend-ci.yml + frontend-ci.yml
+- [x] Tạo `.gitignore` đầy đủ cho Java, Node.js, React
 
 **Backend (Spring Boot)**
-- [ ] Khởi tạo project bằng [Spring Initializr](https://start.spring.io) với dependencies trong `tech-stack.md`
-- [ ] Cấu hình `application.yml` + `application-local.yml`
-- [ ] Viết `V1__init_schema.sql` (copy từ `database-schema.md`), chạy `./mvnw flyway:migrate`
+- [x] Khởi tạo project bằng [Spring Initializr](https://start.spring.io) với dependencies trong `tech-stack.md`
+- [x] Cấu hình `application.yml` + `application-local.yml`
+- [x] Viết `V1__init_schema.sql` (copy từ `database-schema.md`), chạy `./mvnw flyway:migrate`
 - [ ] Tạo tất cả JPA Entities + Enums (xem `database-schema.md`)
 - [ ] Tạo tất cả Repository interfaces
 - [ ] Setup Spring Security cơ bản (permit all để test, lock down sau)
@@ -40,25 +40,25 @@
 - [ ] CI chạy `./mvnw test` pass
 
 **WebSocket Service**
-- [ ] `npm init` + cài dependencies (socket.io, typescript, ts-node-dev, axios, ioredis)
-- [ ] Setup TypeScript config
-- [ ] Entry point `src/index.ts` với health endpoint
-- [ ] Kết nối Redis
+- [x] `npm init` + cài dependencies (socket.io, typescript, ts-node-dev, axios, ioredis)
+- [x] Setup TypeScript config
+- [x] Entry point `src/index.ts` với health endpoint
+- [x] Kết nối Redis
 
 **Judge Service**
-- [ ] `npm init` + cài dependencies (bull, axios, express, typescript)
-- [ ] Setup Bull queue cơ bản
+- [x] `npm init` + cài dependencies (bull, axios, express, typescript)
+- [x] Setup Bull queue cơ bản
 - [ ] Test gọi Judge0 API với submission đơn giản
 
 **Frontend**
-- [ ] `npm create vite@latest frontend -- --template react-ts`
-- [ ] Cài Tailwind CSS, Shadcn/ui, React Router, Zustand, Axios, React Query
-- [ ] Cài Monaco Editor (`@monaco-editor/react`)
-- [ ] Cài Socket.io-client
-- [ ] Setup Vite proxy (forward `/api` tới Spring Boot để tránh CORS dev)
-- [ ] Tạo `router/index.tsx` với routes cơ bản
-- [ ] Tạo Navbar skeleton
-- [ ] Build pass (`npm run build`)
+- [x] `npm create vite@latest frontend -- --template react-ts`
+- [x] Cài Tailwind CSS, Shadcn/ui, React Router, Zustand, Axios, React Query
+- [x] Cài Monaco Editor (`@monaco-editor/react`)
+- [x] Cài Socket.io-client
+- [x] Setup Vite proxy (forward `/api` tới Spring Boot để tránh CORS dev)
+- [x] Tạo `router/index.tsx` với routes cơ bản
+- [x] Tạo Navbar skeleton
+- [x] Build pass (`npm run build`)
 
 ---
 
