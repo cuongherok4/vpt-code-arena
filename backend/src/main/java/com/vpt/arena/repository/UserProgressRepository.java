@@ -12,4 +12,6 @@ import java.util.List;
 public interface UserProgressRepository extends JpaRepository<UserProgress, UUID> {
     Optional<UserProgress> findByUserIdAndLessonId(UUID userId, UUID lessonId);
     List<UserProgress> findByUserIdAndChapterId(UUID userId, UUID chapterId);
+    List<UserProgress> findByUserId(UUID userId);
 }
+

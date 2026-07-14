@@ -23,22 +23,23 @@ public class LessonService {
     public LessonDetailDto getLesson(UUID lessonId, UUID userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found"));
-            
+
         LessonDetailDto dto = new LessonDetailDto();
         dto.setId(lesson.getId());
+        dto.setChapterId(lesson.getChapter().getId());
         dto.setTitle(lesson.getTitle());
         dto.setContent(lesson.getContent());
         dto.setOrder(lesson.getOrder());
         dto.setHasChallenge(lesson.isHasChallenge());
         dto.setChallengeDescription(lesson.getChallengeDescription());
-        
+
         if (userId != null) {
             userProgressRepository.findByUserIdAndLessonId(userId, lessonId).ifPresent(p -> {
                 dto.setCompleted(p.isCompleted());
                 dto.setChallengePassed(p.isChallengePassed());
             });
         }
-        
+
         return dto;
     }
 }

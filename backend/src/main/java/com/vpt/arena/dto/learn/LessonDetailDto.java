@@ -6,6 +6,7 @@ import java.util.UUID;
 @Data
 public class LessonDetailDto {
     private UUID id;
+    private UUID chapterId;   // để FE breadcrumb / navigate
     private String title;
     private String content;
     private Integer order;
