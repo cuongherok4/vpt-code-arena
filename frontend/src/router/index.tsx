@@ -1,43 +1,56 @@
-import { createBrowserRouter } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
+import { Loader2 } from 'lucide-react';
 
-
-const Home = () => (
-  <div className="text-center py-20">
-    <h1 className="text-4xl font-bold mb-4">Chào mừng đến với VPT Code Arena</h1>
-    <p className="text-lg text-muted-foreground">Nền tảng thi đấu và rèn luyện kỹ năng lập trình hàng đầu</p>
-  </div>
+const LazyLoad = (Component: React.ComponentType<any>) => (
+  <Suspense fallback={
+    <div className="flex justify-center items-center py-32 text-slate-400">
+      <Loader2 size={24} className="animate-spin" />
+    </div>
+  }>
+    <Component />
+  </Suspense>
 );
+
+const Home = lazy(() => import('@/pages/Home'));
+const LearnLayout = lazy(() => import('@/pages/learn/LearnLayout'));
+const LearnWelcome = lazy(() => import('@/pages/learn/LearnWelcome'));
+const LessonPage = lazy(() => import('@/pages/learn/LessonPage'));
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <PageLayout />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
+      { index: true, element: LazyLoad(Home) },
       {
         path: 'learn',
-        element: <div>Learn Module (Coming soon)</div>,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="/learn/java" replace />,
+          },
+          {
+            path: ':lang',
+            element: LazyLoad(LearnLayout),
+            children: [
+              {
+                index: true,
+                element: LazyLoad(LearnWelcome),
+              },
+              {
+                path: 'lesson/:id',
+                element: LazyLoad(LessonPage),
+              },
+            ],
+          },
+        ],
       },
-      {
-        path: 'exam',
-        element: <div>Exam Module (Coming soon)</div>,
-      },
-      {
-        path: 'battle',
-        element: <div>Battle Module (Coming soon)</div>,
-      },
-      {
-        path: 'chat',
-        element: <div>Chat Module (Coming soon)</div>,
-      },
-      {
-        path: 'profile',
-        element: <div>User Profile (Coming soon)</div>,
-      },
+      { path: 'exam', element: <div>Exam Module (Coming soon)</div> },
+      { path: 'battle', element: <div>Battle Module (Coming soon)</div> },
+      { path: 'chat', element: <div>Chat Module (Coming soon)</div> },
+      { path: 'profile', element: <div>User Profile (Coming soon)</div> },
     ],
   },
 ]);

@@ -80,7 +80,7 @@ git branch -d feature/<phase>-<feature-name>
 | 2.1 | `feature/p2-learn-backend-domain` | Entities (Chapter, Lesson, UserProgress), Repository, Flyway `V2__seed_learn_data.sql` | Schema DB đầy đủ, seed data có sẵn để test, query cơ bản hoạt động | 🟢 Done |
 | 2.2 | `feature/p2-learn-backend-api` | `LearnController`, `ChapterService`, `LessonService`, `ProgressService`, endpoint `/learn/run-code` | 5 endpoint REST hoạt động, progress user được lưu, code chạy qua Judge0, không N+1 query | 🟢 Done |
 | 2.3 | `feature/p2-learn-backend-tests` | Unit tests `ProgressService`, Integration test `LearnController` | **Hoàn thành:** Coverage >90% cho Learn module, security mock được xử lý | 🟢 Done |
-| 2.4 | `feature/p2-learn-frontend-pages` | `LearnPage`, `LessonPage`, `ChapterTree` component | User thấy danh sách chapter/lesson, điều hướng được giữa các bài học | ⚪ Chưa bắt đầu |
+| 2.4 | `feature/p2-learn-frontend-pages` | `LearnPage`, `LessonPage`, `ChapterTree` component | **Hoàn thành:** Danh sách chapter/lesson, progress bar, điều hướng bài học, mark complete, lazy loading | 🟢 Done |
 | 2.5 | `feature/p2-learn-frontend-editor` | `TryItEditor`, `CodeChallenge`, `ProgressBar`, `learn.api.ts`, Zustand/React Query | User chạy code trực tiếp, submit challenge, tiến độ hiển thị real-time | ⚪ Chưa bắt đầu |
 
 **Thứ tự thực hiện:** 2.1 → 2.2 → 2.3 (song song với 2.4) → 2.5 → merge `develop`

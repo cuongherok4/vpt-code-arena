@@ -1,3 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #020617; /* slate-950 */
+    color: #ffffff;
+  }
+}
+
+/* Prose overrides for dark theme content rendering */
+.prose-invert h1, .prose-invert h2, .prose-invert h3 {
+  color: #f1f5f9;
+}
+.prose-invert p, .prose-invert li {
+  color: #94a3b8;
+}
+.prose-invert code {
+  color: #c4b5fd;
+  background-color: rgba(124, 58, 237, 0.1);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+.prose-invert pre {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
