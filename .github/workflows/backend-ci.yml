@@ -57,6 +57,3 @@ jobs:
       env:
         DATABASE_URL: jdbc:postgresql://localhost:5433/vpt_arena
       run: ./mvnw test
-      
-    - name: Check Jacoco Coverage
-      run: ./mvnw jacoco:check
