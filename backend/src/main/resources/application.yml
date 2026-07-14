@@ -46,3 +46,6 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+judge0:
+  url: ${JUDGE0_URL:http://localhost:2358}
