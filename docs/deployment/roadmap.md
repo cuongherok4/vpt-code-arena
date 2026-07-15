@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | 1 | 1–2 | Setup & Infrastructure | Môi trường dev sẵn sàng, CI/CD chạy được | 🟢 Hoàn thành | 100% |
 | 2 | 3–4 | Learn Module | Learn module hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | 🟡 Đang làm | 17% |
+| 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | 🟡 Đang làm | 33% |
 | 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | ⚪ Chưa bắt đầu | 0% |
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
@@ -93,12 +93,12 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 3 — Exam Module (Tuần 5–6) 🟡 17%
+### Phase 3 — Exam Module (Tuần 5–6) 🟡 33%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 3.1 | `feature/p3-exam-backend-domain` | Problem entity nếu cần mở rộng, Flyway `V5__seed_exam_problems.sql` (8 đề mẫu) | DB có sẵn 8 bài thi, có thể query và filter được | 🟢 Done |
-| 3.2 | `feature/p3-exam-backend-submit` | `ExamController`, `SubmissionService`, async submit flow (PENDING → Judge → callback), `POST /internal/judge-result` | Submit code → chờ Judge0 → cập nhật kết quả tự động, không block request | ⚪ Chưa bắt đầu |
+| 3.2 | `feature/p3-exam-backend-submit` | `ExamController`, `SubmissionService`, async submit flow (PENDING → Judge → callback), `POST /internal/judge-result` | Submit code → lưu PENDING ngay, Judge0 chạy async, cập nhật kết quả tự động | 🟢 Done |
 | 3.3 | `feature/p3-exam-backend-leaderboard` | `LeaderboardService`, `GET /exam/leaderboard` với Redis cache TTL 60s | Leaderboard trả về < 100ms nhờ Redis cache, tự động invalidate | ⚪ Chưa bắt đầu |
 | 3.4 | `feature/p3-exam-backend-tests` | Unit tests LeaderboardService, Integration tests submit flow (mock Judge) | Submit flow test được end-to-end với mock, không cần Judge0 thật | ⚪ Chưa bắt đầu |
 | 3.5 | `feature/p3-exam-frontend-list` | `ExamListPage`, `ProblemStatement` component, `exam.api.ts` | User thấy danh sách đề thi, đọc đề bài rõ ràng | ⚪ Chưa bắt đầu |
