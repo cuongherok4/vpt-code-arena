@@ -22,9 +22,9 @@ public class ChapterService {
     private final UserProgressRepository userProgressRepository;
 
     @Transactional(readOnly = true)
-    public List<ChapterDto> getAllChaptersWithProgress(UUID userId) {
+    public List<ChapterDto> getAllChaptersWithProgress(UUID userId, String language) {
         // JOIN FETCH lessons — 1 query duy nhất, không N+1
-        var chapters = chapterRepository.findAllWithLessons();
+        var chapters = chapterRepository.findAllByLanguageWithLessons(language);
 
         // Nếu có user: load toàn bộ progress 1 lần, group theo lessonId
         Map<UUID, UserProgress> progressMap = userId != null

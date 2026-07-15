@@ -34,6 +34,9 @@ public class Chapter {
     @Column(name = "group_name", nullable = false, length = 100)
     private String groupName;
 
+    @Column(name = "language", nullable = false, length = 20)
+    private String language;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private OffsetDateTime createdAt;

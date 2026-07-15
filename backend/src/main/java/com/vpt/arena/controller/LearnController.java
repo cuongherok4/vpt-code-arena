@@ -46,8 +46,9 @@ public class LearnController {
     @GetMapping("/chapters")
     @Operation(summary = "Get all chapters with lessons and progress")
     public ResponseEntity<List<ChapterDto>> getChapters(
+            @RequestParam(defaultValue = "java") String language,
             @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return ResponseEntity.ok(chapterService.getAllChaptersWithProgress(parseUserId(userIdStr)));
+        return ResponseEntity.ok(chapterService.getAllChaptersWithProgress(parseUserId(userIdStr), language));
     }
 
     @GetMapping("/lessons/{id}")

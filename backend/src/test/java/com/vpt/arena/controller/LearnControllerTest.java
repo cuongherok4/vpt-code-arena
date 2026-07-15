@@ -70,7 +70,7 @@ class LearnControllerTest {
             chapter.setOrder(1);
             chapter.setLessons(List.of(lesson));
 
-            when(chapterService.getAllChaptersWithProgress(null)).thenReturn(List.of(chapter));
+            when(chapterService.getAllChaptersWithProgress(null, "java")).thenReturn(List.of(chapter));
 
             mockMvc.perform(get(BASE + "/chapters"))
                 .andExpect(status().isOk())
@@ -81,24 +81,24 @@ class LearnControllerTest {
         @Test
         @DisplayName("Truyền userId đúng khi có X-User-Id header")
         void shouldPassUserIdWhenHeaderPresent() throws Exception {
-            when(chapterService.getAllChaptersWithProgress(USER_ID)).thenReturn(List.of());
+            when(chapterService.getAllChaptersWithProgress(USER_ID, "java")).thenReturn(List.of());
 
             mockMvc.perform(get(BASE + "/chapters")
                     .header("X-User-Id", USER_ID.toString()))
                 .andExpect(status().isOk());
 
-            verify(chapterService).getAllChaptersWithProgress(USER_ID);
+            verify(chapterService).getAllChaptersWithProgress(USER_ID, "java");
         }
 
         @Test
         @DisplayName("Truyền null khi không có X-User-Id (guest)")
         void shouldPassNullForGuest() throws Exception {
-            when(chapterService.getAllChaptersWithProgress(null)).thenReturn(List.of());
+            when(chapterService.getAllChaptersWithProgress(null, "java")).thenReturn(List.of());
 
             mockMvc.perform(get(BASE + "/chapters"))
                 .andExpect(status().isOk());
 
-            verify(chapterService).getAllChaptersWithProgress(null);
+            verify(chapterService).getAllChaptersWithProgress(null, "java");
         }
     }
 

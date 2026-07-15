@@ -49,3 +49,6 @@ springdoc:
 
 judge0:
   url: ${JUDGE0_URL:http://localhost:2358}
+  default-memory-limit-kb: ${JUDGE0_DEFAULT_MEMORY_LIMIT_KB:256000}
+  java-memory-limit-kb: ${JUDGE0_JAVA_MEMORY_LIMIT_KB:2048000}
+  java-max-processes-and-threads: ${JUDGE0_JAVA_MAX_PROCESSES_AND_THREADS:512}
