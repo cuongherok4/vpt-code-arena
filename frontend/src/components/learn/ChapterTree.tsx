@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { CheckCircle, Circle, BookOpen, Zap, Code2 } from 'lucide-react';
+import { CheckCircle, BookOpen, Zap } from 'lucide-react';
 import type { ChapterDto } from '@/api/learn.api';
 
 interface Props {

@@ -1,11 +1,13 @@
-import { useParams, Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { useParams, Link, useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, Loader2, AlertCircle, Zap, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { learnApi, type ChapterDto } from '@/api/learn.api';
 
+const TryItEditor = lazy(() => import('@/components/learn/TryItEditor'));
+
 const LessonPage = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { chapters, lang } = useOutletContext<{ chapters: ChapterDto[], lang: string }>();
 
@@ -143,6 +145,16 @@ const LessonPage = () => {
             Làm Challenge
           </Link>
         )}
+      </div>
+
+      {/* Try It Editor (hiện cho tất cả bài học) */}
+      <div className="mb-8">
+        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <BookOpen size={14} /> Try It — Thực hành ngay
+        </h3>
+        <Suspense fallback={<div className="h-40 rounded-xl bg-white/5 animate-pulse" />}>
+          <TryItEditor lang={lang} />
+        </Suspense>
       </div>
 
       {/* Bottom Nav */}

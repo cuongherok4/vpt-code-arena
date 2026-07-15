@@ -19,8 +19,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -50,6 +52,11 @@ class ProgressServiceTest {
     void setUp() {
         ReflectionTestUtils.setField(progressService, "objectMapper", objectMapper);
         ReflectionTestUtils.setField(progressService, "judge0Url", "http://localhost:2358");
+        ReflectionTestUtils.setField(progressService, "judge0PollIntervalMs", 1L);
+        ReflectionTestUtils.setField(progressService, "judge0TimeoutMs", 1000L);
+        ReflectionTestUtils.setField(progressService, "judge0DefaultMemoryLimitKb", 256000);
+        ReflectionTestUtils.setField(progressService, "judge0JavaMemoryLimitKb", 2048000);
+        ReflectionTestUtils.setField(progressService, "judge0JavaMaxProcessesAndThreads", 512);
     }
 
     // ─── Fixtures ─────────────────────────────────────────────────────────────
@@ -80,6 +87,10 @@ class ProgressServiceTest {
         req.setSourceCode("System.out.println(\"Hello\");");
         req.setLanguageId(62);
         return req;
+    }
+
+    private String judge0Token() {
+        return "{\"token\":\"token-123\"}";
     }
 
     private String judge0Response(String status, String stdout) {
@@ -156,6 +167,8 @@ class ProgressServiceTest {
         @DisplayName("Trả về passed=true khi Judge0 trả Accepted")
         void shouldReturnPassedWhenAccepted() {
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
 
             RunCodeResponse res = progressService.runCode(buildRequest(), null);
@@ -170,6 +183,8 @@ class ProgressServiceTest {
         @DisplayName("Trả về passed=false khi Judge0 trả Wrong Answer")
         void shouldReturnFailedWhenWrongAnswer() {
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Wrong Answer", "")));
 
             RunCodeResponse res = progressService.runCode(buildRequest(), null);
@@ -183,6 +198,8 @@ class ProgressServiceTest {
         void shouldReturnStderrWhenCompileError() {
             String compileErr = "{\"status\":{\"description\":\"Compilation Error\"},\"stdout\":null,\"stderr\":null,\"compile_output\":\"error msg\",\"time\":null,\"memory\":null}";
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(compileErr));
 
             RunCodeResponse res = progressService.runCode(buildRequest(), null);
@@ -193,14 +210,104 @@ class ProgressServiceTest {
         }
 
         @Test
+        @DisplayName("Decode compile output base64 có xuống dòng từ Judge0")
+        void shouldDecodeMultilineBase64CompileOutput() {
+            String compileErr = "{\"status\":{\"description\":\"Compilation Error\"},\"stdout\":null,\"stderr\":null,"
+                + "\"compile_output\":\"ZXJyb3I6IGV4cGVjdGVkIDsK\\nbWFpbi5jOjM6MjY=\",\"time\":null,\"memory\":null}";
+            when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(compileErr));
+
+            RunCodeResponse res = progressService.runCode(buildRequest(), null);
+
+            assertThat(res.getPassed()).isFalse();
+            assertThat(res.getCompileOutput()).isEqualTo("error: expected ;\nmain.c:3:26");
+        }
+
+        @Test
+        @DisplayName("Gửi flags tránh cgroup v1 khi chạy trong Docker Desktop")
+        void shouldDisableJudge0CgroupModeForDockerDesktopCompatibility() throws Exception {
+            when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
+
+            progressService.runCode(buildRequest(), null);
+
+            ArgumentCaptor<HttpEntity<String>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+            verify(restTemplate).postForEntity(anyString(), captor.capture(), eq(String.class));
+
+            var root = objectMapper.readTree(captor.getValue().getBody());
+            assertThat(root.get("enable_per_process_and_thread_time_limit").asBoolean()).isTrue();
+            assertThat(root.get("enable_per_process_and_thread_memory_limit").asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Gửi memory limit cao hơn cho Java để JVM khởi động được")
+        void shouldUseHigherMemoryLimitForJava() throws Exception {
+            when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
+
+            progressService.runCode(buildRequest(), null);
+
+            ArgumentCaptor<HttpEntity<String>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+            verify(restTemplate).postForEntity(anyString(), captor.capture(), eq(String.class));
+
+            var root = objectMapper.readTree(captor.getValue().getBody());
+            assertThat(root.get("memory_limit").asInt()).isEqualTo(2048000);
+        }
+
+        @Test
+        @DisplayName("Gửi JVM compiler options nhỏ hơn cho Java")
+        void shouldSendJavaCompilerOptions() throws Exception {
+            when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
+
+            progressService.runCode(buildRequest(), null);
+
+            ArgumentCaptor<HttpEntity<String>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+            verify(restTemplate).postForEntity(anyString(), captor.capture(), eq(String.class));
+
+            var root = objectMapper.readTree(captor.getValue().getBody());
+            assertThat(root.get("max_processes_and_or_threads").asInt()).isEqualTo(512);
+            assertThat(root.get("compiler_options").asText())
+                .contains("-J-Xmx256m")
+                .contains("-J-XX:MaxMetaspaceSize=256m");
+        }
+
+        @Test
+        @DisplayName("Giữ memory limit mặc định cho C/Python")
+        void shouldUseDefaultMemoryLimitForNonJava() throws Exception {
+            when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
+            RunCodeRequest cRequest = buildRequest();
+            cRequest.setLanguageId(50);
+
+            progressService.runCode(cRequest, null);
+
+            ArgumentCaptor<HttpEntity<String>> captor = ArgumentCaptor.forClass(HttpEntity.class);
+            verify(restTemplate).postForEntity(anyString(), captor.capture(), eq(String.class));
+
+            var root = objectMapper.readTree(captor.getValue().getBody());
+            assertThat(root.get("memory_limit").asInt()).isEqualTo(256000);
+        }
+
+        @Test
         @DisplayName("Throw 500 khi Judge0 không kết nối được")
         void shouldThrow500WhenJudge0Fails() {
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
-                .thenThrow(new RuntimeException("Connection refused"));
+                .thenThrow(new ResourceAccessException("Connection refused"));
 
             assertThatThrownBy(() -> progressService.runCode(buildRequest(), null))
                 .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("Judge0 error");
+                .hasMessageContaining("Judge0 service is unavailable");
         }
     }
 
@@ -223,6 +330,8 @@ class ProgressServiceTest {
             when(userRepository.findById(userId)).thenReturn(Optional.of(user));
             when(userProgressRepository.findByUserIdAndLessonId(userId, lesson.getId())).thenReturn(Optional.empty());
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
 
             RunCodeResponse res = progressService.submitChallenge(userId, lesson.getId(), buildRequest());
@@ -243,8 +352,13 @@ class ProgressServiceTest {
             when(lessonRepository.findByIdWithChapter(lesson.getId())).thenReturn(Optional.of(lesson));
             // Case 1 pass, case 2 fail
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()))
+                .thenReturn(ResponseEntity.ok(judge0Token()))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")))
-                .thenReturn(ResponseEntity.ok(judge0Response("Wrong Answer", "")));
+                .thenReturn(ResponseEntity.ok(judge0Response("Wrong Answer", "")))
+                .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
 
             RunCodeResponse res = progressService.submitChallenge(userId, lesson.getId(), buildRequest());
 
@@ -259,6 +373,8 @@ class ProgressServiceTest {
 
             when(lessonRepository.findByIdWithChapter(lesson.getId())).thenReturn(Optional.of(lesson));
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
 
             RunCodeResponse res = progressService.submitChallenge(null, lesson.getId(), buildRequest());
@@ -275,6 +391,8 @@ class ProgressServiceTest {
 
             when(lessonRepository.findByIdWithChapter(lesson.getId())).thenReturn(Optional.of(lesson));
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "Hello")));
             when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
@@ -293,6 +411,8 @@ class ProgressServiceTest {
             when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
             when(userProgressRepository.findByUserIdAndLessonId(any(), any())).thenReturn(Optional.empty());
             when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(ResponseEntity.ok(judge0Token()));
+            when(restTemplate.getForEntity(anyString(), eq(String.class)))
                 .thenReturn(ResponseEntity.ok(judge0Response("Accepted", "")));
 
             RunCodeResponse res = progressService.submitChallenge(userId, lesson.getId(), buildRequest());

@@ -17,6 +17,7 @@ const Home = lazy(() => import('@/pages/Home'));
 const LearnLayout = lazy(() => import('@/pages/learn/LearnLayout'));
 const LearnWelcome = lazy(() => import('@/pages/learn/LearnWelcome'));
 const LessonPage = lazy(() => import('@/pages/learn/LessonPage'));
+const ChallengePage = lazy(() => import('@/pages/learn/ChallengePage'));
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ export const router = createBrowserRouter([
               {
                 path: 'lesson/:id',
                 element: LazyLoad(LessonPage),
+              },
+              {
+                path: 'lesson/:id/challenge',
+                element: LazyLoad(ChallengePage),
               },
             ],
           },
