@@ -35,11 +35,11 @@ public class Problem {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private Difficulty difficulty;
 
-    @Column(length = 100)
+    @Column(nullable = false, length = 100)
     private String topic;
 
     @Column(name = "time_limit_ms", nullable = false)
-    private int timeLimitMs = 1000;
+    private int timeLimitMs = 2000;
 
     @Column(name = "memory_limit_kb", nullable = false)
     private int memoryLimitKb = 256000;
