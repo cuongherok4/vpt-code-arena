@@ -3,9 +3,12 @@ package com.vpt.arena.controller;
 import com.vpt.arena.dto.exam.ExamSubmitRequest;
 import com.vpt.arena.dto.exam.ExamLeaderboardEntryDto;
 import com.vpt.arena.dto.exam.JudgeResultRequest;
+import com.vpt.arena.dto.exam.ProblemDetailDto;
+import com.vpt.arena.dto.exam.ProblemListItemDto;
 import com.vpt.arena.dto.exam.SubmissionDto;
 import com.vpt.arena.service.ExamJudgeWorker;
 import com.vpt.arena.service.LeaderboardService;
+import com.vpt.arena.service.ProblemService;
 import com.vpt.arena.service.SubmissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +30,22 @@ public class ExamController {
     private final SubmissionService submissionService;
     private final ExamJudgeWorker examJudgeWorker;
     private final LeaderboardService leaderboardService;
+    private final ProblemService problemService;
+
+    @GetMapping("/api/v1/exam/problems")
+    @Operation(summary = "Get published exam problems")
+    public ResponseEntity<List<ProblemListItemDto>> problems(
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String topic,
+            @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(problemService.findPublished(difficulty, topic, keyword));
+    }
+
+    @GetMapping("/api/v1/exam/problems/{problemId}")
+    @Operation(summary = "Get published exam problem detail")
+    public ResponseEntity<ProblemDetailDto> problem(@PathVariable UUID problemId) {
+        return ResponseEntity.ok(problemService.getPublished(problemId));
+    }
 
     @PostMapping("/api/v1/exam/problems/{problemId}/submissions")
     @Operation(summary = "Submit code for an exam problem asynchronously")

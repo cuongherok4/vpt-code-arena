@@ -18,6 +18,7 @@ const LearnLayout = lazy(() => import('@/pages/learn/LearnLayout'));
 const LearnWelcome = lazy(() => import('@/pages/learn/LearnWelcome'));
 const LessonPage = lazy(() => import('@/pages/learn/LessonPage'));
 const ChallengePage = lazy(() => import('@/pages/learn/ChallengePage'));
+const ExamListPage = lazy(() => import('@/pages/exam/ExamListPage'));
 
 export const router = createBrowserRouter([
   {
@@ -52,7 +53,8 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      { path: 'exam', element: <div>Exam Module (Coming soon)</div> },
+      { path: 'exam', element: LazyLoad(ExamListPage) },
+      { path: 'exam/problems/:id', element: LazyLoad(ExamListPage) },
       { path: 'battle', element: <div>Battle Module (Coming soon)</div> },
       { path: 'chat', element: <div>Chat Module (Coming soon)</div> },
       { path: 'profile', element: <div>User Profile (Coming soon)</div> },
