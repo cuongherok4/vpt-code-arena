@@ -17,6 +17,7 @@ public class SubmissionDto {
     private int points;
     private Integer executionTime;
     private Integer memoryUsed;
+    private String output;
     private String errorOutput;
     private OffsetDateTime submittedAt;
 }

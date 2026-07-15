@@ -87,7 +87,8 @@ class SubmissionJudgeFlowTest {
         assertThat(saved.getPoints()).isEqualTo(100);
         assertThat(saved.getExecutionTime()).isEqualTo(2);
         assertThat(saved.getMemoryUsed()).isEqualTo(2048);
-        verify(leaderboardService).evictExamLeaderboard(problemId);
+        assertThat(saved.getOutput()).isEqualTo("a\n");
+        verify(leaderboardService).evictExamLeaderboard(problemId, "python");
         judge0.verify();
     }
 
@@ -98,7 +99,7 @@ class SubmissionJudgeFlowTest {
         judge0.expect(requestTo("http://judge0.test/submissions/" + token + "?base64_encoded=true&fields=stdout,stderr,compile_output,message,status,time,memory"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("""
-                {"status":{"id":3,"description":"Accepted"},"time":"%s","memory":"%d"}
+                {"status":{"id":3,"description":"Accepted"},"time":"%s","memory":"%d","stdout":"YQo="}
                 """.formatted(time, memory), MediaType.APPLICATION_JSON));
     }
 
