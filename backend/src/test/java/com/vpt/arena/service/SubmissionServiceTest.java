@@ -42,6 +42,7 @@ class SubmissionServiceTest {
     @Mock private ProblemRepository problemRepository;
     @Mock private UserRepository userRepository;
     @Mock private RestTemplate restTemplate;
+    @Mock private LeaderboardService leaderboardService;
 
     @InjectMocks
     private SubmissionService submissionService;
@@ -156,5 +157,6 @@ class SubmissionServiceTest {
         assertThat(dto.getPoints()).isEqualTo(100);
         assertThat(dto.getExecutionTime()).isEqualTo(10);
         assertThat(dto.getMemoryUsed()).isEqualTo(2048);
+        verify(leaderboardService).evictExamLeaderboard(submission.getProblem().getId());
     }
 }

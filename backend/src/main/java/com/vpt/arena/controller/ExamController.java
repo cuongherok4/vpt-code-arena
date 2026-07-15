@@ -1,9 +1,11 @@
 package com.vpt.arena.controller;
 
 import com.vpt.arena.dto.exam.ExamSubmitRequest;
+import com.vpt.arena.dto.exam.ExamLeaderboardEntryDto;
 import com.vpt.arena.dto.exam.JudgeResultRequest;
 import com.vpt.arena.dto.exam.SubmissionDto;
 import com.vpt.arena.service.ExamJudgeWorker;
+import com.vpt.arena.service.LeaderboardService;
 import com.vpt.arena.service.SubmissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +26,7 @@ public class ExamController {
 
     private final SubmissionService submissionService;
     private final ExamJudgeWorker examJudgeWorker;
+    private final LeaderboardService leaderboardService;
 
     @PostMapping("/api/v1/exam/problems/{problemId}/submissions")
     @Operation(summary = "Submit code for an exam problem asynchronously")
@@ -42,6 +45,22 @@ public class ExamController {
             @PathVariable UUID problemId,
             @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
         return ResponseEntity.ok(submissionService.history(requireUserId(userIdStr), problemId));
+    }
+
+    @GetMapping("/api/v1/exam/problems/{problemId}/leaderboard")
+    @Operation(summary = "Get cached leaderboard for an exam problem")
+    public ResponseEntity<List<ExamLeaderboardEntryDto>> leaderboard(
+            @PathVariable UUID problemId,
+            @RequestParam(defaultValue = "50") int limit) {
+        return ResponseEntity.ok(leaderboardService.getExamLeaderboard(problemId, limit));
+    }
+
+    @GetMapping("/api/v1/exam/leaderboard")
+    @Operation(summary = "Get cached exam leaderboard")
+    public ResponseEntity<List<ExamLeaderboardEntryDto>> leaderboardByQuery(
+            @RequestParam UUID problemId,
+            @RequestParam(defaultValue = "50") int limit) {
+        return ResponseEntity.ok(leaderboardService.getExamLeaderboard(problemId, limit));
     }
 
     @PostMapping("/internal/judge-result")

@@ -50,6 +50,7 @@ public class SubmissionService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final LeaderboardService leaderboardService;
 
     @Value("${judge0.url}")
     private String judge0Url;
@@ -129,7 +130,9 @@ public class SubmissionService {
         submission.setExecutionTime(executionTime);
         submission.setMemoryUsed(memoryUsed);
         submission.setErrorOutput(errorOutput);
-        return toDto(submissionRepository.save(submission));
+        Submission saved = submissionRepository.save(submission);
+        leaderboardService.evictExamLeaderboard(saved.getProblem().getId());
+        return toDto(saved);
     }
 
     private JudgeOutcome judge(Submission submission) {
