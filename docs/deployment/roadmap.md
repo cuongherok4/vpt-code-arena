@@ -7,8 +7,8 @@
 | Phase | Tuần | Nội dung | Deliverable | Trạng thái | % |
 |---|---|---|---|---|---|
 | 1 | 1–2 | Setup & Infrastructure | Môi trường dev sẵn sàng, CI/CD chạy được | 🟢 Hoàn thành | 100% |
-| 2 | 3–4 | Learn Module | Learn module hoàn chỉnh | 🟡 Đang làm | 40% |
-| 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
+| 2 | 3–4 | Learn Module | Learn module hoàn chỉnh | 🟢 Hoàn thành | 100% |
+| 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | 🟡 Đang làm | 83% |
 | 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | ⚪ Chưa bắt đầu | 0% |
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
@@ -73,7 +73,7 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 2 — Learn Module (Tuần 3–4) 🟡 40%
+### Phase 2 — Learn Module (Tuần 3–4) ✅ 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
@@ -81,7 +81,7 @@ git branch -d feature/<phase>-<feature-name>
 | 2.2 | `feature/p2-learn-backend-api` | `LearnController`, `ChapterService`, `LessonService`, `ProgressService`, endpoint `/learn/run-code` | 5 endpoint REST hoạt động, progress user được lưu, code chạy qua Judge0, không N+1 query | 🟢 Done |
 | 2.3 | `feature/p2-learn-backend-tests` | Unit tests `ProgressService`, Integration test `LearnController` | **Hoàn thành:** Coverage >90% cho Learn module, security mock được xử lý | 🟢 Done |
 | 2.4 | `feature/p2-learn-frontend-pages` | `LearnPage`, `LessonPage`, `ChapterTree` component | **Hoàn thành:** Danh sách chapter/lesson, progress bar, điều hướng bài học, mark complete, lazy loading | 🟢 Done |
-| 2.5 | `feature/p2-learn-frontend-editor` | `TryItEditor`, `CodeChallenge`, `ProgressBar`, `learn.api.ts`, Zustand/React Query | User chạy code trực tiếp, submit challenge, tiến độ hiển thị real-time | ⚪ Chưa bắt đầu |
+| 2.5 | `feature/p2-learn-frontend-editor` | `TryItEditor`, `CodeChallenge`, `ProgressBar`, `learn.api.ts`, Zustand/React Query | User chạy code trực tiếp, submit challenge, tiến độ hiển thị real-time | 🟢 Done |
 
 **Thứ tự thực hiện:** 2.1 → 2.2 → 2.3 (song song với 2.4) → 2.5 → merge `develop`
 
@@ -93,15 +93,15 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 3 — Exam Module (Tuần 5–6) ⚪ 0%
+### Phase 3 — Exam Module (Tuần 5–6) 🟡 83%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 3.1 | `feature/p3-exam-backend-domain` | Problem entity nếu cần mở rộng, Flyway `V3__seed_problems.sql` (5–10 đề mẫu) | DB có sẵn 5–10 bài thi, có thể query và filter được | ⚪ Chưa bắt đầu |
-| 3.2 | `feature/p3-exam-backend-submit` | `ExamController`, `SubmissionService`, async submit flow (PENDING → Judge → callback), `POST /internal/judge-result` | Submit code → chờ Judge0 → cập nhật kết quả tự động, không block request | ⚪ Chưa bắt đầu |
-| 3.3 | `feature/p3-exam-backend-leaderboard` | `LeaderboardService`, `GET /exam/leaderboard` với Redis cache TTL 60s | Leaderboard trả về < 100ms nhờ Redis cache, tự động invalidate | ⚪ Chưa bắt đầu |
-| 3.4 | `feature/p3-exam-backend-tests` | Unit tests LeaderboardService, Integration tests submit flow (mock Judge) | Submit flow test được end-to-end với mock, không cần Judge0 thật | ⚪ Chưa bắt đầu |
-| 3.5 | `feature/p3-exam-frontend-list` | `ExamListPage`, `ProblemStatement` component, `exam.api.ts` | User thấy danh sách đề thi, đọc đề bài rõ ràng | ⚪ Chưa bắt đầu |
+| 3.1 | `feature/p3-exam-backend-domain` | Problem entity nếu cần mở rộng, Flyway `V5__seed_exam_problems.sql` (8 đề mẫu) | DB có sẵn 8 bài thi, có thể query và filter được | 🟢 Done |
+| 3.2 | `feature/p3-exam-backend-submit` | `ExamController`, `SubmissionService`, async submit flow (PENDING → Judge → callback), `POST /internal/judge-result` | Submit code → lưu PENDING ngay, Judge0 chạy async, cập nhật kết quả tự động | 🟢 Done |
+| 3.3 | `feature/p3-exam-backend-leaderboard` | `LeaderboardService`, `GET /exam/leaderboard` với Redis cache TTL 60s | Leaderboard cache theo problem, invalidate O(1) sau judge result, limit tối đa 100 | 🟢 Done |
+| 3.4 | `feature/p3-exam-backend-tests` | Unit tests LeaderboardService, Integration tests submit flow (mock Judge) | Submit flow có test mock Judge0, ProblemService có unit test filter/detail | 🟢 Done |
+| 3.5 | `feature/p3-exam-frontend-list` | `ExamListPage`, `ProblemStatement` component, `exam.api.ts` | User thấy danh sách đề thi, filter độ khó/tìm kiếm, đọc đề và sample rõ ràng | 🟢 Done |
 | 3.6 | `feature/p3-exam-frontend-problem` | `ExamProblemPage`, `SubmitPanel`, `SubmissionHistory`, `ExamLeaderboard`, polling / WS notification | User submit code, xem kết quả ngay, thấy lịch sử submit và bảng xếp hạng | ⚪ Chưa bắt đầu |
 
 **Thứ tự thực hiện:** 3.1 → 3.2 → 3.3 → 3.4 (song song với 3.5) → 3.6 → merge `develop`
