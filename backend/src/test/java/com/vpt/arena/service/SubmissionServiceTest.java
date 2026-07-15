@@ -150,6 +150,7 @@ class SubmissionServiceTest {
         request.setPoints(100);
         request.setExecutionTime(10);
         request.setMemoryUsed(2048);
+        request.setOutput("ok\n");
 
         SubmissionDto dto = submissionService.applyJudgeResult(request);
 
@@ -157,6 +158,7 @@ class SubmissionServiceTest {
         assertThat(dto.getPoints()).isEqualTo(100);
         assertThat(dto.getExecutionTime()).isEqualTo(10);
         assertThat(dto.getMemoryUsed()).isEqualTo(2048);
-        verify(leaderboardService).evictExamLeaderboard(submission.getProblem().getId());
+        assertThat(dto.getOutput()).isEqualTo("ok\n");
+        verify(leaderboardService).evictExamLeaderboard(submission.getProblem().getId(), "python");
     }
 }

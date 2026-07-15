@@ -61,11 +61,11 @@ class LeaderboardServiceTest {
             [{"rank":1,"userId":"11111111-1111-4111-8111-111111111111","userName":"Alice","points":100,"executionTime":12,"memoryUsed":2048,"submittedAt":null,"acceptedCount":2}]
             """);
 
-        List<ExamLeaderboardEntryDto> result = leaderboardService.getExamLeaderboard(problemId, 50);
+        List<ExamLeaderboardEntryDto> result = leaderboardService.getExamLeaderboard(problemId, "python", 50);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getUserName()).isEqualTo("Alice");
-        verify(submissionRepository, never()).findLeaderboardRows(any(), any(), any());
+        verify(submissionRepository, never()).findLeaderboardRows(any(), any(), any(), any());
     }
 
     @Test
@@ -79,10 +79,10 @@ class LeaderboardServiceTest {
         when(problemRepository.existsById(problemId)).thenReturn(true);
         when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(anyString())).thenReturn(null);
-        when(submissionRepository.findLeaderboardRows(eq(problemId), eq(JudgeResult.AC), any(Pageable.class)))
+        when(submissionRepository.findLeaderboardRows(eq(problemId), eq("python"), eq(JudgeResult.AC), any(Pageable.class)))
             .thenReturn(List.of(row));
 
-        List<ExamLeaderboardEntryDto> result = leaderboardService.getExamLeaderboard(problemId, 10);
+        List<ExamLeaderboardEntryDto> result = leaderboardService.getExamLeaderboard(problemId, "python", 10);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getRank()).isEqualTo(1);
@@ -96,7 +96,7 @@ class LeaderboardServiceTest {
         UUID problemId = UUID.randomUUID();
         when(problemRepository.existsById(problemId)).thenReturn(false);
 
-        assertThatThrownBy(() -> leaderboardService.getExamLeaderboard(problemId, 50))
+        assertThatThrownBy(() -> leaderboardService.getExamLeaderboard(problemId, "python", 50))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Problem not found");
     }
@@ -106,9 +106,9 @@ class LeaderboardServiceTest {
     void shouldEvictProblemLeaderboardKey() {
         UUID problemId = UUID.randomUUID();
 
-        leaderboardService.evictExamLeaderboard(problemId);
+        leaderboardService.evictExamLeaderboard(problemId, "python");
 
-        verify(stringRedisTemplate).delete("exam:leaderboard:" + problemId);
+        verify(stringRedisTemplate).delete("exam:leaderboard:" + problemId + ":python");
     }
 
     private SubmissionRepository.ExamLeaderboardRow row(

@@ -17,5 +17,6 @@ public class JudgeResultRequest {
     private Integer points;
     private Integer executionTime;
     private Integer memoryUsed;
+    private String output;
     private String errorOutput;
 }

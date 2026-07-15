@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Slf4j
@@ -34,13 +35,14 @@ public class LeaderboardService {
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
 
-    public List<ExamLeaderboardEntryDto> getExamLeaderboard(UUID problemId, int requestedLimit) {
+    public List<ExamLeaderboardEntryDto> getExamLeaderboard(UUID problemId, String language, int requestedLimit) {
         if (!problemRepository.existsById(problemId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found");
         }
 
+        String normalizedLanguage = normalizeLanguage(language);
         int limit = normalizeLimit(requestedLimit);
-        String cacheKey = cacheKey(problemId);
+        String cacheKey = cacheKey(problemId, normalizedLanguage);
         String cached = stringRedisTemplate.opsForValue().get(cacheKey);
         if (cached != null && !cached.isBlank()) {
             try {
@@ -51,7 +53,7 @@ public class LeaderboardService {
             }
         }
 
-        List<ExamLeaderboardEntryDto> leaderboard = buildLeaderboard(problemId, MAX_LIMIT);
+        List<ExamLeaderboardEntryDto> leaderboard = buildLeaderboard(problemId, normalizedLanguage, MAX_LIMIT);
         try {
             stringRedisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(leaderboard), EXAM_LEADERBOARD_TTL);
         } catch (JsonProcessingException e) {
@@ -60,13 +62,13 @@ public class LeaderboardService {
         return limit(leaderboard, limit);
     }
 
-    public void evictExamLeaderboard(UUID problemId) {
-        stringRedisTemplate.delete(cacheKey(problemId));
+    public void evictExamLeaderboard(UUID problemId, String language) {
+        stringRedisTemplate.delete(cacheKey(problemId, normalizeLanguage(language)));
     }
 
-    private List<ExamLeaderboardEntryDto> buildLeaderboard(UUID problemId, int limit) {
+    private List<ExamLeaderboardEntryDto> buildLeaderboard(UUID problemId, String language, int limit) {
         List<SubmissionRepository.ExamLeaderboardRow> rows =
-            submissionRepository.findLeaderboardRows(problemId, JudgeResult.AC, PageRequest.of(0, limit));
+            submissionRepository.findLeaderboardRows(problemId, language, JudgeResult.AC, PageRequest.of(0, limit));
 
         int[] rank = {1};
         return rows.stream()
@@ -95,7 +97,18 @@ public class LeaderboardService {
         return leaderboard.subList(0, limit);
     }
 
-    private String cacheKey(UUID problemId) {
-        return "exam:leaderboard:" + problemId;
+    private String cacheKey(UUID problemId, String language) {
+        return "exam:leaderboard:" + problemId + ":" + language;
+    }
+
+    private String normalizeLanguage(String language) {
+        if (language == null || language.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Language is required");
+        }
+        String normalized = language.trim().toLowerCase(Locale.ROOT);
+        return switch (normalized) {
+            case "c", "java", "python", "python3" -> normalized.equals("python3") ? "python" : normalized;
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported language");
+        };
     }
 }

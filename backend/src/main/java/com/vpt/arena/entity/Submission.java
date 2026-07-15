@@ -51,6 +51,9 @@ public class Submission {
     @Column(name = "memory_used")
     private Integer memoryUsed;
 
+    @Column(columnDefinition = "TEXT")
+    private String output;
+
     @Column(name = "error_output", columnDefinition = "TEXT")
     private String errorOutput;
 

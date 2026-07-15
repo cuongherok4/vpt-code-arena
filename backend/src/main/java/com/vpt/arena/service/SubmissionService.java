@@ -101,7 +101,7 @@ public class SubmissionService {
         Submission submission = submissionRepository.findByIdWithProblem(submissionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found"));
         JudgeOutcome outcome = judge(submission);
-        applyJudgeResult(submissionId, outcome.result(), outcome.points(), outcome.executionTime(), outcome.memoryUsed(), outcome.errorOutput());
+        applyJudgeResult(submissionId, outcome.result(), outcome.points(), outcome.executionTime(), outcome.memoryUsed(), outcome.output(), outcome.errorOutput());
     }
 
     @Transactional
@@ -112,26 +112,28 @@ public class SubmissionService {
             request.getPoints() == null ? 0 : request.getPoints(),
             request.getExecutionTime(),
             request.getMemoryUsed(),
+            request.getOutput(),
             request.getErrorOutput()
         );
     }
 
     @Transactional
     public SubmissionDto markJudgeFailure(UUID submissionId, String message) {
-        return applyJudgeResult(submissionId, JudgeResult.RE, 0, null, null, firstNonBlank(message, "Judge failed"));
+        return applyJudgeResult(submissionId, JudgeResult.RE, 0, null, null, null, firstNonBlank(message, "Judge failed"));
     }
 
     @Transactional
-    public SubmissionDto applyJudgeResult(UUID submissionId, JudgeResult result, int points, Integer executionTime, Integer memoryUsed, String errorOutput) {
+    public SubmissionDto applyJudgeResult(UUID submissionId, JudgeResult result, int points, Integer executionTime, Integer memoryUsed, String output, String errorOutput) {
         Submission submission = submissionRepository.findById(submissionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Submission not found"));
         submission.setResult(result);
         submission.setPoints(Math.max(points, 0));
         submission.setExecutionTime(executionTime);
         submission.setMemoryUsed(memoryUsed);
+        submission.setOutput(output);
         submission.setErrorOutput(errorOutput);
         Submission saved = submissionRepository.save(submission);
-        leaderboardService.evictExamLeaderboard(saved.getProblem().getId());
+        leaderboardService.evictExamLeaderboard(saved.getProblem().getId(), saved.getLanguage());
         return toDto(saved);
     }
 
@@ -141,34 +143,37 @@ public class SubmissionService {
         try {
             JsonNode cases = objectMapper.readTree(problem.getTestCases()).path("cases");
             if (!cases.isArray() || cases.isEmpty()) {
-                return new JudgeOutcome(JudgeResult.RE, 0, null, null, "Problem has no test cases");
+                return new JudgeOutcome(JudgeResult.RE, 0, null, null, null, "Problem has no test cases");
             }
 
             Integer maxTimeMs = null;
             Integer maxMemoryKb = null;
+            String firstOutput = null;
             for (JsonNode testCase : cases) {
+                String expected = testCase.path("expected").asText("");
                 Judge0Result result = runJudge0(
                     submission.getCode(),
                     languageId,
                     testCase.path("input").asText(""),
-                    testCase.path("expected").asText(""),
+                    expected,
                     problem.getTimeLimitMs(),
                     problem.getMemoryLimitKb()
                 );
                 maxTimeMs = max(maxTimeMs, result.executionTimeMs());
                 maxMemoryKb = max(maxMemoryKb, result.memoryKb());
+                firstOutput = firstNonBlank(firstOutput, result.output());
 
                 JudgeResult mapped = mapStatus(result.status());
                 if (mapped != JudgeResult.AC) {
-                    return new JudgeOutcome(mapped, 0, maxTimeMs, maxMemoryKb, result.errorOutput());
+                    return new JudgeOutcome(mapped, 0, maxTimeMs, maxMemoryKb, result.output(), errorOutputFor(mapped, expected, result));
                 }
             }
 
-            return new JudgeOutcome(JudgeResult.AC, pointsFor(problem.getDifficulty()), maxTimeMs, maxMemoryKb, null);
+            return new JudgeOutcome(JudgeResult.AC, pointsFor(problem.getDifficulty()), maxTimeMs, maxMemoryKb, firstOutput, null);
         } catch (JsonProcessingException e) {
-            return new JudgeOutcome(JudgeResult.RE, 0, null, null, "Invalid problem test cases");
+            return new JudgeOutcome(JudgeResult.RE, 0, null, null, null, "Invalid problem test cases");
         } catch (RestClientException e) {
-            return new JudgeOutcome(JudgeResult.RE, 0, null, null, "Judge0 service is unavailable");
+            return new JudgeOutcome(JudgeResult.RE, 0, null, null, null, "Judge0 service is unavailable");
         }
     }
 
@@ -220,6 +225,7 @@ public class SubmissionService {
                     status.isBlank() ? "Unknown" : status,
                     parseTimeMs(text(root, "time")),
                     parseInteger(text(root, "memory")),
+                    decodeBase64(text(root, "stdout")),
                     firstNonBlank(
                         decodeBase64(firstNonBlank(text(root, "compile_output"), text(root, "message"))),
                         decodeBase64(text(root, "stderr"))
@@ -230,7 +236,7 @@ public class SubmissionService {
             sleep();
         }
 
-        return new Judge0Result("Time Limit Exceeded", null, null, "Judge0 did not finish in time");
+        return new Judge0Result("Time Limit Exceeded", null, null, null, "Judge0 did not finish in time");
     }
 
     private SubmissionDto toDto(Submission submission) {
@@ -242,6 +248,7 @@ public class SubmissionService {
             .points(submission.getPoints())
             .executionTime(submission.getExecutionTime())
             .memoryUsed(submission.getMemoryUsed())
+            .output(submission.getOutput())
             .errorOutput(submission.getErrorOutput())
             .submittedAt(submission.getSubmittedAt())
             .build();
@@ -303,6 +310,13 @@ public class SubmissionService {
         }
     }
 
+    private String errorOutputFor(JudgeResult result, String expectedOutput, Judge0Result judge0Result) {
+        if (result == JudgeResult.WA) {
+            return "Expected:\n" + expectedOutput + "\nActual:\n" + firstNonBlank(judge0Result.output(), "");
+        }
+        return judge0Result.errorOutput();
+    }
+
     private void sleep() {
         try {
             Thread.sleep(judge0PollIntervalMs);
@@ -338,7 +352,7 @@ public class SubmissionService {
         }
     }
 
-    private record Judge0Result(String status, Integer executionTimeMs, Integer memoryKb, String errorOutput) {}
+    private record Judge0Result(String status, Integer executionTimeMs, Integer memoryKb, String output, String errorOutput) {}
 
-    private record JudgeOutcome(JudgeResult result, int points, Integer executionTime, Integer memoryUsed, String errorOutput) {}
+    private record JudgeOutcome(JudgeResult result, int points, Integer executionTime, Integer memoryUsed, String output, String errorOutput) {}
 }

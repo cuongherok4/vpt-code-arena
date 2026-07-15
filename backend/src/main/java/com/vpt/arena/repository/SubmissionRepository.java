@@ -37,11 +37,13 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
             ) AS acceptedCount
         FROM Submission s
         WHERE s.problem.id = :problemId
+          AND s.language = :language
           AND s.result = :result
           AND NOT EXISTS (
               SELECT better.id
               FROM Submission better
               WHERE better.problem.id = :problemId
+                AND better.language = :language
                 AND better.result = :result
                 AND better.user.id = s.user.id
                 AND (
@@ -61,6 +63,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         """)
     List<ExamLeaderboardRow> findLeaderboardRows(
         @Param("problemId") UUID problemId,
+        @Param("language") String language,
         @Param("result") JudgeResult result,
         Pageable pageable
     );

@@ -70,16 +70,18 @@ public class ExamController {
     @Operation(summary = "Get cached leaderboard for an exam problem")
     public ResponseEntity<List<ExamLeaderboardEntryDto>> leaderboard(
             @PathVariable UUID problemId,
+            @RequestParam(defaultValue = "python") String language,
             @RequestParam(defaultValue = "50") int limit) {
-        return ResponseEntity.ok(leaderboardService.getExamLeaderboard(problemId, limit));
+        return ResponseEntity.ok(leaderboardService.getExamLeaderboard(problemId, language, limit));
     }
 
     @GetMapping("/api/v1/exam/leaderboard")
     @Operation(summary = "Get cached exam leaderboard")
     public ResponseEntity<List<ExamLeaderboardEntryDto>> leaderboardByQuery(
             @RequestParam UUID problemId,
+            @RequestParam(defaultValue = "python") String language,
             @RequestParam(defaultValue = "50") int limit) {
-        return ResponseEntity.ok(leaderboardService.getExamLeaderboard(problemId, limit));
+        return ResponseEntity.ok(leaderboardService.getExamLeaderboard(problemId, language, limit));
     }
 
     @PostMapping("/internal/judge-result")
