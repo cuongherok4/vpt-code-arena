@@ -46,6 +46,7 @@ class BattleServiceTest {
     @Mock private BattleRoomProblemRepository battleRoomProblemRepository;
     @Mock private ProblemRepository problemRepository;
     @Mock private UserRepository userRepository;
+    @Mock private BattleRealtimeNotifier battleRealtimeNotifier;
 
     @InjectMocks
     private BattleService battleService;

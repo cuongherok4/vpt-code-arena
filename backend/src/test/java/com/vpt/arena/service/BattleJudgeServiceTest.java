@@ -50,6 +50,7 @@ class BattleJudgeServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private RestTemplate restTemplate;
     @Mock private ObjectMapper objectMapper;
+    @Mock private BattleRealtimeNotifier battleRealtimeNotifier;
 
     @InjectMocks
     private BattleJudgeService battleJudgeService;
@@ -130,6 +131,8 @@ class BattleJudgeServiceTest {
         BattleSubmission submission = submission(submissionId, room, user, problem, OffsetDateTime.now());
         when(battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)).thenReturn(Optional.of(submission));
         when(roomRepository.findDetailedByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
+        when(roomRepository.findDetailedById(room.getId())).thenReturn(Optional.of(room));
+        when(battleSubmissionRepository.findLeaderboardSubmissions(room.getId())).thenReturn(List.of(submission));
         when(battleSubmissionRepository.existsByRoomIdAndUserIdAndProblemIdAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
             .thenReturn(false);
         when(battleSubmissionRepository.save(any(BattleSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -151,6 +154,8 @@ class BattleJudgeServiceTest {
         BattleSubmission submission = submission(submissionId, room, user, problem, OffsetDateTime.now());
         when(battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)).thenReturn(Optional.of(submission));
         when(roomRepository.findDetailedByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
+        when(roomRepository.findDetailedById(room.getId())).thenReturn(Optional.of(room));
+        when(battleSubmissionRepository.findLeaderboardSubmissions(room.getId())).thenReturn(List.of(submission));
         when(battleSubmissionRepository.existsByRoomIdAndUserIdAndProblemIdAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
             .thenReturn(true);
         when(battleSubmissionRepository.save(any(BattleSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
