@@ -41,6 +41,7 @@ public class BattleService {
     private final BattleRoomProblemRepository battleRoomProblemRepository;
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
+    private final BattleRealtimeNotifier battleRealtimeNotifier;
 
     @Transactional(readOnly = true)
     public List<BattleRoomDto> listPublicWaitingRooms() {
@@ -163,7 +164,9 @@ public class BattleService {
             }
         }
 
-        return toDto(saved);
+        BattleRoomDto dto = toDto(saved);
+        battleRealtimeNotifier.publishStarted(dto);
+        return dto;
     }
 
     @Transactional(readOnly = true)

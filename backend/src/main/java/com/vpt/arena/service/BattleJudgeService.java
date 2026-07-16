@@ -63,6 +63,7 @@ public class BattleJudgeService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final BattleRealtimeNotifier battleRealtimeNotifier;
 
     @Value("${judge0.url}")
     private String judge0Url;
@@ -141,7 +142,10 @@ public class BattleJudgeService {
         submission.setExecutionTime(executionTime);
         submission.setPoints(points);
         BattleSubmission saved = battleSubmissionRepository.save(submission);
-        return toDto(saved);
+        BattleSubmissionDto dto = toDto(saved);
+        battleRealtimeNotifier.publishSubmissionResult(dto);
+        battleRealtimeNotifier.publishLeaderboard(saved.getRoom().getId(), calculateLeaderboard(saved.getRoom().getId()));
+        return dto;
     }
 
     @Transactional(readOnly = true)
@@ -182,6 +186,7 @@ public class BattleJudgeService {
             result.setLastAcTime(entry.getLastAcceptedAt());
             roomResultRepository.save(result);
         }
+        battleRealtimeNotifier.publishFinished(roomId, leaderboard);
         return leaderboard;
     }
 
