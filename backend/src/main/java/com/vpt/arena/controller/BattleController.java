@@ -2,6 +2,11 @@ package com.vpt.arena.controller;
 
 import com.vpt.arena.dto.battle.BattleRoomCreateRequest;
 import com.vpt.arena.dto.battle.BattleRoomDto;
+import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
+import com.vpt.arena.dto.battle.BattleSubmissionDto;
+import com.vpt.arena.dto.battle.BattleSubmitRequest;
+import com.vpt.arena.service.BattleJudgeService;
+import com.vpt.arena.service.BattleJudgeWorker;
 import com.vpt.arena.service.BattleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +35,8 @@ import java.util.UUID;
 public class BattleController {
 
     private final BattleService battleService;
+    private final BattleJudgeService battleJudgeService;
+    private final BattleJudgeWorker battleJudgeWorker;
 
     @GetMapping("/rooms")
     @Operation(summary = "List public waiting battle rooms")
@@ -83,6 +90,31 @@ public class BattleController {
             @PathVariable UUID roomId,
             @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
         return ResponseEntity.ok(battleService.startRoom(roomId, requireUserId(userIdStr)));
+    }
+
+    @PostMapping({"/rooms/{roomId}/submissions", "/rooms/{roomId}/submit"})
+    @Operation(summary = "Submit code in a battle room asynchronously")
+    public ResponseEntity<BattleSubmissionDto> submit(
+            @PathVariable UUID roomId,
+            @Valid @RequestBody BattleSubmitRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
+        BattleSubmissionDto submission = battleJudgeService.submit(roomId, requireUserId(userIdStr), request);
+        battleJudgeWorker.judgeSubmission(submission.getId());
+        return ResponseEntity.accepted().body(submission);
+    }
+
+    @GetMapping("/rooms/{roomId}/leaderboard")
+    @Operation(summary = "Get battle leaderboard")
+    public ResponseEntity<List<BattleLeaderboardEntryDto>> leaderboard(@PathVariable UUID roomId) {
+        return ResponseEntity.ok(battleJudgeService.leaderboard(roomId));
+    }
+
+    @PostMapping("/rooms/{roomId}/finish")
+    @Operation(summary = "Finish a battle room")
+    public ResponseEntity<List<BattleLeaderboardEntryDto>> finish(
+            @PathVariable UUID roomId,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
+        return ResponseEntity.ok(battleJudgeService.finishRoomAsUser(roomId, requireUserId(userIdStr)));
     }
 
     private UUID requireUserId(String userIdStr) {
