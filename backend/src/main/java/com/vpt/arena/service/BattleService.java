@@ -109,7 +109,6 @@ public class BattleService {
     @Transactional
     public Optional<BattleRoomDto> leaveRoom(UUID roomId, UUID userId) {
         Room room = findRoomForUpdate(roomId);
-        ensureWaiting(room);
 
         Optional<RoomMember> member = roomMemberRepository.findByRoomIdAndUserId(roomId, userId);
         if (member.isEmpty()) {
@@ -120,8 +119,12 @@ public class BattleService {
         roomMemberRepository.delete(member.get());
 
         if (room.getMembers().isEmpty()) {
-            roomRepository.delete(room);
-            return Optional.empty();
+            if (room.getStatus() == RoomStatus.WAITING) {
+                roomRepository.delete(room);
+                return Optional.empty();
+            }
+            room.setStatus(RoomStatus.FINISHED);
+            return Optional.of(toDto(roomRepository.save(room)));
         }
 
         if (room.getCreator().getId().equals(userId)) {

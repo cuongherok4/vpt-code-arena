@@ -94,10 +94,10 @@ class BattleControllerTest {
     }
 
     @Test
-    @DisplayName("POST /rooms validate timeLimitMin tối thiểu 10 phút")
+    @DisplayName("POST /rooms validate timeLimitMin tối thiểu 2 phút")
     void shouldRejectTooShortTimeLimit() throws Exception {
         BattleRoomCreateRequest request = createRequest();
-        request.setTimeLimitMin(5);
+        request.setTimeLimitMin(1);
 
         mockMvc.perform(post(BASE + "/rooms")
                 .header("X-User-Id", USER_ID.toString())

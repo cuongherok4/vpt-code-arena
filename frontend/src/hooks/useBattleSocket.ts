@@ -9,6 +9,26 @@ type ReadyUpdate = {
   totalMembers: number;
 };
 
+type LeaderboardEvent = {
+  roomId?: string;
+  leaderboard: unknown[];
+};
+
+type SubmissionResultEvent = {
+  submissionId: string;
+  problemId: string;
+  result: string;
+  points: number;
+  executionTime?: number | null;
+  output?: string | null;
+  errorOutput?: string | null;
+};
+
+type FinishedEvent = {
+  roomId?: string;
+  finalLeaderboard: unknown[];
+};
+
 type MemberEvent = {
   roomId: string;
   userId: string;
@@ -22,6 +42,10 @@ type BattleSocketOptions = {
   onMemberChange?: (event: MemberEvent) => void;
   onReadyUpdate?: (event: ReadyUpdate) => void;
   onStarted?: () => void;
+  onTick?: (remainingSeconds: number) => void;
+  onLeaderboardUpdate?: (leaderboard: unknown[]) => void;
+  onSubmissionResult?: (result: SubmissionResultEvent) => void;
+  onFinished?: (leaderboard: unknown[]) => void;
   onError?: (message: string) => void;
 };
 
@@ -33,6 +57,10 @@ export function useBattleSocket({
   onMemberChange,
   onReadyUpdate,
   onStarted,
+  onTick,
+  onLeaderboardUpdate,
+  onSubmissionResult,
+  onFinished,
   onError,
 }: BattleSocketOptions) {
   const socketRef = useRef<Socket | null>(null);
@@ -67,13 +95,32 @@ export function useBattleSocket({
     socket.on('battle:member-left', onMemberChange || (() => undefined));
     socket.on('battle:ready-update', onReadyUpdate || (() => undefined));
     socket.on('battle:started', () => onStarted?.());
+    socket.on('battle:tick', (event: { remainingSeconds?: number }) => {
+      if (typeof event.remainingSeconds === 'number') onTick?.(event.remainingSeconds);
+    });
+    socket.on('battle:leaderboard-update', (event: LeaderboardEvent) => {
+      onLeaderboardUpdate?.(event.leaderboard ?? []);
+    });
+    socket.on('battle:submission-result', (event: SubmissionResultEvent) => onSubmissionResult?.(event));
+    socket.on('battle:finished', (event: FinishedEvent) => onFinished?.(event.finalLeaderboard ?? []));
 
     return () => {
       socket.emit('battle:leave', { roomId });
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [roomId, onJoined, onMemberChange, onReadyUpdate, onStarted, onError]);
+  }, [
+    roomId,
+    onJoined,
+    onMemberChange,
+    onReadyUpdate,
+    onStarted,
+    onTick,
+    onLeaderboardUpdate,
+    onSubmissionResult,
+    onFinished,
+    onError,
+  ]);
 
   const setReady = useCallback((ready: boolean) => {
     if (!roomId || !socketRef.current?.connected) return;

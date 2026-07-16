@@ -43,6 +43,8 @@ public class BattleRealtimeNotifier {
         payload.put("result", submission.getResult());
         payload.put("points", submission.getPoints());
         payload.put("executionTime", submission.getExecutionTime());
+        payload.put("output", submission.getOutput());
+        payload.put("errorOutput", submission.getErrorOutput());
         publish("submission-result", submission.getRoomId(), submission.getUserId(), payload);
     }
 

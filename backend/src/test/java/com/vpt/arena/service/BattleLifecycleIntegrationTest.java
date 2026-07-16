@@ -95,18 +95,18 @@ class BattleLifecycleIntegrationTest {
         assertThat(finalLeaderboard).hasSize(2);
         assertThat(finalLeaderboard.get(0).getUserId()).isEqualTo(bob.getId());
         assertThat(finalLeaderboard.get(0).getRank()).isEqualTo(1);
-        assertThat(finalLeaderboard.get(0).getTotalPoints()).isEqualTo(100);
+        assertThat(finalLeaderboard.get(0).getTotalPoints()).isEqualTo(200);
         assertThat(finalLeaderboard.get(0).getAcceptedCount()).isEqualTo(2);
         assertThat(finalLeaderboard.get(1).getUserId()).isEqualTo(alice.getId());
         assertThat(finalLeaderboard.get(1).getRank()).isEqualTo(2);
-        assertThat(finalLeaderboard.get(1).getTotalPoints()).isEqualTo(50);
+        assertThat(finalLeaderboard.get(1).getTotalPoints()).isEqualTo(100);
 
         Room finished = roomRepository.findById(started.getId()).orElseThrow();
         assertThat(finished.getStatus()).isEqualTo(RoomStatus.FINISHED);
         List<RoomResult> persistedResults = roomResultRepository.findByRoomIdOrderByRankAsc(started.getId());
         assertThat(persistedResults).hasSize(2);
         assertThat(persistedResults.get(0).getUser().getId()).isEqualTo(bob.getId());
-        assertThat(persistedResults.get(0).getTotalPoints()).isEqualTo(100);
+        assertThat(persistedResults.get(0).getTotalPoints()).isEqualTo(200);
         assertThat(battleSubmissionRepository.findByRoomIdOrderBySubmittedAtAsc(started.getId())).hasSize(3);
 
         assertThatThrownBy(() -> battleJudgeService.submit(started.getId(), alice.getId(), submitRequest(firstProblemId)))
@@ -133,6 +133,27 @@ class BattleLifecycleIntegrationTest {
         assertThat(finished).isEqualTo(1);
         assertThat(roomRepository.findById(started.getId()).orElseThrow().getStatus()).isEqualTo(RoomStatus.FINISHED);
         assertThat(roomResultRepository.findByRoomIdOrderByRankAsc(started.getId())).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("member can finalize room after time is over")
+    void shouldAllowMemberToFinishExpiredRoom() {
+        BattleRoomDto created = battleService.createRoom(alice.getId(), createRequest());
+        battleService.joinRoom(created.getId(), bob.getId());
+        BattleRoomDto started = battleService.startRoom(created.getId(), alice.getId());
+
+        assertThatThrownBy(() -> battleJudgeService.finishRoomAsUser(started.getId(), bob.getId()))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Only room creator can finish before time is over");
+
+        Room room = roomRepository.findById(started.getId()).orElseThrow();
+        room.setEndTime(OffsetDateTime.now().minusSeconds(1));
+        roomRepository.saveAndFlush(room);
+
+        var finalLeaderboard = battleJudgeService.finishRoomAsUser(started.getId(), bob.getId());
+
+        assertThat(finalLeaderboard).hasSize(2);
+        assertThat(roomRepository.findById(started.getId()).orElseThrow().getStatus()).isEqualTo(RoomStatus.FINISHED);
     }
 
     private BattleRoomCreateRequest createRequest() {

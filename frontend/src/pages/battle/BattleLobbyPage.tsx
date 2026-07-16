@@ -170,7 +170,7 @@ export const BattleLobbyPage = () => {
             <div className="grid grid-cols-3 gap-2">
               <NumberField label="Người" value={form.maxMembers} min={2} max={20} onChange={maxMembers => setForm(prev => ({ ...prev, maxMembers }))} />
               <NumberField label="Bài" value={form.numProblems} min={1} max={10} onChange={numProblems => setForm(prev => ({ ...prev, numProblems }))} />
-              <NumberField label="Phút" value={form.timeLimitMin} min={10} max={180} onChange={timeLimitMin => setForm(prev => ({ ...prev, timeLimitMin }))} />
+              <NumberField label="Phút" value={form.timeLimitMin} min={2} max={180} onChange={timeLimitMin => setForm(prev => ({ ...prev, timeLimitMin }))} />
             </div>
             <div className="grid grid-cols-4 gap-1">
               {difficulties.map(item => (
