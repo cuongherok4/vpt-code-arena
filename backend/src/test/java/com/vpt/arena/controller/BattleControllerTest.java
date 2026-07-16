@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -116,6 +117,18 @@ class BattleControllerTest {
             .andExpect(jsonPath("$.id").value(ROOM_ID.toString()));
 
         verify(battleService).joinRoom(ROOM_ID, USER_ID);
+    }
+
+    @Test
+    @DisplayName("POST /rooms/{id}/leave trả 204 khi phòng rỗng và bị xóa")
+    void shouldLeaveAndDeleteEmptyRoom() throws Exception {
+        when(battleService.leaveRoom(ROOM_ID, USER_ID)).thenReturn(Optional.empty());
+
+        mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/leave")
+                .header("X-User-Id", USER_ID.toString()))
+            .andExpect(status().isNoContent());
+
+        verify(battleService).leaveRoom(ROOM_ID, USER_ID);
     }
 
     @Test
