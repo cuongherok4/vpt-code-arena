@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -103,6 +104,35 @@ public class BattleService {
         room.getMembers().add(member);
 
         return toDto(room);
+    }
+
+    @Transactional
+    public Optional<BattleRoomDto> leaveRoom(UUID roomId, UUID userId) {
+        Room room = findRoomForUpdate(roomId);
+        ensureWaiting(room);
+
+        Optional<RoomMember> member = roomMemberRepository.findByRoomIdAndUserId(roomId, userId);
+        if (member.isEmpty()) {
+            return Optional.of(toDto(room));
+        }
+
+        room.getMembers().removeIf(item -> item.getUser().getId().equals(userId));
+        roomMemberRepository.delete(member.get());
+
+        if (room.getMembers().isEmpty()) {
+            roomRepository.delete(room);
+            return Optional.empty();
+        }
+
+        if (room.getCreator().getId().equals(userId)) {
+            RoomMember nextCreator = room.getMembers().stream()
+                .min(Comparator.comparing(RoomMember::getJoinedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+                .orElseThrow();
+            nextCreator.setReady(true);
+            room.setCreator(nextCreator.getUser());
+        }
+
+        return Optional.of(toDto(roomRepository.save(room)));
     }
 
     @Transactional

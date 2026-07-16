@@ -66,6 +66,16 @@ public class BattleController {
         return ResponseEntity.ok(battleService.joinRoom(roomId, requireUserId(userIdStr)));
     }
 
+    @PostMapping("/rooms/{roomId}/leave")
+    @Operation(summary = "Leave a waiting battle room")
+    public ResponseEntity<BattleRoomDto> leave(
+            @PathVariable UUID roomId,
+            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
+        return battleService.leaveRoom(roomId, requireUserId(userIdStr))
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     @PutMapping("/rooms/{roomId}")
     @Operation(summary = "Update a waiting battle room")
     public ResponseEntity<BattleRoomDto> update(

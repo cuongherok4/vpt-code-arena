@@ -156,6 +156,55 @@ class BattleServiceTest {
     }
 
     @Nested
+    @DisplayName("leaveRoom")
+    class LeaveRoom {
+        @Test
+        @DisplayName("Xóa phòng WAITING khi thành viên cuối cùng rời phòng")
+        void shouldDeleteWaitingRoomWhenLastMemberLeaves() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            Room room = room(roomId, creator, RoomStatus.WAITING);
+            RoomMember creatorMember = member(room, creator, true);
+            room.getMembers().add(creatorMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, creator.getId())).thenReturn(Optional.of(creatorMember));
+
+            Optional<BattleRoomDto> dto = battleService.leaveRoom(roomId, creator.getId());
+
+            assertThat(dto).isEmpty();
+            verify(roomMemberRepository).delete(creatorMember);
+            verify(roomRepository).delete(room);
+        }
+
+        @Test
+        @DisplayName("Chuyển chủ phòng khi creator rời nhưng vẫn còn member")
+        void shouldTransferCreatorWhenCreatorLeaves() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            User bob = user(UUID.randomUUID(), "Bob");
+            Room room = room(roomId, creator, RoomStatus.WAITING);
+            RoomMember creatorMember = member(room, creator, true);
+            RoomMember bobMember = member(room, bob, false);
+            room.getMembers().add(creatorMember);
+            room.getMembers().add(bobMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, creator.getId())).thenReturn(Optional.of(creatorMember));
+            when(roomRepository.save(room)).thenReturn(room);
+            when(battleRoomProblemRepository.findByRoomIdOrderByOrderAsc(roomId)).thenReturn(List.of());
+
+            Optional<BattleRoomDto> dto = battleService.leaveRoom(roomId, creator.getId());
+
+            assertThat(dto).isPresent();
+            assertThat(dto.get().getCreatorId()).isEqualTo(bob.getId());
+            assertThat(dto.get().getMemberCount()).isEqualTo(1);
+            assertThat(dto.get().getMembers().getFirst().isCreator()).isTrue();
+            assertThat(dto.get().getMembers().getFirst().isReady()).isTrue();
+            verify(roomMemberRepository).delete(creatorMember);
+            verify(roomRepository, never()).delete(any());
+        }
+    }
+
+    @Nested
     @DisplayName("startRoom")
     class StartRoom {
         @Test
