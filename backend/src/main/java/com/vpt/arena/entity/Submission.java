@@ -37,6 +37,9 @@ public class Submission {
     @Column(nullable = false, length = 20)
     private String language;
 
+    @Column(nullable = false)
+    private int points = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "judge_result", nullable = false)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
@@ -47,6 +50,12 @@ public class Submission {
 
     @Column(name = "memory_used")
     private Integer memoryUsed;
+
+    @Column(columnDefinition = "TEXT")
+    private String output;
+
+    @Column(name = "error_output", columnDefinition = "TEXT")
+    private String errorOutput;
 
     @Column(name = "submitted_at", updatable = false)
     @CreatedDate
