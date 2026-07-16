@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, UUID> {
@@ -27,4 +28,6 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
 
     @EntityGraph(attributePaths = {"creator", "members", "members.user"})
     List<Room> findByIsPublicTrueAndStatusOrderByCreatedAtDesc(RoomStatus status);
+
+    List<Room> findByStatusAndEndTimeBefore(RoomStatus status, OffsetDateTime endTime);
 }
