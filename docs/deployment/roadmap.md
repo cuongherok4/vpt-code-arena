@@ -9,7 +9,7 @@
 | 1 | 1–2 | Setup & Infrastructure | Môi trường dev sẵn sàng, CI/CD chạy được | 🟢 Hoàn thành | 100% |
 | 2 | 3–4 | Learn Module | Learn module hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | 🟡 Đang thực hiện | 33% |
+| 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | 🟡 Đang thực hiện | 50% |
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 7 | 14–15 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
@@ -114,13 +114,13 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 4 — Battle Module (Tuần 7–9) 🟡 33%
+### Phase 4 — Battle Module (Tuần 7–9) 🟡 50%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 4.1 | `feature/p4-battle-backend-room` | `BattleController` (CRUD phòng), `BattleService` (createRoom, joinRoom, startRoom), edge cases (join sau start, submit hết giờ) | CRUD phòng, tạo/join/start phòng được, khóa join/start bằng DB lock, các edge case xử lý đúng | 🟢 Done |
 | 4.2 | `feature/p4-battle-backend-scoring` | `JudgeCallbackService`, scoring logic, `BattleScheduler` (@Scheduled check hết giờ → finishRoom) | Submit battle async qua Judge0, điểm cộng theo AC đầu tiên, leaderboard tính rank đúng, phòng tự kết thúc sau timeout | 🟢 Done |
-| 4.3 | `feature/p4-battle-backend-tests` | Unit tests BattleService (start, join, scoring), Integration tests battle lifecycle | Toàn bộ vòng đời battle (create → join → start → finish) test được tự động | ⚪ Chưa bắt đầu |
+| 4.3 | `feature/p4-battle-backend-tests` | Unit tests BattleService (start, join, scoring), Integration tests battle lifecycle | Unit tests scoring/scheduler/controller và integration test vòng đời battle (create → join → start → submit → finish) chạy tự động | 🟢 Done |
 | 4.4 | `feature/p4-battle-websocket` | `/battle` namespace, JWT middleware, handlers (`battle:join/ready/leave`), server events, Redis pub/sub, countdown tick | Real-time sync trạng thái phòng giữa tất cả client, countdown chạy đồng bộ | ⚪ Chưa bắt đầu |
 | 4.5 | `feature/p4-battle-frontend-lobby` | `BattleLobbyPage`, `BattleRoomPage` (member list, ready toggle, start button), `battle.api.ts` | User tạo/join phòng, thấy danh sách thành viên real-time, toggle ready | ⚪ Chưa bắt đầu |
 | 4.6 | `feature/p4-battle-frontend-arena` | `BattleArenaPage`, `useBattleSocket` hook, `CountdownTimer`, `RealTimeLeaderboard`, `FinalResultModal` | User code trong phòng thi, thấy đồng hồ đếm ngược, bảng xếp hạng live, kết quả cuối | ⚪ Chưa bắt đầu |
