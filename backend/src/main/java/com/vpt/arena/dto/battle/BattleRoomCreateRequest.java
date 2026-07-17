@@ -24,7 +24,7 @@ public class BattleRoomCreateRequest {
     @Max(value = 10, message = "numProblems must be at most 10")
     private int numProblems = 3;
 
-    @Min(value = 2, message = "timeLimitMin must be at least 2")
+    @Min(value = 10, message = "timeLimitMin must be at least 10")
     @Max(value = 180, message = "timeLimitMin must be at most 180")
     private int timeLimitMin = 30;
 

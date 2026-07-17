@@ -20,7 +20,7 @@ public class BattleJudgeWorker {
             battleJudgeService.judgeSubmission(submissionId);
         } catch (Exception e) {
             log.error("Async battle judging failed for submission {}: {}", submissionId, e.getMessage(), e);
-            battleJudgeService.markJudgeFailure(submissionId, e.getMessage());
+            battleJudgeService.markJudgeFailure(submissionId);
         }
     }
 }

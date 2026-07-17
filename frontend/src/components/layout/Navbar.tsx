@@ -1,7 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore';
+import { Code2, Trophy, BookOpen, MessageSquare, User } from 'lucide-react';
 
 const NAV_LINKS = [
   { to: '/learn', icon: BookOpen, label: 'Học tập' },
@@ -12,7 +11,6 @@ const NAV_LINKS = [
 
 export const Navbar = () => {
   const { pathname } = useLocation();
-  const { isAuthenticated, user } = useAuthStore();
 
   return (
     <nav className="border-b border-white/10 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
@@ -42,23 +40,13 @@ export const Navbar = () => {
           })}
         </div>
 
-        {isAuthenticated ? (
-          <Link
-            to="/profile"
-            className="flex items-center space-x-2 border border-white/10 rounded-md px-3 py-1.5 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
-          >
-            <User className="h-4 w-4" />
-            <span className="text-sm font-medium hidden sm:inline-block">{user?.name ?? 'Tai khoan'}</span>
-          </Link>
-        ) : (
-          <Link
-            to="/login"
-            className="flex items-center space-x-2 rounded-md bg-violet-600 px-3 py-1.5 text-white hover:bg-violet-500 transition-colors"
-          >
-            <LogIn className="h-4 w-4" />
-            <span className="text-sm font-medium hidden sm:inline-block">Dang nhap</span>
-          </Link>
-        )}
+        <Link
+          to="/profile"
+          className="flex items-center space-x-2 border border-white/10 rounded-full px-3 py-1.5 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+        >
+          <User className="h-4 w-4" />
+          <span className="text-sm font-medium hidden sm:inline-block">Tài khoản</span>
+        </Link>
       </div>
     </nav>
   );
