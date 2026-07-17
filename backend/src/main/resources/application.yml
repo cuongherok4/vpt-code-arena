@@ -49,6 +49,12 @@ spring:
 server:
   port: 8080
 
+security:
+  rate-limit:
+    login:
+      capacity: ${LOGIN_RATE_LIMIT_CAPACITY:5}
+      window-seconds: ${LOGIN_RATE_LIMIT_WINDOW_SECONDS:60}
+
 jwt:
   secret: ${JWT_SECRET:defaultSecretKeyThatIsAtLeast64CharactersLongSoThatItWorksProperlyForDevEnvironment1234567890}
   access-expiry-seconds: ${JWT_ACCESS_EXPIRY_SECONDS:900}

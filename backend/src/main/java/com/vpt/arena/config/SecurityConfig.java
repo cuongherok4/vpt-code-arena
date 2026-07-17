@@ -2,9 +2,11 @@ package com.vpt.arena.config;
 
 import com.vpt.arena.security.JwtAuthFilter;
 import com.vpt.arena.security.CustomOAuth2UserService;
+import com.vpt.arena.security.LoginRateLimitFilter;
 import com.vpt.arena.security.OAuth2FailureHandler;
 import com.vpt.arena.security.OAuth2SuccessHandler;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,6 +31,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(
             HttpSecurity http,
             ObjectProvider<JwtAuthFilter> jwtAuthFilter,
+            LoginRateLimitFilter loginRateLimitFilter,
             ObjectProvider<CustomOAuth2UserService> customOAuth2UserService,
             ObjectProvider<OAuth2SuccessHandler> oauth2SuccessHandler,
             ObjectProvider<OAuth2FailureHandler> oauth2FailureHandler) throws Exception {
@@ -35,6 +39,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
+                        .contentTypeOptions(contentTypeOptions -> {})
+                        .referrerPolicy(referrerPolicy ->
+                                referrerPolicy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
@@ -49,6 +59,7 @@ public class SecurityConfig {
                     oauth2SuccessHandler.ifAvailable(oauth::successHandler);
                     oauth2FailureHandler.ifAvailable(oauth::failureHandler);
                 });
+        http.addFilterBefore(loginRateLimitFilter, UsernamePasswordAuthenticationFilter.class);
         jwtAuthFilter.ifAvailable(filter ->
                 http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class));
         return http.build();
@@ -68,5 +79,12 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public FilterRegistrationBean<LoginRateLimitFilter> loginRateLimitFilterRegistration(LoginRateLimitFilter filter) {
+        FilterRegistrationBean<LoginRateLimitFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 }
