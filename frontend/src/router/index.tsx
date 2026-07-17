@@ -24,6 +24,9 @@ const BattleLobbyPage = lazy(() => import('@/pages/battle/BattleLobbyPage'));
 const BattleRoomPage = lazy(() => import('@/pages/battle/BattleRoomPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('@/pages/auth/VerifyEmailPage'));
 const OAuthCallbackPage = lazy(() => import('@/pages/auth/OAuthCallbackPage'));
 const ProfilePlaceholderPage = lazy(() => import('@/pages/auth/ProfilePlaceholderPage'));
 
@@ -67,6 +70,9 @@ export const router = createBrowserRouter([
       { path: 'chat', element: <div>Chat Module (Coming soon)</div> },
       { path: 'login', element: LazyLoad(LoginPage) },
       { path: 'register', element: LazyLoad(RegisterPage) },
+      { path: 'forgot-password', element: LazyLoad(ForgotPasswordPage) },
+      { path: 'reset-password', element: LazyLoad(ResetPasswordPage) },
+      { path: 'verify-email', element: LazyLoad(VerifyEmailPage) },
       { path: 'auth/callback', element: LazyLoad(OAuthCallbackPage) },
       { path: 'profile', element: LazyLoad(ProfilePlaceholderPage) },
     ],
