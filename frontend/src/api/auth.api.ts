@@ -33,5 +33,11 @@ export const authApi = {
     authClient.post<AuthResponse>('/refresh', { refreshToken }).then((res) => res.data),
   logout: (refreshToken: string) =>
     authClient.post('/logout', { refreshToken }).then((res) => res.data),
+  verifyEmail: (token: string) =>
+    authClient.post('/verify-email', { token }).then((res) => res.data),
+  forgotPassword: (email: string) =>
+    authClient.post('/forgot-password', { email }).then((res) => res.data),
+  resetPassword: (payload: { token: string; password: string }) =>
+    authClient.post('/reset-password', payload).then((res) => res.data),
   oauthUrl: (provider: 'google' | 'github') => `${backendBaseUrl}/oauth2/authorization/${provider}`,
 };

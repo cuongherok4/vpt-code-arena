@@ -63,6 +63,11 @@ export default function LoginPage() {
               </button>
             </div>
           </label>
+          <div className="flex justify-end">
+            <Link className="text-sm text-violet-300 hover:text-violet-200" to="/forgot-password">
+              Quen mat khau?
+            </Link>
+          </div>
 
           {(error || searchParams.get('oauthError')) && (
             <p className="text-sm text-red-300">{error || searchParams.get('oauthError')}</p>
