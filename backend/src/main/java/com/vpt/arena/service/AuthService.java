@@ -42,6 +42,20 @@ public class AuthService {
         return issueTokens(userRepository.save(user));
     }
 
+    @Transactional
+    public AuthResponse oauthLogin(String provider, String providerId, String email, String name) {
+        String normalizedEmail = normalizeEmail(email);
+        User user = userRepository.findByEmail(normalizedEmail)
+            .map(existing -> updateOAuthUser(existing, provider, providerId, name))
+            .orElseGet(() -> createOAuthUser(provider, providerId, normalizedEmail, name));
+
+        if (user.isBanned()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is banned");
+        }
+
+        return issueTokens(userRepository.save(user));
+    }
+
     public AuthResponse login(LoginRequest request) {
         String email = normalizeEmail(request.getEmail());
         User user = userRepository.findByEmail(email)
@@ -84,7 +98,7 @@ public class AuthService {
         }
     }
 
-    private AuthResponse issueTokens(User user) {
+    public AuthResponse issueTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.save(user.getId(), refreshToken);
@@ -108,5 +122,27 @@ public class AuthService {
 
     private String normalizeEmail(String email) {
         return email.toLowerCase().trim();
+    }
+
+    private User updateOAuthUser(User user, String provider, String providerId, String name) {
+        user.setOauthProvider(provider);
+        user.setOauthId(providerId);
+        user.setEmailVerified(true);
+        if (name != null && !name.isBlank()) {
+            user.setName(name.trim());
+        }
+        return user;
+    }
+
+    private User createOAuthUser(String provider, String providerId, String email, String name) {
+        User user = new User();
+        user.setEmail(email);
+        user.setName(name == null || name.isBlank() ? email.substring(0, email.indexOf('@')) : name.trim());
+        user.setRole(Role.USER);
+        user.setEmailVerified(true);
+        user.setBanned(false);
+        user.setOauthProvider(provider);
+        user.setOauthId(providerId);
+        return user;
     }
 }

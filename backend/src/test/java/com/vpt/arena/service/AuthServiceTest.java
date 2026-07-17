@@ -132,6 +132,40 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("OAuth login tạo user mới và verify email")
+    void shouldCreateOAuthUser() {
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(UUID.randomUUID());
+            return user;
+        });
+
+        AuthResponse response = authService.oauthLogin("google", "google-123", "Alice@Example.com", "Alice OAuth");
+
+        assertThat(response.getUser().getEmail()).isEqualTo("alice@example.com");
+        assertThat(response.getUser().isEmailVerified()).isTrue();
+        assertThat(response.getAccessToken()).isNotBlank();
+        verify(refreshTokenService).save(response.getUser().getId(), response.getRefreshToken());
+    }
+
+    @Test
+    @DisplayName("OAuth login cập nhật user hiện có")
+    void shouldUpdateExistingOAuthUser() {
+        User user = user(UUID.randomUUID(), passwordEncoder.encode("StrongPass123"));
+        user.setEmailVerified(false);
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AuthResponse response = authService.oauthLogin("github", "42", "alice@example.com", "Alice GitHub");
+
+        assertThat(response.getUser().getName()).isEqualTo("Alice GitHub");
+        assertThat(response.getUser().isEmailVerified()).isTrue();
+        assertThat(user.getOauthProvider()).isEqualTo("github");
+        assertThat(user.getOauthId()).isEqualTo("42");
+    }
+
+    @Test
     @DisplayName("Logout revoke refresh token")
     void shouldLogoutAndRevokeRefreshToken() {
         User user = user(UUID.randomUUID(), passwordEncoder.encode("StrongPass123"));

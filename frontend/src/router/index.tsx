@@ -24,6 +24,7 @@ const BattleLobbyPage = lazy(() => import('@/pages/battle/BattleLobbyPage'));
 const BattleRoomPage = lazy(() => import('@/pages/battle/BattleRoomPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const OAuthCallbackPage = lazy(() => import('@/pages/auth/OAuthCallbackPage'));
 const ProfilePlaceholderPage = lazy(() => import('@/pages/auth/ProfilePlaceholderPage'));
 
 export const router = createBrowserRouter([
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
       { path: 'chat', element: <div>Chat Module (Coming soon)</div> },
       { path: 'login', element: LazyLoad(LoginPage) },
       { path: 'register', element: LazyLoad(RegisterPage) },
+      { path: 'auth/callback', element: LazyLoad(OAuthCallbackPage) },
       { path: 'profile', element: LazyLoad(ProfilePlaceholderPage) },
     ],
   },

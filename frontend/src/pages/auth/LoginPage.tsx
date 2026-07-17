@@ -1,10 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, loading, error, clearError, isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,7 +64,9 @@ export default function LoginPage() {
             </div>
           </label>
 
-          {error && <p className="text-sm text-red-300">{error}</p>}
+          {(error || searchParams.get('oauthError')) && (
+            <p className="text-sm text-red-300">{error || searchParams.get('oauthError')}</p>
+          )}
 
           <button
             type="submit"
@@ -73,6 +77,27 @@ export default function LoginPage() {
             {loading ? 'Dang xu ly...' : 'Dang nhap'}
           </button>
         </form>
+
+        <div className="my-6 flex items-center gap-3 text-xs uppercase text-slate-500">
+          <span className="h-px flex-1 bg-white/10" />
+          <span>OAuth</span>
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <a
+            href={authApi.oauthUrl('google')}
+            className="inline-flex items-center justify-center rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/5"
+          >
+            Google
+          </a>
+          <a
+            href={authApi.oauthUrl('github')}
+            className="inline-flex items-center justify-center rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/5"
+          >
+            GitHub
+          </a>
+        </div>
 
         <p className="mt-6 text-sm text-slate-400">
           Chua co tai khoan? <Link className="text-violet-300 hover:text-violet-200" to="/register">Dang ky</Link>

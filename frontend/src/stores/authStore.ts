@@ -11,6 +11,7 @@ type AuthState = {
   isAuthenticated: boolean;
   register: (payload: { name: string; email: string; password: string }) => Promise<boolean>;
   login: (payload: { email: string; password: string }) => Promise<boolean>;
+  acceptOAuth: (response: AuthResponse) => void;
   refresh: () => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -64,6 +65,10 @@ export const useAuthStore = create<AuthState>()(
           set({ loading: false, error: errorMessage(error) });
           return false;
         }
+      },
+
+      acceptOAuth: (response) => {
+        set(applyAuth(response));
       },
 
       refresh: async () => {

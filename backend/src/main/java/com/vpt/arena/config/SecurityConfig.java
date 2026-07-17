@@ -1,6 +1,9 @@
 package com.vpt.arena.config;
 
 import com.vpt.arena.security.JwtAuthFilter;
+import com.vpt.arena.security.CustomOAuth2UserService;
+import com.vpt.arena.security.OAuth2FailureHandler;
+import com.vpt.arena.security.OAuth2SuccessHandler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,18 +25,30 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, ObjectProvider<JwtAuthFilter> jwtAuthFilter) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            ObjectProvider<JwtAuthFilter> jwtAuthFilter,
+            ObjectProvider<CustomOAuth2UserService> customOAuth2UserService,
+            ObjectProvider<OAuth2SuccessHandler> oauth2SuccessHandler,
+            ObjectProvider<OAuth2FailureHandler> oauth2FailureHandler) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().permitAll()
-                );
+                )
+                .oauth2Login(oauth -> {
+                    customOAuth2UserService.ifAvailable(userService ->
+                        oauth.userInfoEndpoint(userInfo -> userInfo.userService(userService)));
+                    oauth2SuccessHandler.ifAvailable(oauth::successHandler);
+                    oauth2FailureHandler.ifAvailable(oauth::failureHandler);
+                });
         jwtAuthFilter.ifAvailable(filter ->
                 http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class));
         return http.build();

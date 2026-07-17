@@ -5,6 +5,8 @@ const authClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const backendBaseUrl = 'http://localhost:8080';
+
 export type Role = 'USER' | 'ADMIN';
 
 export type AuthUser = {
@@ -31,4 +33,5 @@ export const authApi = {
     authClient.post<AuthResponse>('/refresh', { refreshToken }).then((res) => res.data),
   logout: (refreshToken: string) =>
     authClient.post('/logout', { refreshToken }).then((res) => res.data),
+  oauthUrl: (provider: 'google' | 'github') => `${backendBaseUrl}/oauth2/authorization/${provider}`,
 };
