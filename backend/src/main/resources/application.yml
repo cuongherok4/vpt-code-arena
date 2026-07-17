@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties],optional:file:backend/.env[.properties]
   profiles:
     active: local
   datasource:
@@ -46,6 +48,9 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
 judge0:
   url: ${JUDGE0_URL:http://localhost:2358}
