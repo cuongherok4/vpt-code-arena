@@ -12,7 +12,6 @@ import com.vpt.arena.entity.Room;
 import com.vpt.arena.entity.RoomMember;
 import com.vpt.arena.entity.RoomResult;
 import com.vpt.arena.entity.User;
-import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.entity.enums.JudgeResult;
 import com.vpt.arena.entity.enums.RoomStatus;
 import com.vpt.arena.repository.BattleRoomProblemRepository;
@@ -31,7 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -65,8 +63,6 @@ public class BattleJudgeService {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final BattleRealtimeNotifier battleRealtimeNotifier;
-    private final TransactionTemplate transactionTemplate;
 
     @Value("${judge0.url}")
     private String judge0Url;
@@ -113,32 +109,16 @@ public class BattleJudgeService {
         BattleSubmission submission = battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Battle submission not found"));
         JudgeOutcome outcome = judge(submission);
-        applyJudgeResult(submissionId, outcome);
+        applyJudgeResult(submissionId, outcome.result(), outcome.executionTime());
     }
 
     @Transactional
     public BattleSubmissionDto markJudgeFailure(UUID submissionId) {
-        return markJudgeFailure(submissionId, "Judge service failed");
+        return applyJudgeResult(submissionId, JudgeResult.RE, null);
     }
 
-    public BattleSubmissionDto markJudgeFailure(UUID submissionId, String message) {
-        return applyJudgeResult(submissionId, new JudgeOutcome(
-            JudgeResult.RE,
-            null,
-            null,
-            firstNonBlank(message, "Judge service failed")
-        ));
-    }
-
+    @Transactional
     public BattleSubmissionDto applyJudgeResult(UUID submissionId, JudgeResult result, Integer executionTime) {
-        return applyJudgeResult(submissionId, new JudgeOutcome(result, executionTime, null, null));
-    }
-
-    private BattleSubmissionDto applyJudgeResult(UUID submissionId, JudgeOutcome outcome) {
-        return transactionTemplate.execute(status -> applyJudgeResultInTransaction(submissionId, outcome));
-    }
-
-    private BattleSubmissionDto applyJudgeResultInTransaction(UUID submissionId, JudgeOutcome outcome) {
         BattleSubmission submission = battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Battle submission not found"));
         roomRepository.findDetailedByIdForUpdate(submission.getRoom().getId())
@@ -148,27 +128,20 @@ public class BattleJudgeService {
         }
 
         int points = 0;
-        if (outcome.result() == JudgeResult.AC) {
-            int maxPoints = pointsFor(submission.getProblem().getDifficulty());
-            int previousBest = battleSubmissionRepository.maxPointsByRoomUserProblemAndResult(
-                submission.getRoom().getId(),
-                submission.getUser().getId(),
-                submission.getProblem().getId(),
-                JudgeResult.AC
-            );
-            points = previousBest < maxPoints ? maxPoints : 0;
+        if (result == JudgeResult.AC && !battleSubmissionRepository.existsByRoomIdAndUserIdAndProblemIdAndResult(
+            submission.getRoom().getId(),
+            submission.getUser().getId(),
+            submission.getProblem().getId(),
+            JudgeResult.AC
+        )) {
+            points = pointsPerProblem(submission.getRoom());
         }
 
-        submission.setResult(outcome.result());
-        submission.setExecutionTime(outcome.executionTime());
-        submission.setOutput(blankToNull(outcome.output()));
-        submission.setErrorOutput(blankToNull(outcome.errorOutput()));
+        submission.setResult(result);
+        submission.setExecutionTime(executionTime);
         submission.setPoints(points);
         BattleSubmission saved = battleSubmissionRepository.save(submission);
-        BattleSubmissionDto dto = toDto(saved);
-        battleRealtimeNotifier.publishSubmissionResult(dto);
-        battleRealtimeNotifier.publishLeaderboard(saved.getRoom().getId(), calculateLeaderboard(saved.getRoom().getId()));
-        return dto;
+        return toDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -180,11 +153,8 @@ public class BattleJudgeService {
     public List<BattleLeaderboardEntryDto> finishRoomAsUser(UUID roomId, UUID userId) {
         Room room = roomRepository.findDetailedById(roomId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found"));
-        boolean isCreator = room.getCreator().getId().equals(userId);
-        boolean isMember = roomMemberRepository.existsByRoomIdAndUserId(roomId, userId);
-        boolean isExpired = room.getEndTime() != null && !OffsetDateTime.now().isBefore(room.getEndTime());
-        if (!isCreator && (!isMember || !isExpired)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only room creator can finish before time is over");
+        if (!room.getCreator().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only room creator can finish the room");
         }
         return finishRoom(roomId);
     }
@@ -212,7 +182,6 @@ public class BattleJudgeService {
             result.setLastAcTime(entry.getLastAcceptedAt());
             roomResultRepository.save(result);
         }
-        battleRealtimeNotifier.publishFinished(roomId, leaderboard);
         return leaderboard;
     }
 
@@ -247,12 +216,8 @@ public class BattleJudgeService {
                 submission.getUser().getId(),
                 id -> new ScoreAccumulator(submission.getUser().getId(), submission.getUser().getName())
             );
-            UUID problemId = submission.getProblem().getId();
-            int previousBest = score.acceptedProblemPoints.getOrDefault(problemId, 0);
-            if (submission.getPoints() > previousBest) {
-                score.acceptedProblemPoints.put(problemId, submission.getPoints());
-                score.acceptedProblems.put(problemId, submission.getSubmittedAt());
-                score.totalPoints += submission.getPoints() - previousBest;
+            if (score.acceptedProblems.putIfAbsent(submission.getProblem().getId(), submission.getSubmittedAt()) == null) {
+                score.totalPoints += submission.getPoints();
                 score.lastAcceptedAt = maxTime(score.lastAcceptedAt, submission.getSubmittedAt());
             }
         }
@@ -284,11 +249,10 @@ public class BattleJudgeService {
         try {
             JsonNode cases = objectMapper.readTree(problem.getTestCases()).path("cases");
             if (!cases.isArray() || cases.isEmpty()) {
-                return new JudgeOutcome(JudgeResult.RE, null, null, "Problem has no runnable test cases");
+                return new JudgeOutcome(JudgeResult.RE, null);
             }
 
             Integer maxTimeMs = null;
-            String lastOutput = null;
             for (JsonNode testCase : cases) {
                 Judge0Result result = runJudge0(
                     submission.getCode(),
@@ -299,22 +263,16 @@ public class BattleJudgeService {
                     problem.getMemoryLimitKb()
                 );
                 maxTimeMs = max(maxTimeMs, result.executionTimeMs());
-                lastOutput = firstNonBlank(result.stdout(), lastOutput);
                 JudgeResult mapped = mapStatus(result.status());
                 if (mapped != JudgeResult.AC) {
-                    return new JudgeOutcome(
-                        mapped,
-                        maxTimeMs,
-                        result.stdout(),
-                        errorOutputFor(mapped, testCase.path("expected").asText(""), result)
-                    );
+                    return new JudgeOutcome(mapped, maxTimeMs);
                 }
             }
-            return new JudgeOutcome(JudgeResult.AC, maxTimeMs, lastOutput, null);
+            return new JudgeOutcome(JudgeResult.AC, maxTimeMs);
         } catch (JsonProcessingException e) {
-            return new JudgeOutcome(JudgeResult.RE, null, null, "Could not read problem test cases");
+            return new JudgeOutcome(JudgeResult.RE, null);
         } catch (RestClientException e) {
-            return new JudgeOutcome(JudgeResult.RE, null, null, "Judge service is unavailable");
+            return new JudgeOutcome(JudgeResult.RE, null);
         }
     }
 
@@ -362,18 +320,11 @@ public class BattleJudgeService {
                 || (!status.isBlank() && !"In Queue".equalsIgnoreCase(status) && !"Processing".equalsIgnoreCase(status));
 
             if (finished) {
-                return new Judge0Result(
-                    status.isBlank() ? "Unknown" : status,
-                    parseTimeMs(text(root, "time")),
-                    decodeBase64(text(root, "stdout")),
-                    decodeBase64(text(root, "stderr")),
-                    decodeBase64(text(root, "compile_output")),
-                    decodeBase64(text(root, "message"))
-                );
+                return new Judge0Result(status.isBlank() ? "Unknown" : status, parseTimeMs(text(root, "time")));
             }
             sleep();
         }
-        return new Judge0Result("Time Limit Exceeded", null, null, null, null, "Judge timed out");
+        return new Judge0Result("Time Limit Exceeded", null);
     }
 
     private BattleSubmissionDto toDto(BattleSubmission submission) {
@@ -386,18 +337,12 @@ public class BattleJudgeService {
             .result(submission.getResult())
             .points(submission.getPoints())
             .executionTime(submission.getExecutionTime())
-            .output(submission.getOutput())
-            .errorOutput(submission.getErrorOutput())
             .submittedAt(submission.getSubmittedAt())
             .build();
     }
 
-    private int pointsFor(Difficulty difficulty) {
-        return switch (difficulty) {
-            case EASY -> 100;
-            case MEDIUM -> 200;
-            case HARD -> 300;
-        };
+    private int pointsPerProblem(Room room) {
+        return room.getNumProblems() <= 1 ? 100 : 100 / room.getNumProblems();
     }
 
     private String normalizeLanguage(String language) {
@@ -461,6 +406,7 @@ public class BattleJudgeService {
         return Base64.getEncoder().encodeToString((value == null ? "" : value).getBytes(StandardCharsets.UTF_8));
     }
 
+    @SuppressWarnings("unused")
     private String decodeBase64(String value) {
         if (value == null || value.isBlank()) return value;
         try {
@@ -475,40 +421,14 @@ public class BattleJudgeService {
         }
     }
 
-    private String firstNonBlank(String... values) {
-        for (String value : values) {
-            if (value != null && !value.isBlank()) return value;
-        }
-        return null;
-    }
+    private record Judge0Result(String status, Integer executionTimeMs) {}
 
-    private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value;
-    }
-
-    private String errorOutputFor(JudgeResult result, String expectedOutput, Judge0Result judge0Result) {
-        if (result == JudgeResult.WA) {
-            return "Expected:\n" + expectedOutput + "\nActual:\n" + firstNonBlank(judge0Result.stdout(), "");
-        }
-        return firstNonBlank(judge0Result.compileOutput(), judge0Result.stderr(), judge0Result.message(), judge0Result.status());
-    }
-
-    private record Judge0Result(
-        String status,
-        Integer executionTimeMs,
-        String stdout,
-        String stderr,
-        String compileOutput,
-        String message
-    ) {}
-
-    private record JudgeOutcome(JudgeResult result, Integer executionTime, String output, String errorOutput) {}
+    private record JudgeOutcome(JudgeResult result, Integer executionTime) {}
 
     private static class ScoreAccumulator {
         private final UUID userId;
         private final String name;
         private final Map<UUID, OffsetDateTime> acceptedProblems = new LinkedHashMap<>();
-        private final Map<UUID, Integer> acceptedProblemPoints = new LinkedHashMap<>();
         private int totalPoints = 0;
         private OffsetDateTime lastAcceptedAt;
 

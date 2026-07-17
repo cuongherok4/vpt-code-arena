@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -42,7 +41,6 @@ public class BattleService {
     private final BattleRoomProblemRepository battleRoomProblemRepository;
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
-    private final BattleRealtimeNotifier battleRealtimeNotifier;
 
     @Transactional(readOnly = true)
     public List<BattleRoomDto> listPublicWaitingRooms() {
@@ -107,38 +105,6 @@ public class BattleService {
     }
 
     @Transactional
-    public Optional<BattleRoomDto> leaveRoom(UUID roomId, UUID userId) {
-        Room room = findRoomForUpdate(roomId);
-
-        Optional<RoomMember> member = roomMemberRepository.findByRoomIdAndUserId(roomId, userId);
-        if (member.isEmpty()) {
-            return Optional.of(toDto(room));
-        }
-
-        room.getMembers().removeIf(item -> item.getUser().getId().equals(userId));
-        roomMemberRepository.delete(member.get());
-
-        if (room.getMembers().isEmpty()) {
-            if (room.getStatus() == RoomStatus.WAITING) {
-                roomRepository.delete(room);
-                return Optional.empty();
-            }
-            room.setStatus(RoomStatus.FINISHED);
-            return Optional.of(toDto(roomRepository.save(room)));
-        }
-
-        if (room.getCreator().getId().equals(userId)) {
-            RoomMember nextCreator = room.getMembers().stream()
-                .min(Comparator.comparing(RoomMember::getJoinedAt, Comparator.nullsLast(Comparator.naturalOrder())))
-                .orElseThrow();
-            nextCreator.setReady(true);
-            room.setCreator(nextCreator.getUser());
-        }
-
-        return Optional.of(toDto(roomRepository.save(room)));
-    }
-
-    @Transactional
     public BattleRoomDto updateRoom(UUID roomId, UUID userId, BattleRoomCreateRequest request) {
         Room room = findRoomForUpdate(roomId);
         ensureCreator(room, userId);
@@ -197,9 +163,7 @@ public class BattleService {
             }
         }
 
-        BattleRoomDto dto = toDto(saved);
-        battleRealtimeNotifier.publishStarted(dto);
-        return dto;
+        return toDto(saved);
     }
 
     @Transactional(readOnly = true)

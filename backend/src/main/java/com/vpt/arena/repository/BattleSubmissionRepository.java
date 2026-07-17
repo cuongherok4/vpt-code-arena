@@ -18,20 +18,7 @@ public interface BattleSubmissionRepository extends JpaRepository<BattleSubmissi
     @Query("SELECT s FROM BattleSubmission s WHERE s.id = :id")
     Optional<BattleSubmission> findWithRoomAndProblemAndUserById(@Param("id") UUID id);
 
-    @Query("""
-        SELECT COALESCE(MAX(s.points), 0)
-        FROM BattleSubmission s
-        WHERE s.room.id = :roomId
-          AND s.user.id = :userId
-          AND s.problem.id = :problemId
-          AND s.result = :result
-        """)
-    int maxPointsByRoomUserProblemAndResult(
-        @Param("roomId") UUID roomId,
-        @Param("userId") UUID userId,
-        @Param("problemId") UUID problemId,
-        @Param("result") JudgeResult result
-    );
+    boolean existsByRoomIdAndUserIdAndProblemIdAndResult(UUID roomId, UUID userId, UUID problemId, JudgeResult result);
 
     List<BattleSubmission> findByRoomIdOrderBySubmittedAtAsc(UUID roomId);
 

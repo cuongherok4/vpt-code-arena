@@ -1,77 +1,32 @@
 import express from 'express';
+import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { Redis } from 'ioredis';
-import { Server } from 'socket.io';
-import { registerBattleNamespace, type BattleEvent } from './battleNamespace.js';
-import { RedisBattleStore } from './redisBattleStore.js';
 
 const app = express();
-app.use(express.json());
-
 const httpServer = createServer(app);
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*').split(',').map((origin) => origin.trim());
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
+    origin: '*',
     methods: ['GET', 'POST']
   }
 });
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-const redis = new Redis(redisUrl);
-const subscriber = new Redis(redisUrl);
-const battleStore = new RedisBattleStore(redis);
-const battleNamespace = registerBattleNamespace(io, battleStore, {
-  jwtSecret: process.env.JWT_SECRET || '',
-  authDisabled: process.env.WS_AUTH_DISABLED === 'true'
-});
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-app.get('/health', (_req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'websocket-service' });
-});
-
-app.post('/internal/battle/events', (req, res) => {
-  const event = req.body as BattleEvent;
-  if (!event?.type || !event?.roomId) {
-    res.status(400).json({ error: 'Invalid battle event' });
-    return;
-  }
-  battleNamespace.handleBattleEvent(event);
-  res.status(202).json({ accepted: true });
-});
-
-subscriber.subscribe('battle:events', (error) => {
-  if (error) {
-    console.error('Failed to subscribe to battle events:', error);
-  }
-});
-
-subscriber.on('message', (_channel, message) => {
-  try {
-    battleNamespace.handleBattleEvent(JSON.parse(message) as BattleEvent);
-  } catch (error) {
-    console.error('Invalid battle event message:', error);
-  }
 });
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
+  
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });
 });
 
-const PORT = Number(process.env.PORT || 3001);
+const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`WebSocket service running on port ${PORT}`);
 });
-
-function shutdown() {
-  battleNamespace.stopAllCountdowns();
-  subscriber.disconnect();
-  redis.disconnect();
-  httpServer.close(() => process.exit(0));
-}
-
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
