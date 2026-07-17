@@ -52,6 +52,12 @@ public class BattleSubmission {
     @Column(name = "execution_time")
     private Integer executionTime;
 
+    @Column(columnDefinition = "TEXT")
+    private String output;
+
+    @Column(name = "error_output", columnDefinition = "TEXT")
+    private String errorOutput;
+
     @Column(name = "submitted_at", updatable = false)
     @CreatedDate
     private OffsetDateTime submittedAt;

@@ -19,11 +19,14 @@ import com.vpt.arena.repository.RoomRepository;
 import com.vpt.arena.repository.RoomResultRepository;
 import com.vpt.arena.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
@@ -35,6 +38,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,9 +54,19 @@ class BattleJudgeServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private RestTemplate restTemplate;
     @Mock private ObjectMapper objectMapper;
+    @Mock private BattleRealtimeNotifier battleRealtimeNotifier;
+    @Mock private TransactionTemplate transactionTemplate;
 
     @InjectMocks
     private BattleJudgeService battleJudgeService;
+
+    @BeforeEach
+    void runTransactionCallbacks() {
+        lenient().when(transactionTemplate.execute(any())).thenAnswer(invocation -> {
+            TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
+        });
+    }
 
     private User user(UUID id, String name) {
         User user = new User();
@@ -121,7 +135,7 @@ class BattleJudgeServiceTest {
     }
 
     @Test
-    @DisplayName("AC đầu tiên nhận điểm theo số bài")
+    @DisplayName("AC đầu tiên nhận điểm theo độ khó bài")
     void shouldAwardPointsForFirstAcceptedSubmission() {
         UUID submissionId = UUID.randomUUID();
         User user = user(UUID.randomUUID(), "Alice");
@@ -130,19 +144,21 @@ class BattleJudgeServiceTest {
         BattleSubmission submission = submission(submissionId, room, user, problem, OffsetDateTime.now());
         when(battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)).thenReturn(Optional.of(submission));
         when(roomRepository.findDetailedByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
-        when(battleSubmissionRepository.existsByRoomIdAndUserIdAndProblemIdAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
-            .thenReturn(false);
+        when(roomRepository.findDetailedById(room.getId())).thenReturn(Optional.of(room));
+        when(battleSubmissionRepository.findLeaderboardSubmissions(room.getId())).thenReturn(List.of(submission));
+        when(battleSubmissionRepository.maxPointsByRoomUserProblemAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
+            .thenReturn(0);
         when(battleSubmissionRepository.save(any(BattleSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         var dto = battleJudgeService.applyJudgeResult(submissionId, JudgeResult.AC, 120);
 
         assertThat(dto.getResult()).isEqualTo(JudgeResult.AC);
-        assertThat(dto.getPoints()).isEqualTo(50);
+        assertThat(dto.getPoints()).isEqualTo(100);
         assertThat(dto.getExecutionTime()).isEqualTo(120);
     }
 
     @Test
-    @DisplayName("AC lặp lại cùng bài không cộng thêm điểm")
+    @DisplayName("AC lặp lại cùng bài chỉ nhận điểm nếu cao hơn điểm cũ")
     void shouldNotAwardDuplicateAcceptedSubmission() {
         UUID submissionId = UUID.randomUUID();
         User user = user(UUID.randomUUID(), "Alice");
@@ -151,13 +167,41 @@ class BattleJudgeServiceTest {
         BattleSubmission submission = submission(submissionId, room, user, problem, OffsetDateTime.now());
         when(battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)).thenReturn(Optional.of(submission));
         when(roomRepository.findDetailedByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
-        when(battleSubmissionRepository.existsByRoomIdAndUserIdAndProblemIdAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
-            .thenReturn(true);
+        when(roomRepository.findDetailedById(room.getId())).thenReturn(Optional.of(room));
+        when(battleSubmissionRepository.findLeaderboardSubmissions(room.getId())).thenReturn(List.of(submission));
+        when(battleSubmissionRepository.maxPointsByRoomUserProblemAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
+            .thenReturn(100);
         when(battleSubmissionRepository.save(any(BattleSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         var dto = battleJudgeService.applyJudgeResult(submissionId, JudgeResult.AC, 120);
 
         assertThat(dto.getPoints()).isZero();
+    }
+
+    @Test
+    @DisplayName("AC mới nâng điểm nếu dữ liệu cũ có điểm thấp hơn")
+    void shouldUpgradeAcceptedSubmissionScoreWhenNewRuleIsHigher() {
+        UUID submissionId = UUID.randomUUID();
+        User user = user(UUID.randomUUID(), "Alice");
+        Room room = room(UUID.randomUUID(), user, 2);
+        Problem problem = problem(UUID.randomUUID(), "A");
+        BattleSubmission submission = submission(submissionId, room, user, problem, OffsetDateTime.now());
+        BattleSubmission oldAccepted = submission(UUID.randomUUID(), room, user, problem, OffsetDateTime.now().minusMinutes(1));
+        oldAccepted.setResult(JudgeResult.AC);
+        oldAccepted.setPoints(33);
+        when(battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)).thenReturn(Optional.of(submission));
+        when(roomRepository.findDetailedByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
+        when(roomRepository.findDetailedById(room.getId())).thenReturn(Optional.of(room));
+        when(battleSubmissionRepository.findLeaderboardSubmissions(room.getId())).thenReturn(List.of(oldAccepted, submission));
+        when(battleSubmissionRepository.maxPointsByRoomUserProblemAndResult(room.getId(), user.getId(), problem.getId(), JudgeResult.AC))
+            .thenReturn(33);
+        when(battleSubmissionRepository.save(any(BattleSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var dto = battleJudgeService.applyJudgeResult(submissionId, JudgeResult.AC, 120);
+        List<BattleLeaderboardEntryDto> leaderboard = battleJudgeService.leaderboard(room.getId());
+
+        assertThat(dto.getPoints()).isEqualTo(100);
+        assertThat(leaderboard.getFirst().getTotalPoints()).isEqualTo(100);
     }
 
     @Test
@@ -178,6 +222,27 @@ class BattleJudgeServiceTest {
         assertThat(dto.getResult()).isEqualTo(JudgeResult.AC);
         assertThat(dto.getPoints()).isEqualTo(50);
         verify(battleSubmissionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Judge failure lưu error output để FE hiển thị")
+    void shouldExposeJudgeFailureErrorOutput() {
+        UUID submissionId = UUID.randomUUID();
+        User user = user(UUID.randomUUID(), "Alice");
+        Room room = room(UUID.randomUUID(), user, 1);
+        Problem problem = problem(UUID.randomUUID(), "A");
+        BattleSubmission submission = submission(submissionId, room, user, problem, OffsetDateTime.now());
+        when(battleSubmissionRepository.findWithRoomAndProblemAndUserById(submissionId)).thenReturn(Optional.of(submission));
+        when(roomRepository.findDetailedByIdForUpdate(room.getId())).thenReturn(Optional.of(room));
+        when(roomRepository.findDetailedById(room.getId())).thenReturn(Optional.of(room));
+        when(battleSubmissionRepository.findLeaderboardSubmissions(room.getId())).thenReturn(List.of(submission));
+        when(battleSubmissionRepository.save(any(BattleSubmission.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var dto = battleJudgeService.markJudgeFailure(submissionId);
+
+        assertThat(dto.getResult()).isEqualTo(JudgeResult.RE);
+        assertThat(dto.getErrorOutput()).isEqualTo("Judge service failed");
+        verify(battleRealtimeNotifier).publishSubmissionResult(dto);
     }
 
     @Test

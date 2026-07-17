@@ -46,6 +46,7 @@ class BattleServiceTest {
     @Mock private BattleRoomProblemRepository battleRoomProblemRepository;
     @Mock private ProblemRepository problemRepository;
     @Mock private UserRepository userRepository;
+    @Mock private BattleRealtimeNotifier battleRealtimeNotifier;
 
     @InjectMocks
     private BattleService battleService;
@@ -151,6 +152,101 @@ class BattleServiceTest {
                 .hasMessageContaining("Room already started");
 
             verify(roomMemberRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("leaveRoom")
+    class LeaveRoom {
+        @Test
+        @DisplayName("Xóa phòng WAITING khi thành viên cuối cùng rời phòng")
+        void shouldDeleteWaitingRoomWhenLastMemberLeaves() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            Room room = room(roomId, creator, RoomStatus.WAITING);
+            RoomMember creatorMember = member(room, creator, true);
+            room.getMembers().add(creatorMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, creator.getId())).thenReturn(Optional.of(creatorMember));
+
+            Optional<BattleRoomDto> dto = battleService.leaveRoom(roomId, creator.getId());
+
+            assertThat(dto).isEmpty();
+            verify(roomMemberRepository).delete(creatorMember);
+            verify(roomRepository).delete(room);
+        }
+
+        @Test
+        @DisplayName("Chuyển chủ phòng khi creator rời nhưng vẫn còn member")
+        void shouldTransferCreatorWhenCreatorLeaves() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            User bob = user(UUID.randomUUID(), "Bob");
+            Room room = room(roomId, creator, RoomStatus.WAITING);
+            RoomMember creatorMember = member(room, creator, true);
+            RoomMember bobMember = member(room, bob, false);
+            room.getMembers().add(creatorMember);
+            room.getMembers().add(bobMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, creator.getId())).thenReturn(Optional.of(creatorMember));
+            when(roomRepository.save(room)).thenReturn(room);
+            when(battleRoomProblemRepository.findByRoomIdOrderByOrderAsc(roomId)).thenReturn(List.of());
+
+            Optional<BattleRoomDto> dto = battleService.leaveRoom(roomId, creator.getId());
+
+            assertThat(dto).isPresent();
+            assertThat(dto.get().getCreatorId()).isEqualTo(bob.getId());
+            assertThat(dto.get().getMemberCount()).isEqualTo(1);
+            assertThat(dto.get().getMembers().getFirst().isCreator()).isTrue();
+            assertThat(dto.get().getMembers().getFirst().isReady()).isTrue();
+            verify(roomMemberRepository).delete(creatorMember);
+            verify(roomRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Kết thúc phòng IN_PROGRESS khi thành viên cuối cùng rời trận")
+        void shouldFinishInProgressRoomWhenLastMemberLeaves() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            Room room = room(roomId, creator, RoomStatus.IN_PROGRESS);
+            RoomMember creatorMember = member(room, creator, true);
+            room.getMembers().add(creatorMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, creator.getId())).thenReturn(Optional.of(creatorMember));
+            when(roomRepository.save(room)).thenReturn(room);
+            when(battleRoomProblemRepository.findByRoomIdOrderByOrderAsc(roomId)).thenReturn(List.of());
+
+            Optional<BattleRoomDto> dto = battleService.leaveRoom(roomId, creator.getId());
+
+            assertThat(dto).isPresent();
+            assertThat(dto.get().getStatus()).isEqualTo(RoomStatus.FINISHED);
+            assertThat(dto.get().getMemberCount()).isZero();
+            verify(roomMemberRepository).delete(creatorMember);
+            verify(roomRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Cho phép rời phòng đã FINISHED")
+        void shouldAllowLeavingFinishedRoom() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            User bob = user(UUID.randomUUID(), "Bob");
+            Room room = room(roomId, creator, RoomStatus.FINISHED);
+            RoomMember creatorMember = member(room, creator, true);
+            RoomMember bobMember = member(room, bob, false);
+            room.getMembers().add(creatorMember);
+            room.getMembers().add(bobMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, bob.getId())).thenReturn(Optional.of(bobMember));
+            when(roomRepository.save(room)).thenReturn(room);
+            when(battleRoomProblemRepository.findByRoomIdOrderByOrderAsc(roomId)).thenReturn(List.of());
+
+            Optional<BattleRoomDto> dto = battleService.leaveRoom(roomId, bob.getId());
+
+            assertThat(dto).isPresent();
+            assertThat(dto.get().getStatus()).isEqualTo(RoomStatus.FINISHED);
+            assertThat(dto.get().getMemberCount()).isEqualTo(1);
+            verify(roomMemberRepository).delete(bobMember);
         }
     }
 

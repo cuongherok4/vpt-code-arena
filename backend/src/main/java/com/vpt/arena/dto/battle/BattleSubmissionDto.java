@@ -18,6 +18,8 @@ public class BattleSubmissionDto {
     private JudgeResult result;
     private int points;
     private Integer executionTime;
+    private String output;
+    private String errorOutput;
     private OffsetDateTime submittedAt;
 
     public UUID getSubmissionId() {

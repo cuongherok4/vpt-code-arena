@@ -20,6 +20,11 @@ const LessonPage = lazy(() => import('@/pages/learn/LessonPage'));
 const ChallengePage = lazy(() => import('@/pages/learn/ChallengePage'));
 const ExamListPage = lazy(() => import('@/pages/exam/ExamListPage'));
 const ExamProblemPage = lazy(() => import('@/pages/exam/ExamProblemPage'));
+const BattleLobbyPage = lazy(() => import('@/pages/battle/BattleLobbyPage'));
+const BattleRoomPage = lazy(() => import('@/pages/battle/BattleRoomPage'));
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const ProfilePlaceholderPage = lazy(() => import('@/pages/auth/ProfilePlaceholderPage'));
 
 export const router = createBrowserRouter([
   {
@@ -56,9 +61,12 @@ export const router = createBrowserRouter([
       },
       { path: 'exam', element: LazyLoad(ExamListPage) },
       { path: 'exam/problems/:id', element: LazyLoad(ExamProblemPage) },
-      { path: 'battle', element: <div>Battle Module (Coming soon)</div> },
+      { path: 'battle', element: LazyLoad(BattleLobbyPage) },
+      { path: 'battle/rooms/:roomId', element: LazyLoad(BattleRoomPage) },
       { path: 'chat', element: <div>Chat Module (Coming soon)</div> },
-      { path: 'profile', element: <div>User Profile (Coming soon)</div> },
+      { path: 'login', element: LazyLoad(LoginPage) },
+      { path: 'register', element: LazyLoad(RegisterPage) },
+      { path: 'profile', element: LazyLoad(ProfilePlaceholderPage) },
     ],
   },
 ]);
