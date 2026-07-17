@@ -21,6 +21,15 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     List<Submission> findTop20ByUserIdAndProblemIdOrderBySubmittedAtDesc(UUID userId, UUID problemId);
 
     @Query("""
+        SELECT s
+        FROM Submission s
+        JOIN FETCH s.problem
+        WHERE s.user.id = :userId
+        ORDER BY s.submittedAt DESC
+        """)
+    List<Submission> findRecentByUserId(@Param("userId") UUID userId, Pageable pageable);
+
+    @Query("""
         SELECT
             s.user.id AS userId,
             s.user.name AS userName,

@@ -5,6 +5,7 @@ import com.vpt.arena.entity.enums.JudgeResult;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -34,6 +35,16 @@ public interface BattleSubmissionRepository extends JpaRepository<BattleSubmissi
     );
 
     List<BattleSubmission> findByRoomIdOrderBySubmittedAtAsc(UUID roomId);
+
+    @Query("""
+        SELECT s
+        FROM BattleSubmission s
+        JOIN FETCH s.problem
+        JOIN FETCH s.room
+        WHERE s.user.id = :userId
+        ORDER BY s.submittedAt DESC
+        """)
+    List<BattleSubmission> findRecentByUserId(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
         SELECT s
