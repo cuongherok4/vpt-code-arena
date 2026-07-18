@@ -4,6 +4,7 @@ import type { ExtendedError, Socket } from 'socket.io';
 export type AuthUser = {
   userId: string;
   name?: string;
+  token?: string;
 };
 
 type JwtPayload = {
@@ -40,7 +41,8 @@ export function authenticateSocket(secret: string, authDisabled: boolean) {
 
     socket.data.user = {
       userId,
-      name: payload.name
+      name: payload.name,
+      token
     } satisfies AuthUser;
     next();
   };
