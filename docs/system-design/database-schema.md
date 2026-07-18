@@ -235,7 +235,7 @@ CREATE INDEX idx_direct_messages_conversation ON direct_messages(sender_id, rece
 CREATE INDEX idx_direct_messages_unread        ON direct_messages(receiver_id, is_read);
 
 -- ─────────────────────────────────────────
--- SOCIAL / FRIENDS (Backlog sau Phase 6)
+-- SOCIAL / FRIENDS (Phase 7)
 -- ─────────────────────────────────────────
 CREATE TABLE friend_requests (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
