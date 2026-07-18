@@ -3,7 +3,9 @@ import { createServer } from 'http';
 import { Redis } from 'ioredis';
 import { Server } from 'socket.io';
 import { registerBattleNamespace, type BattleEvent } from './battleNamespace.js';
+import { registerChatNamespace } from './chatNamespace.js';
 import { RedisBattleStore } from './redisBattleStore.js';
+import { RedisChatPresenceStore } from './redisChatPresenceStore.js';
 
 const app = express();
 app.use(express.json());
@@ -21,9 +23,15 @@ const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 const redis = new Redis(redisUrl);
 const subscriber = new Redis(redisUrl);
 const battleStore = new RedisBattleStore(redis);
+const chatPresenceStore = new RedisChatPresenceStore(redis);
 const battleNamespace = registerBattleNamespace(io, battleStore, {
   jwtSecret: process.env.JWT_SECRET || '',
   authDisabled: process.env.WS_AUTH_DISABLED === 'true'
+});
+registerChatNamespace(io, chatPresenceStore, {
+  jwtSecret: process.env.JWT_SECRET || '',
+  authDisabled: process.env.WS_AUTH_DISABLED === 'true',
+  backendUrl: process.env.BACKEND_URL || 'http://localhost:8080'
 });
 
 app.get('/health', (_req, res) => {
