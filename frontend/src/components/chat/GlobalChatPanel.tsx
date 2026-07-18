@@ -54,7 +54,7 @@ export const GlobalChatPanel = ({
           Đang tải...
         </div>
       ) : (
-        <MessageList messages={messages} currentUserId={currentUserId} />
+        <MessageList messages={messages} currentUserId={currentUserId} onError={onError} />
       )}
 
       <ChatComposer disabled={!connected} placeholder="Nhắn vào cộng đồng..." onSend={async (message) => {
