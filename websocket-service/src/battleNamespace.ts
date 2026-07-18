@@ -2,6 +2,7 @@ import type { Namespace, Server, Socket } from 'socket.io';
 import { authenticateSocket, type AuthUser } from './auth.js';
 
 const ROOM_PREFIX = 'room:';
+const USER_PREFIX = 'user:';
 const DEFAULT_TICK_INTERVAL_MS = 1000;
 
 export type BattleMember = {
@@ -16,7 +17,9 @@ export type BattleEvent =
   | { type: 'started'; roomId: string; payload: { endTime?: string; [key: string]: unknown } }
   | { type: 'submission-result'; roomId: string; userId?: string; payload: Record<string, unknown> }
   | { type: 'leaderboard-update'; roomId: string; payload: Record<string, unknown> }
-  | { type: 'finished'; roomId: string; payload: Record<string, unknown> };
+  | { type: 'finished'; roomId: string; payload: Record<string, unknown> }
+  | { type: 'invite'; roomId: string; userId: string; payload: Record<string, unknown> }
+  | { type: 'member-kicked'; roomId: string; userId: string; payload: Record<string, unknown> };
 
 export interface BattleStore {
   getMembers(roomId: string): Promise<BattleMember[]>;
@@ -49,6 +52,8 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
 
   battle.on('connection', (socket) => {
     socket.data.joinedBattleRooms = new Set<string>();
+    const connectedUser = requireUser(socket);
+    socket.join(userChannel(connectedUser.userId));
 
     socket.on('battle:join', async (payload, ack) => {
       try {
@@ -120,6 +125,43 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
       }
     });
 
+    socket.on('battle:invite', async (payload, ack) => {
+      try {
+        const user = requireUser(socket);
+        const roomId = requireRoomId(payload);
+        const toUserId = requireUserId(payload, 'toUserId');
+        const roomNameValue = typeof payload === 'object' && payload !== null
+          ? (payload as { roomName?: unknown }).roomName
+          : undefined;
+        const roomName = typeof roomNameValue === 'string'
+          ? roomNameValue
+          : 'Battle Room';
+        battle.to(userChannel(toUserId)).emit('battle:invite-received', {
+          roomId,
+          roomName,
+          inviterId: user.userId,
+          inviterName: user.name,
+          invitedAt: new Date().toISOString()
+        });
+        ack?.({ success: true });
+      } catch (error) {
+        emitError(socket, errorCode(error), errorMessage(error));
+        ack?.({ success: false, error: errorCode(error) });
+      }
+    });
+
+    socket.on('battle:kick-member', async (payload, ack) => {
+      try {
+        const roomId = requireRoomId(payload);
+        const userId = requireUserId(payload, 'userId');
+        await kickMember(battle, store, roomId, userId);
+        ack?.({ success: true });
+      } catch (error) {
+        emitError(socket, errorCode(error), errorMessage(error));
+        ack?.({ success: false, error: errorCode(error) });
+      }
+    });
+
     socket.on('disconnect', async () => {
       const rooms = Array.from(socket.data.joinedBattleRooms ?? []) as string[];
       await Promise.all(rooms.map((roomId) => leaveRoom(battle, store, socket, roomId)));
@@ -152,6 +194,19 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
 
     if (event.type === 'leaderboard-update') {
       battle.to(roomName).emit('battle:leaderboard-update', event.payload);
+      return;
+    }
+
+    if (event.type === 'invite') {
+      battle.to(userChannel(event.userId)).emit('battle:invite-received', {
+        ...event.payload,
+        invitedAt: new Date().toISOString()
+      });
+      return;
+    }
+
+    if (event.type === 'member-kicked') {
+      kickMember(battle, store, event.roomId, event.userId).catch(() => undefined);
       return;
     }
 
@@ -195,6 +250,21 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
   };
 }
 
+async function kickMember(namespace: Namespace, store: BattleStore, roomId: string, userId: string): Promise<void> {
+  const roomName = roomChannel(roomId);
+  const sockets = await namespace.in(roomName).fetchSockets();
+  await Promise.all(sockets
+    .filter((client) => client.data.user?.userId === userId)
+    .map(async (client) => {
+      await client.leave(roomName);
+      client.data.joinedBattleRooms?.delete(roomId);
+      await store.removeMember(roomId, userId, client.id);
+      client.emit('battle:kicked', { roomId, userId });
+    }));
+  const members = await store.getMembers(roomId);
+  namespace.to(roomName).emit('battle:member-kicked', { roomId, userId, memberCount: members.length });
+}
+
 async function leaveRoom(namespace: Namespace, store: BattleStore, socket: Socket, roomId: string): Promise<void> {
   const user = requireUser(socket);
   const roomName = roomChannel(roomId);
@@ -230,6 +300,20 @@ function requireRoomId(payload: unknown): string {
 
 function roomChannel(roomId: string): string {
   return `${ROOM_PREFIX}${roomId}`;
+}
+
+function userChannel(userId: string): string {
+  return `${USER_PREFIX}${userId}`;
+}
+
+function requireUserId(payload: unknown, field: string): string {
+  const userId = typeof payload === 'object' && payload !== null && field in payload
+    ? String((payload as Record<string, unknown>)[field])
+    : '';
+  if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(userId)) {
+    throw new BattleSocketError('INVALID_USER', `${field} is required`);
+  }
+  return userId;
 }
 
 function emitError(socket: Socket, code: string, message: string): void {

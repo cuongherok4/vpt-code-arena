@@ -1,5 +1,6 @@
 package com.vpt.arena.controller;
 
+import com.vpt.arena.dto.battle.BattleInviteDto;
 import com.vpt.arena.dto.battle.BattleRoomCreateRequest;
 import com.vpt.arena.dto.battle.BattleRoomDto;
 import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
@@ -101,6 +102,24 @@ public class BattleController {
             @PathVariable UUID roomId,
             @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(battleService.startRoom(roomId, requireUserId(principal)));
+    }
+
+    @PostMapping("/rooms/{roomId}/invites/{userId}")
+    @Operation(summary = "Invite a friend to a waiting battle room")
+    public ResponseEntity<BattleInviteDto> inviteFriend(
+            @PathVariable UUID roomId,
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleService.inviteFriend(roomId, requireUserId(principal), userId));
+    }
+
+    @DeleteMapping("/rooms/{roomId}/members/{userId}")
+    @Operation(summary = "Kick a member from a waiting battle room")
+    public ResponseEntity<BattleRoomDto> kickMember(
+            @PathVariable UUID roomId,
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleService.kickMember(roomId, requireUserId(principal), userId));
     }
 
     @PostMapping({"/rooms/{roomId}/submissions", "/rooms/{roomId}/submit"})

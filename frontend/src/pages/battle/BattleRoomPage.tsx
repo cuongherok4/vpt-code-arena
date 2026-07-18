@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Copy, Loader2, Lock, LogOut, Play, Radio, Shield, Swords, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Copy, Loader2, Lock, LogOut, Play, Radio, Shield, Swords, Trophy, UserMinus, UserPlus, Users } from 'lucide-react';
 import { battleApi, type BattleLeaderboardEntryDto, type BattleMemberDto, type BattleRoomDto, type BattleSubmissionDto } from '@/api/battle.api';
+import { friendsApi } from '@/api/friends.api';
 import { useBattleSocket } from '@/hooks/useBattleSocket';
 import BattleArenaPage from './BattleArenaPage';
 import CountdownTimer from '@/components/battle/CountdownTimer';
@@ -34,6 +35,14 @@ export const BattleRoomPage = () => {
     queryFn: () => battleApi.getLeaderboard(roomId!),
     enabled: !!roomId && isAuthenticated && (roomQuery.data?.status === 'IN_PROGRESS' || roomQuery.data?.status === 'FINISHED'),
     refetchInterval: roomQuery.data?.status === 'IN_PROGRESS' ? 10000 : false,
+  });
+
+  const friendsQuery = useQuery({
+    queryKey: ['friends'],
+    queryFn: friendsApi.friends,
+    enabled: !!roomId && isAuthenticated && roomQuery.data?.status === 'WAITING' && roomQuery.data?.creatorId === currentUserId,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
   });
 
   const refreshRoom = useCallback(() => {
@@ -84,6 +93,13 @@ export const BattleRoomPage = () => {
     refreshRoom();
   }, [queryClient, refreshRoom, roomId]);
 
+  const handleKicked = useCallback((event: { roomId: string; userId: string }) => {
+    if (event.roomId !== roomId || event.userId !== currentUserId) return;
+    queryClient.invalidateQueries({ queryKey: ['battle-rooms'] });
+    queryClient.removeQueries({ queryKey: ['battle-room', roomId] });
+    navigate('/battle', { replace: true });
+  }, [currentUserId, navigate, queryClient, roomId]);
+
   const { mutate: finishBattleRoom, isPending: finishingRoom } = useMutation({
     mutationFn: () => battleApi.finishRoom(roomId!),
     onSuccess: (leaderboard) => {
@@ -105,6 +121,7 @@ export const BattleRoomPage = () => {
     roomId: isAuthenticated ? roomId : undefined,
     onJoined: refreshRoom,
     onMemberChange: refreshRoom,
+    onKicked: handleKicked,
     onStarted: refreshRoom,
     onReadyUpdate: handleReadyUpdate,
     onTick: setRemainingSeconds,
@@ -139,6 +156,20 @@ export const BattleRoomPage = () => {
     },
   });
 
+  const inviteMutation = useMutation({
+    mutationFn: (friendId: string) => battleApi.inviteFriend(roomId!, friendId),
+    onError: (error) => setSocketError(apiErrorMessage(error, 'Không thể gửi lời mời. Chỉ mời được bạn bè khi phòng còn chờ và còn chỗ.')),
+  });
+
+  const kickMutation = useMutation({
+    mutationFn: (userId: string) => battleApi.kickMember(roomId!, userId),
+    onSuccess: (room) => {
+      queryClient.setQueryData(['battle-room', roomId], room);
+      queryClient.invalidateQueries({ queryKey: ['battle-rooms'] });
+    },
+    onError: (error) => setSocketError(apiErrorMessage(error, 'Không thể kick thành viên. Chỉ chủ phòng được kick khi phòng còn chờ.')),
+  });
+
   const room = roomQuery.data;
   const members = useMemo(() => mergeReady(room, readyByUser), [room, readyByUser]);
   const leaderboard = liveLeaderboard.length > 0 ? liveLeaderboard : (leaderboardQuery.data ?? []);
@@ -146,6 +177,8 @@ export const BattleRoomPage = () => {
   const me = members.find(member => member.userId === currentUserId);
   const isCreator = room?.creatorId === currentUserId;
   const canStart = !!room && room.status === 'WAITING' && isCreator && room.memberCount >= 2;
+  const invitedFriendIds = new Set(members.map(member => member.userId));
+  const invitableFriends = (friendsQuery.data ?? []).filter(friend => !invitedFriendIds.has(friend.id));
   const shownRemainingSeconds = remainingSeconds ?? secondsUntil(room?.endTime);
   const maxBattlePoints = totalBattlePoints(room?.problems ?? []);
 
@@ -298,12 +331,61 @@ export const BattleRoomPage = () => {
           </div>
           <div className="divide-y divide-white/10">
             {members.map(member => (
-              <MemberRow key={member.userId} member={member} current={member.userId === currentUserId} />
+              <MemberRow
+                key={member.userId}
+                member={member}
+                current={member.userId === currentUserId}
+                canKick={isCreator && member.userId !== currentUserId && room.status === 'WAITING'}
+                kicking={kickMutation.isPending}
+                onKick={() => {
+                  if (window.confirm(`Kick ${member.name || member.userId} khỏi phòng?`)) {
+                    kickMutation.mutate(member.userId);
+                  }
+                }}
+              />
             ))}
           </div>
         </section>
 
         <aside className="space-y-3">
+          {isCreator && (
+            <section className="rounded-lg border border-white/10 bg-slate-950/70 p-3">
+              <div className="mb-3 flex items-center gap-2">
+                <UserPlus size={17} className="text-violet-300" />
+                <h3 className="text-sm font-semibold text-white">Mời bạn bè</h3>
+              </div>
+              {friendsQuery.isLoading ? (
+                <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-sm text-slate-400">
+                  <Loader2 size={15} className="animate-spin" />
+                  Đang tải bạn bè...
+                </div>
+              ) : invitableFriends.length === 0 ? (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-sm text-slate-500">
+                  Không còn bạn bè phù hợp để mời.
+                </div>
+              ) : (
+                <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
+                  {invitableFriends.map(friend => (
+                    <div key={friend.id} className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-white">{friend.name}</p>
+                        <p className="truncate text-xs text-slate-500">ID {friend.publicId}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => inviteMutation.mutate(friend.id)}
+                        disabled={inviteMutation.isPending}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-violet-500 px-2 py-1.5 text-xs font-semibold text-white hover:bg-violet-400 disabled:opacity-50"
+                      >
+                        <UserPlus size={13} />
+                        Mời
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
           <>
               {!me && (
                 <button
@@ -400,6 +482,20 @@ function pointsForDifficulty(difficulty: BattleRoomDto['problems'][number]['diff
   return ({ EASY: 100, MEDIUM: 200, HARD: 300 })[difficulty];
 }
 
+function apiErrorMessage(error: unknown, fallback: string): string {
+  const response = typeof error === 'object' && error !== null && 'response' in error
+    ? (error as { response?: { data?: unknown } }).response
+    : undefined;
+  const data = response?.data;
+  if (typeof data === 'object' && data !== null && 'message' in data && typeof data.message === 'string') {
+    return data.message;
+  }
+  if (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string') {
+    return data.error;
+  }
+  return fallback;
+}
+
 const FinalResults = ({
   entries,
   maxPoints,
@@ -453,7 +549,19 @@ const FinalResults = ({
   </section>
 );
 
-const MemberRow = ({ member, current }: { member: BattleMemberDto; current: boolean }) => (
+const MemberRow = ({
+  member,
+  current,
+  canKick,
+  kicking,
+  onKick,
+}: {
+  member: BattleMemberDto;
+  current: boolean;
+  canKick?: boolean;
+  kicking?: boolean;
+  onKick?: () => void;
+}) => (
   <div className="flex items-center justify-between gap-3 p-4">
     <div className="min-w-0">
       <div className="flex items-center gap-2">
@@ -463,11 +571,24 @@ const MemberRow = ({ member, current }: { member: BattleMemberDto; current: bool
       </div>
       <p className="mt-1 truncate text-xs text-slate-500">{member.userId}</p>
     </div>
-    <span className={`shrink-0 rounded-md border px-2 py-1 text-xs font-semibold ${
-      member.ready ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-white/5 text-slate-400'
-    }`}>
-      {member.ready ? 'Ready' : 'Waiting'}
-    </span>
+    <div className="flex shrink-0 items-center gap-2">
+      <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${
+        member.ready ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-white/5 text-slate-400'
+      }`}>
+        {member.ready ? 'Ready' : 'Waiting'}
+      </span>
+      {canKick && (
+        <button
+          type="button"
+          onClick={onKick}
+          disabled={kicking}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 text-red-200 hover:bg-red-500/15 disabled:opacity-50"
+          title="Kick khỏi phòng"
+        >
+          <UserMinus size={15} />
+        </button>
+      )}
+    </div>
   </div>
 );
 

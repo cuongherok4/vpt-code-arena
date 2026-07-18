@@ -1,5 +1,6 @@
 package com.vpt.arena.service;
 
+import com.vpt.arena.dto.battle.BattleInviteDto;
 import com.vpt.arena.dto.battle.BattleMemberDto;
 import com.vpt.arena.dto.battle.BattleProblemDto;
 import com.vpt.arena.dto.battle.BattleRoomCreateRequest;
@@ -12,6 +13,7 @@ import com.vpt.arena.entity.User;
 import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.entity.enums.RoomStatus;
 import com.vpt.arena.repository.BattleRoomProblemRepository;
+import com.vpt.arena.repository.FriendshipRepository;
 import com.vpt.arena.repository.ProblemRepository;
 import com.vpt.arena.repository.RoomMemberRepository;
 import com.vpt.arena.repository.RoomRepository;
@@ -43,6 +45,7 @@ public class BattleService {
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
     private final BattleRealtimeNotifier battleRealtimeNotifier;
+    private final FriendshipRepository friendshipRepository;
 
     @Transactional(readOnly = true)
     public List<BattleRoomDto> listPublicWaitingRooms() {
@@ -200,6 +203,48 @@ public class BattleService {
         BattleRoomDto dto = toDto(saved);
         battleRealtimeNotifier.publishStarted(dto);
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public BattleInviteDto inviteFriend(UUID roomId, UUID inviterId, UUID inviteeId) {
+        if (inviterId.equals(inviteeId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot invite yourself");
+        }
+        Room room = findRoom(roomId);
+        ensureCreator(room, inviterId);
+        ensureWaiting(room);
+        if (!friendshipRepository.existsByUserIdAndFriendId(inviterId, inviteeId)
+                && !friendshipRepository.existsByUserIdAndFriendId(inviteeId, inviterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only friends can be invited to battle rooms");
+        }
+        if (roomMemberRepository.existsByRoomIdAndUserId(roomId, inviteeId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already in this room");
+        }
+        if (roomMemberRepository.countByRoomId(roomId) >= room.getMaxMembers()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Room is full");
+        }
+        User invitee = findUser(inviteeId);
+        BattleInviteDto invite = new BattleInviteDto(room.getId(), room.getName(), room.getCreator().getId(), room.getCreator().getName(), invitee.getId());
+        battleRealtimeNotifier.publishInvite(invite);
+        return invite;
+    }
+
+    @Transactional
+    public BattleRoomDto kickMember(UUID roomId, UUID creatorId, UUID targetUserId) {
+        if (creatorId.equals(targetUserId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator cannot kick themselves");
+        }
+        Room room = findRoomForUpdate(roomId);
+        ensureCreator(room, creatorId);
+        ensureWaiting(room);
+
+        RoomMember target = roomMemberRepository.findByRoomIdAndUserId(roomId, targetUserId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Member not found"));
+        room.getMembers().removeIf(member -> member.getUser().getId().equals(targetUserId));
+        roomMemberRepository.delete(target);
+        battleRealtimeNotifier.publishMemberKicked(roomId, targetUserId);
+
+        return toDto(roomRepository.save(room));
     }
 
     @Transactional(readOnly = true)

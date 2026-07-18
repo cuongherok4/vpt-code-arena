@@ -1,9 +1,11 @@
 
-import { useEffect, useRef, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useLocation } from 'react-router-dom';
-import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User, UsersRound } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User, UsersRound, X } from 'lucide-react';
+import { battleApi } from '@/api/battle.api';
 import { friendsApi } from '@/api/friends.api';
+import { useBattleInviteSocket, type BattleInviteEvent } from '@/hooks/useBattleInviteSocket';
 import { useAuthStore } from '@/stores/authStore';
 
 const NAV_LINKS = [
@@ -16,11 +18,28 @@ const NAV_LINKS = [
 
 export const Navbar = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuthStore();
   const previousIncomingCount = useRef(0);
   const previousPendingCount = useRef(0);
   const [showFriendNotice, setShowFriendNotice] = useState(false);
+  const [battleInvite, setBattleInvite] = useState<BattleInviteEvent | null>(null);
+
+  const handleBattleInvite = useCallback((event: BattleInviteEvent) => {
+    setBattleInvite(event);
+  }, []);
+
+  useBattleInviteSocket(handleBattleInvite);
+
+  const joinInviteMutation = useMutation({
+    mutationFn: (roomId: string) => battleApi.joinRoom(roomId),
+    onSuccess: (room) => {
+      setBattleInvite(null);
+      queryClient.invalidateQueries({ queryKey: ['battle-rooms'] });
+      navigate(`/battle/rooms/${room.id}`);
+    },
+  });
 
   const friendRequestsQuery = useQuery({
     queryKey: ['friend-requests'],
@@ -117,6 +136,43 @@ export const Navbar = () => {
           <span className="block font-semibold text-white">Có lời mời kết bạn mới</span>
           <span className="mt-1 block text-xs text-slate-400">Bạn đang có {incomingCount} lời mời đang chờ.</span>
         </Link>
+      )}
+      {battleInvite && (
+        <div className="absolute right-4 top-[72px] w-80 rounded-lg border border-violet-400/25 bg-slate-950 p-3 text-sm text-slate-200 shadow-xl shadow-black/30">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="block font-semibold text-white">Bạn được mời thi đấu</span>
+              <span className="mt-1 block text-xs text-slate-400">
+                {battleInvite.inviterName ?? 'Một người bạn'} mời bạn vào phòng {battleInvite.roomName}.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBattleInvite(null)}
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-white/5 hover:text-white"
+              title="Từ chối"
+            >
+              <X size={15} />
+            </button>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => joinInviteMutation.mutate(battleInvite.roomId)}
+              disabled={joinInviteMutation.isPending}
+              className="inline-flex flex-1 items-center justify-center rounded-lg bg-violet-500 px-3 py-2 text-sm font-semibold text-white hover:bg-violet-400 disabled:opacity-50"
+            >
+              {joinInviteMutation.isPending ? 'Đang vào...' : 'Tham gia'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBattleInvite(null)}
+              className="rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 hover:bg-white/5"
+            >
+              Từ chối
+            </button>
+          </div>
+        </div>
       )}
     </nav>
   );
