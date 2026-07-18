@@ -141,6 +141,9 @@
 | `RealTimeLeaderboard` | BattleArenaPage | Bảng xếp hạng cập nhật real-time (cột: rank, tên, điểm, số bài AC) |
 | `BattleChat` | BattleArenaPage | Chat panel thu gọn bên cạnh (Room Chat) |
 | `FinalResultModal` | BattleArenaPage | Modal hiện khi `battle:finished` với bảng xếp hạng cuối |
+| `InviteFriendsModal` | BattleRoomPage | Chủ phòng chọn bạn bè để mời vào phòng |
+| `BattleInvitePopup` | App layout / Notification layer | Ô mời realtime hiện trên màn hình người được mời, có nút Tham gia/Từ chối |
+| `KickMemberButton` | BattleRoomPage | Chỉ hiện với chủ phòng khi phòng WAITING |
 
 ### Layout BattleArenaPage
 
@@ -176,6 +179,27 @@
 | `DMChatWindow` | ProfilePage | Chat 1-1 |
 | `ChatMessage` | Tất cả chat | Bubble tin nhắn với avatar, tên, timestamp |
 | `OnlineIndicator` | Avatar | Chấm xanh/xám cho online status |
+| `UserMiniProfilePopover` | Global/Room chat, MemberList | Click tên/avatar để xem profile, kết bạn, nhắn tin, mời vào battle |
+| `FriendButton` | Chat/Profile/MemberList | Gửi hoặc hủy lời mời kết bạn theo trạng thái hiện tại |
+
+---
+
+## 5.5. Friends & Social
+
+### Pages
+
+| Page | Route | Mô tả |
+|---|---|---|
+| `FriendsPage` | `/friends` | Danh sách bạn bè, lời mời đến/đi, tìm user theo tên hoặc id |
+
+### Components
+
+| Component | Dùng ở | Mô tả |
+|---|---|---|
+| `FriendsList` | FriendsPage / Chat sidebar | Danh sách bạn bè, online/offline, action xem thông tin/nhắn tin/xóa bạn |
+| `FriendRequestsPanel` | FriendsPage / Navbar dropdown | Lời mời kết bạn đến/đi, nút accept/reject |
+| `UserSearchBox` | FriendsPage | Tìm user bằng tên hoặc UUID để kết bạn |
+| `FriendActionMenu` | Chat/Profile/Battle | Menu: xem thông tin, kết bạn, nhắn tin, mời vào phòng |
 
 ---
 

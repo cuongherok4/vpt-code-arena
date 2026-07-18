@@ -165,6 +165,15 @@ git branch -d feature/<phase>-<feature-name>
 
 **Thứ tự thực hiện:** 6.1 → 6.2 (song song) → 6.3 → merge `develop`
 
+**Backlog mở rộng sau Phase 6 — Social & Friends**
+
+| # | Feature Branch | Nội dung | Kết quả cần đạt | Trạng thái |
+|---|---|---|---|---|
+| 6.4 | `feature/p6-social-friends-backend` | Friend domain: tìm user theo tên/id, gửi/chấp nhận/từ chối lời mời kết bạn, danh sách bạn bè, xóa bạn | Có API kết bạn đầy đủ, chống request trùng, chỉ user đăng nhập mới thao tác được | ⚪ Chưa bắt đầu |
+| 6.5 | `feature/p6-social-friends-frontend` | `FriendsPage/FriendsPanel`, `UserMiniProfilePopover`, `FriendButton`, `FriendRequestsPanel` | User xem danh sách bạn bè; click bạn để xem thông tin, nhắn tin, xóa bạn | ⚪ Chưa bắt đầu |
+| 6.6 | `feature/p6-chat-social-actions` | Tích hợp kết bạn trong Global Chat và Room Chat: click tên/avatar mở popover, kết bạn trực tiếp từ tin nhắn hoặc thành viên phòng | Kết bạn qua khung chat thế giới, kết bạn trong phòng battle sau khi join | ⚪ Chưa bắt đầu |
+| 6.7 | `feature/p6-battle-friend-invite` | Mời bạn bè vào phòng battle, popup invite realtime cho người được mời, host kick người trong hàng chờ trước khi start | Chủ phòng mời bạn bè thi đấu; người được mời thấy ô mời trên màn hình với nút tham gia/từ chối; chủ phòng kick được member ở WAITING | ⚪ Chưa bắt đầu |
+
 **🎯 Phase 6 hoàn thành — Hệ thống có thể:**
 - Chat global với tất cả người dùng online
 - Chat riêng trong phòng battle
