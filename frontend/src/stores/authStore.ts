@@ -12,6 +12,7 @@ type AuthState = {
   register: (payload: { name: string; email: string; password: string }) => Promise<boolean>;
   login: (payload: { email: string; password: string }) => Promise<boolean>;
   acceptOAuth: (response: AuthResponse) => void;
+  updateUser: (user: AuthUser) => void;
   refresh: () => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -69,6 +70,10 @@ export const useAuthStore = create<AuthState>()(
 
       acceptOAuth: (response) => {
         set(applyAuth(response));
+      },
+
+      updateUser: (user) => {
+        set({ user });
       },
 
       refresh: async () => {

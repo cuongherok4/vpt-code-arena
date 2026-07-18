@@ -37,4 +37,11 @@ public class DirectMessage {
     @Column(name = "created_at", updatable = false)
     @CreatedDate
     private OffsetDateTime createdAt;
+
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private User deletedBy;
 }
