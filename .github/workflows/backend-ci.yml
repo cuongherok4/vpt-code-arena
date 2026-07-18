@@ -5,10 +5,12 @@ on:
     branches: [ "main", "develop" ]
     paths:
       - 'backend/**'
+      - 'websocket-service/**'  # BẮT BUỘC THÊM DÒNG NÀY
   pull_request:
     branches: [ "main", "develop" ]
     paths:
       - 'backend/**'
+      - 'websocket-service/**'  # BẮT BUỘC THÊM DÒNG NÀY
 
 jobs:
   build-and-test:
