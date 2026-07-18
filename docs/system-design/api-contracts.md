@@ -388,6 +388,45 @@ Rời phòng.
 { "left": true }
 ```
 
+### POST /battle/rooms/:id/invites *(auth required — chủ phòng/member được phép mời)*
+Mời bạn bè vào phòng battle đang WAITING.
+```json
+// Request
+{ "userId": "uuid" }
+
+// Response 202
+{
+  "inviteId": "uuid",
+  "invited": true,
+  "roomId": "uuid",
+  "receiverId": "uuid",
+  "expiresAt": "2026-07-19T01:30:00Z"
+}
+```
+
+Nếu người được mời đang online, backend/websocket gửi realtime event để FE hiện popup invite toàn cục.
+
+### POST /battle/rooms/invites/:inviteId/accept *(auth required)*
+Chấp nhận lời mời battle và join phòng nếu phòng còn WAITING/chưa đầy.
+```json
+// Response 200
+{ "accepted": true, "roomId": "uuid" }
+```
+
+### POST /battle/rooms/invites/:inviteId/reject *(auth required)*
+Từ chối lời mời battle.
+```json
+// Response 200
+{ "rejected": true }
+```
+
+### DELETE /battle/rooms/:id/members/:userId *(auth required — chủ phòng)*
+Kick một thành viên khỏi hàng chờ trước khi phòng start.
+```json
+// Response 200
+{ "kicked": true, "roomId": "uuid", "userId": "uuid" }
+```
+
 ### POST /battle/rooms/:id/ready *(auth required)*
 Toggle trạng thái sẵn sàng.
 ```json
@@ -487,6 +526,66 @@ Danh sách các cuộc hội thoại DM.
     "unreadCount": 3
   }
 ]
+```
+
+---
+
+## Friends & Social
+
+### GET /users/search?q=<name_or_id> *(auth required)*
+Tìm user để kết bạn bằng tên hoặc UUID.
+```json
+// Response 200
+[
+  { "id": "uuid", "name": "User A", "email": "masked@example.com", "friendStatus": "NONE" }
+]
+```
+
+### GET /friends *(auth required)*
+Danh sách bạn bè của user hiện tại.
+```json
+// Response 200
+[
+  { "id": "uuid", "name": "User A", "avatar": null, "online": true, "friendsSince": "..." }
+]
+```
+
+### GET /friends/requests *(auth required)*
+Lời mời kết bạn đến/đi.
+```json
+// Response 200
+{
+  "incoming": [ { "requestId": "uuid", "user": { "id": "uuid", "name": "..." }, "createdAt": "..." } ],
+  "outgoing": [ { "requestId": "uuid", "user": { "id": "uuid", "name": "..." }, "createdAt": "..." } ]
+}
+```
+
+### POST /friends/requests/:userId *(auth required)*
+Gửi lời mời kết bạn.
+```json
+// Response 201
+{ "requestId": "uuid", "status": "PENDING" }
+```
+
+### POST /friends/requests/:requestId/accept *(auth required)*
+Chấp nhận lời mời kết bạn.
+```json
+// Response 200
+{ "status": "ACCEPTED", "friendId": "uuid" }
+```
+
+### POST /friends/requests/:requestId/reject *(auth required)*
+Từ chối lời mời kết bạn.
+```json
+// Response 200
+{ "status": "REJECTED" }
+```
+
+### DELETE /friends/:userId *(auth required)*
+Xóa bạn.
+```json
+// Response 200
+{ "removed": true }
 ```
 
 ---
