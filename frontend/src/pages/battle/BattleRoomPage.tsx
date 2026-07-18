@@ -1,18 +1,20 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Copy, Loader2, LogOut, Play, Radio, Shield, Swords, Trophy, Users } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, Copy, Loader2, Lock, LogOut, Play, Radio, Shield, Swords, Trophy, Users } from 'lucide-react';
 import { battleApi, type BattleLeaderboardEntryDto, type BattleMemberDto, type BattleRoomDto, type BattleSubmissionDto } from '@/api/battle.api';
 import { useBattleSocket } from '@/hooks/useBattleSocket';
 import BattleArenaPage from './BattleArenaPage';
 import CountdownTimer from '@/components/battle/CountdownTimer';
 import RealTimeLeaderboard from '@/components/battle/RealTimeLeaderboard';
+import { useAuthStore } from '@/stores/authStore';
 
 export const BattleRoomPage = () => {
   const roomId = getRoomIdFromPath();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const currentUserId = localStorage.getItem('userId') || '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+  const { isAuthenticated, user } = useAuthStore();
+  const currentUserId = user?.id ?? '';
   const [readyByUser, setReadyByUser] = useState<Record<string, boolean>>({});
   const [socketError, setSocketError] = useState('');
   const [leaveError, setLeaveError] = useState('');
@@ -24,13 +26,13 @@ export const BattleRoomPage = () => {
   const roomQuery = useQuery({
     queryKey: ['battle-room', roomId],
     queryFn: () => battleApi.getRoom(roomId!),
-    enabled: !!roomId,
+    enabled: !!roomId && isAuthenticated,
   });
 
   const leaderboardQuery = useQuery({
     queryKey: ['battle-leaderboard', roomId],
     queryFn: () => battleApi.getLeaderboard(roomId!),
-    enabled: !!roomId && (roomQuery.data?.status === 'IN_PROGRESS' || roomQuery.data?.status === 'FINISHED'),
+    enabled: !!roomId && isAuthenticated && (roomQuery.data?.status === 'IN_PROGRESS' || roomQuery.data?.status === 'FINISHED'),
     refetchInterval: roomQuery.data?.status === 'IN_PROGRESS' ? 10000 : false,
   });
 
@@ -100,7 +102,7 @@ export const BattleRoomPage = () => {
   }, [finishBattleRoom, finishingRoom, roomId]);
 
   const { connected, setReady } = useBattleSocket({
-    roomId,
+    roomId: isAuthenticated ? roomId : undefined,
     onJoined: refreshRoom,
     onMemberChange: refreshRoom,
     onStarted: refreshRoom,
@@ -148,10 +150,24 @@ export const BattleRoomPage = () => {
   const maxBattlePoints = totalBattlePoints(room?.problems ?? []);
 
   const toggleReady = () => {
+    if (!currentUserId) return;
     const nextReady = !(me?.ready ?? false);
     setReadyByUser(prev => ({ ...prev, [currentUserId]: nextReady }));
     setReady(nextReady);
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto max-w-xl rounded-lg border border-white/10 bg-slate-950/70 p-6 text-center">
+        <Lock size={32} className="mx-auto mb-3 text-violet-300" />
+        <h1 className="text-xl font-semibold text-white">Cần đăng nhập để vào phòng battle</h1>
+        <p className="mt-2 text-sm text-slate-400">Phòng battle dùng tài khoản thật để đồng bộ thành viên, ready và submit.</p>
+        <Link to="/login" className="mt-5 inline-flex rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-400">
+          Đăng nhập
+        </Link>
+      </div>
+    );
+  }
 
   const confirmLeave = () => {
     if (!room) return;
