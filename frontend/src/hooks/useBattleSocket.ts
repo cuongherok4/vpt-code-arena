@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
+import { useAuthStore } from '@/stores/authStore';
 
 type ReadyUpdate = {
   roomId: string;
@@ -63,18 +64,21 @@ export function useBattleSocket({
   onFinished,
   onError,
 }: BattleSocketOptions) {
+  const { accessToken, user } = useAuthStore();
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     if (!roomId) return;
+    if (!accessToken || !user?.id) {
+      setConnected(false);
+      onError?.('Bạn cần đăng nhập để kết nối realtime battle.');
+      return;
+    }
 
-    const token = localStorage.getItem('accessToken');
-    const userId = localStorage.getItem('userId') || '3fa85f64-5717-4562-b3fc-2c963f66afa6';
-    const name = localStorage.getItem('userName') || 'Dev User';
     const socket = io(`${wsUrl}/battle`, {
       transports: ['websocket'],
-      auth: token ? { token: `Bearer ${token}` } : { userId, name },
+      auth: { token: `Bearer ${accessToken}` },
     });
     socketRef.current = socket;
 
@@ -111,6 +115,8 @@ export function useBattleSocket({
     };
   }, [
     roomId,
+    accessToken,
+    user?.id,
     onJoined,
     onMemberChange,
     onReadyUpdate,

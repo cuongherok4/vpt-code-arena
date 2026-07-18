@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, DoorOpen, Loader2, Plus, RefreshCw, Swords, Users } from 'lucide-react';
+import { AlertCircle, DoorOpen, Loader2, Lock, Plus, RefreshCw, Swords, Users } from 'lucide-react';
 import { battleApi, type BattleRoomCreateRequest, type Difficulty } from '@/api/battle.api';
+import { useAuthStore } from '@/stores/authStore';
 
 const difficulties: Array<{ value: Difficulty | ''; label: string }> = [
   { value: '', label: 'Mixed' },
@@ -12,13 +13,11 @@ const difficulties: Array<{ value: Difficulty | ''; label: string }> = [
   { value: 'HARD', label: 'Hard' },
 ];
 
-const defaultUserId = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
-
 export const BattleLobbyPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
   const [joinCode, setJoinCode] = useState('');
-  const [userId, setUserId] = useState(localStorage.getItem('userId') || defaultUserId);
   const [form, setForm] = useState<BattleRoomCreateRequest>({
     name: 'Battle nhanh',
     isPublic: true,
@@ -32,17 +31,12 @@ export const BattleLobbyPage = () => {
   const roomsQuery = useQuery({
     queryKey: ['battle-rooms'],
     queryFn: battleApi.getRooms,
+    enabled: isAuthenticated,
     refetchInterval: 10000,
   });
 
-  const saveDevUser = () => {
-    localStorage.setItem('userId', userId.trim());
-    localStorage.setItem('userName', `User ${userId.trim().slice(0, 4)}`);
-  };
-
   const createMutation = useMutation({
     mutationFn: () => {
-      saveDevUser();
       return battleApi.createRoom({
         ...form,
         name: form.name.trim(),
@@ -57,10 +51,7 @@ export const BattleLobbyPage = () => {
   });
 
   const joinMutation = useMutation({
-    mutationFn: (roomId: string) => {
-      saveDevUser();
-      return battleApi.joinRoom(roomId);
-    },
+    mutationFn: (roomId: string) => battleApi.joinRoom(roomId),
     onSuccess: (room) => {
       queryClient.invalidateQueries({ queryKey: ['battle-rooms'] });
       navigate(`/battle/rooms/${room.id}`);
@@ -72,19 +63,34 @@ export const BattleLobbyPage = () => {
   const error = useMemo(() => {
     const apiError = createMutation.error || joinMutation.error;
     if (!apiError) return '';
-    return 'Không thể xử lý phòng battle. Kiểm tra userId dev có tồn tại trong DB và phòng vẫn còn chờ.';
+    return 'Không thể xử lý phòng battle. Kiểm tra bạn đã đăng nhập và phòng vẫn còn chờ.';
   }, [createMutation.error, joinMutation.error]);
 
   const submitCreate = (event: FormEvent) => {
     event.preventDefault();
+    if (!isAuthenticated) return;
     createMutation.mutate();
   };
 
   const submitJoin = (event: FormEvent) => {
     event.preventDefault();
+    if (!isAuthenticated) return;
     const roomId = joinCode.trim();
     if (roomId) joinMutation.mutate(roomId);
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto max-w-xl rounded-lg border border-white/10 bg-slate-950/70 p-6 text-center">
+        <Lock size={32} className="mx-auto mb-3 text-violet-300" />
+        <h1 className="text-xl font-semibold text-white">Cần đăng nhập để vào đấu trường</h1>
+        <p className="mt-2 text-sm text-slate-400">Battle dùng tài khoản thật để tạo phòng, join phòng, ready và submit.</p>
+        <Link to="/login" className="mt-5 inline-flex rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-400">
+          Đăng nhập
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
@@ -236,17 +242,6 @@ export const BattleLobbyPage = () => {
             </button>
           </div>
         </form>
-
-        <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-300">Dev userId</label>
-          <input
-            value={userId}
-            onChange={event => setUserId(event.target.value)}
-            onBlur={saveDevUser}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-violet-400/50"
-          />
-          <p className="mt-2 text-xs leading-5 text-slate-500">Dùng tạm đến Phase 5 Auth. userId phải tồn tại trong DB.</p>
-        </div>
 
         {error && (
           <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">{error}</div>

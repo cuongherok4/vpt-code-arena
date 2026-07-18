@@ -5,6 +5,7 @@ import com.vpt.arena.dto.battle.BattleRoomDto;
 import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
 import com.vpt.arena.dto.battle.BattleSubmissionDto;
 import com.vpt.arena.dto.battle.BattleSubmitRequest;
+import com.vpt.arena.security.CustomUserDetails;
 import com.vpt.arena.service.BattleJudgeService;
 import com.vpt.arena.service.BattleJudgeWorker;
 import com.vpt.arena.service.BattleService;
@@ -14,13 +15,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -54,24 +55,24 @@ public class BattleController {
     @Operation(summary = "Create a battle room")
     public ResponseEntity<BattleRoomDto> create(
             @Valid @RequestBody BattleRoomCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(battleService.createRoom(requireUserId(userIdStr), request));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(battleService.createRoom(requireUserId(principal), request));
     }
 
     @PostMapping("/rooms/{roomId}/join")
     @Operation(summary = "Join a waiting battle room")
     public ResponseEntity<BattleRoomDto> join(
             @PathVariable UUID roomId,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return ResponseEntity.ok(battleService.joinRoom(roomId, requireUserId(userIdStr)));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleService.joinRoom(roomId, requireUserId(principal)));
     }
 
     @PostMapping("/rooms/{roomId}/leave")
     @Operation(summary = "Leave a waiting battle room")
     public ResponseEntity<BattleRoomDto> leave(
             @PathVariable UUID roomId,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return battleService.leaveRoom(roomId, requireUserId(userIdStr))
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return battleService.leaveRoom(roomId, requireUserId(principal))
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.noContent().build());
     }
@@ -81,16 +82,16 @@ public class BattleController {
     public ResponseEntity<BattleRoomDto> update(
             @PathVariable UUID roomId,
             @Valid @RequestBody BattleRoomCreateRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return ResponseEntity.ok(battleService.updateRoom(roomId, requireUserId(userIdStr), request));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleService.updateRoom(roomId, requireUserId(principal), request));
     }
 
     @DeleteMapping("/rooms/{roomId}")
     @Operation(summary = "Delete a waiting battle room")
     public ResponseEntity<Void> delete(
             @PathVariable UUID roomId,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        battleService.deleteRoom(roomId, requireUserId(userIdStr));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        battleService.deleteRoom(roomId, requireUserId(principal));
         return ResponseEntity.noContent().build();
     }
 
@@ -98,8 +99,8 @@ public class BattleController {
     @Operation(summary = "Start a battle room")
     public ResponseEntity<BattleRoomDto> start(
             @PathVariable UUID roomId,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return ResponseEntity.ok(battleService.startRoom(roomId, requireUserId(userIdStr)));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleService.startRoom(roomId, requireUserId(principal)));
     }
 
     @PostMapping({"/rooms/{roomId}/submissions", "/rooms/{roomId}/submit"})
@@ -107,8 +108,8 @@ public class BattleController {
     public ResponseEntity<BattleSubmissionDto> submit(
             @PathVariable UUID roomId,
             @Valid @RequestBody BattleSubmitRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        BattleSubmissionDto submission = battleJudgeService.submit(roomId, requireUserId(userIdStr), request);
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        BattleSubmissionDto submission = battleJudgeService.submit(roomId, requireUserId(principal), request);
         battleJudgeWorker.judgeSubmission(submission.getId());
         return ResponseEntity.accepted().body(submission);
     }
@@ -123,18 +124,14 @@ public class BattleController {
     @Operation(summary = "Finish a battle room")
     public ResponseEntity<List<BattleLeaderboardEntryDto>> finish(
             @PathVariable UUID roomId,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdStr) {
-        return ResponseEntity.ok(battleJudgeService.finishRoomAsUser(roomId, requireUserId(userIdStr)));
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleJudgeService.finishRoomAsUser(roomId, requireUserId(principal)));
     }
 
-    private UUID requireUserId(String userIdStr) {
-        if (userIdStr == null || userIdStr.isBlank()) {
+    private UUID requireUserId(CustomUserDetails principal) {
+        if (principal == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
         }
-        try {
-            return UUID.fromString(userIdStr);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
-        }
+        return principal.getId();
     }
 }
