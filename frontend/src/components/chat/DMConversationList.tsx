@@ -1,24 +1,38 @@
 import { MessageCirclePlus } from 'lucide-react';
 import { OnlineIndicator } from '@/components/chat/OnlineIndicator';
 import type { ChatConversation } from '@/api/chat.api';
+import type { Friend } from '@/api/friends.api';
 
 type DMConversationListProps = {
   conversations: ChatConversation[];
+  friends: Friend[];
   selectedUserId: string;
   onlineUserIds: Set<string>;
   onSelect: (userId: string) => void;
 };
 
-export const DMConversationList = ({ conversations, selectedUserId, onlineUserIds, onSelect }: DMConversationListProps) => (
+export const DMConversationList = ({ conversations, friends, selectedUserId, onlineUserIds, onSelect }: DMConversationListProps) => {
+  const conversationByUserId = new Map(conversations.map((item) => [item.userId, item]));
+  const friendRows = friends.map((friend) => ({
+    userId: friend.id,
+    userName: friend.name,
+    userEmail: friend.email,
+    lastMessage: conversationByUserId.get(friend.id)?.lastMessage ?? 'Bắt đầu nhắn tin',
+    unread: conversationByUserId.get(friend.id)?.unread ?? false,
+  }));
+  const otherConversations = conversations.filter((item) => !friends.some((friend) => friend.id === item.userId));
+  const rows = [...friendRows, ...otherConversations];
+
+  return (
   <div className="min-h-0 overflow-y-auto">
-    {conversations.length === 0 ? (
+    {rows.length === 0 ? (
       <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-500">
         <MessageCirclePlus size={20} className="mb-2 text-cyan-300" />
-        Chưa có hội thoại.
+        Chưa có bạn bè để nhắn tin.
       </div>
     ) : (
       <div className="space-y-2">
-        {conversations.map((item) => (
+        {rows.map((item) => (
           <button
             key={item.userId}
             type="button"
@@ -39,4 +53,5 @@ export const DMConversationList = ({ conversations, selectedUserId, onlineUserId
       </div>
     )}
   </div>
-);
+  );
+};

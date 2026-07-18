@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, Lock, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { chatApi, type ChatMessage } from '@/api/chat.api';
+import { friendsApi } from '@/api/friends.api';
 import { DMChatWindow } from '@/components/chat/DMChatWindow';
 import { DMConversationList } from '@/components/chat/DMConversationList';
 import { GlobalChatPanel } from '@/components/chat/GlobalChatPanel';
-import { RoomChatPanel } from '@/components/chat/RoomChatPanel';
 import { useChatSocket } from '@/hooks/useChatSocket';
 import { useAuthStore } from '@/stores/authStore';
 
 const tabs = [
   { value: 'global', label: 'Global' },
-  { value: 'room', label: 'Room' },
   { value: 'dm', label: 'DM' },
 ] as const;
 
@@ -20,10 +19,12 @@ type ChatTab = (typeof tabs)[number]['value'];
 
 export const ChatPage = () => {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated, user } = useAuthStore();
-  const [tab, setTab] = useState<ChatTab>('global');
+  const initialDmUserId = searchParams.get('dm') ?? '';
+  const [tab, setTab] = useState<ChatTab>(initialDmUserId ? 'dm' : 'global');
   const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
-  const [selectedDmUserId, setSelectedDmUserId] = useState('');
+  const [selectedDmUserId, setSelectedDmUserId] = useState(initialDmUserId);
   const [error, setError] = useState('');
 
   const conversationsQuery = useQuery({
@@ -31,7 +32,21 @@ export const ChatPage = () => {
     queryFn: chatApi.conversations,
     enabled: isAuthenticated,
   });
+
+  const friendsQuery = useQuery({
+    queryKey: ['friends'],
+    queryFn: friendsApi.friends,
+    enabled: isAuthenticated,
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
+  });
   const refetchConversations = conversationsQuery.refetch;
+
+  useEffect(() => {
+    if (!initialDmUserId) return;
+    setTab('dm');
+    setSelectedDmUserId(initialDmUserId);
+  }, [initialDmUserId]);
 
   const appendMessage = useCallback((message: ChatMessage) => {
     setLiveMessages((prev) => prev.some((item) => item.id === message.id) ? prev : [...prev, message]);
@@ -56,6 +71,19 @@ export const ChatPage = () => {
     onDirectMessage: appendMessage,
     onError: showError,
   });
+
+  const selectedFriend = friendsQuery.data?.find((friend) => friend.id === selectedDmUserId);
+  const selectedConversation = conversationsQuery.data?.find((conversation) => conversation.userId === selectedDmUserId);
+  const selectedDmUserName = selectedFriend?.name ?? selectedConversation?.userName;
+  const selectedDmUserEmail = selectedFriend?.email ?? selectedConversation?.userEmail;
+  const selectDmUser = useCallback((userId: string) => {
+    setSelectedDmUserId(userId);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('dm', userId);
+      return next;
+    });
+  }, [setSearchParams]);
 
   useEffect(() => {
     if (!chatSocket.connected) return;
@@ -82,7 +110,7 @@ export const ChatPage = () => {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Community Chat</h1>
-          <p className="mt-1 text-sm text-slate-400">Global, room và direct message theo thời gian thực.</p>
+          <p className="mt-1 text-sm text-slate-400">Global và direct message theo thời gian thực.</p>
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-300">
           <span className={`h-2.5 w-2.5 rounded-full ${chatSocket.connected ? 'bg-emerald-400' : 'bg-slate-600'}`} />
@@ -123,18 +151,6 @@ export const ChatPage = () => {
         />
       )}
 
-      {tab === 'room' && (
-        <RoomChatPanel
-          connected={chatSocket.connected}
-          liveMessages={liveMessages}
-          currentUserId={user?.id}
-          joinRoom={chatSocket.joinRoom}
-          leaveRoom={chatSocket.leaveRoom}
-          sendRoom={chatSocket.sendRoom}
-          onError={showError}
-        />
-      )}
-
       {tab === 'dm' && (
         <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
           <aside className="flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4">
@@ -151,18 +167,20 @@ export const ChatPage = () => {
             </div>
             <DMConversationList
               conversations={conversationsQuery.data ?? []}
+              friends={friendsQuery.data ?? []}
               selectedUserId={selectedDmUserId}
               onlineUserIds={chatSocket.onlineUserIds}
-              onSelect={setSelectedDmUserId}
+              onSelect={selectDmUser}
             />
           </aside>
           <DMChatWindow
             connected={chatSocket.connected}
             selectedUserId={selectedDmUserId}
+            selectedUserName={selectedDmUserName}
+            selectedUserEmail={selectedDmUserEmail}
             onlineUserIds={chatSocket.onlineUserIds}
             liveMessages={liveMessages}
             currentUserId={user?.id}
-            onSelectUser={setSelectedDmUserId}
             sendDirect={chatSocket.sendDirect}
             onError={showError}
           />

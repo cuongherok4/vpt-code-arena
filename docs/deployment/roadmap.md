@@ -12,7 +12,7 @@
 | 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | 🟢 Hoàn thành | 100% |
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | ⚪ Chưa bắt đầu | 0% |
+| 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟡 Đang thực hiện | 50% |
 | 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 9 | 18–19 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 10 | 20–21 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
@@ -174,12 +174,12 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 7 — Social & Battle Invite (Tuần 14–15) ⚪ 0%
+### Phase 7 — Social & Battle Invite (Tuần 14–15) 🟡 50%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 7.1 | `feature/p7-social-friends-backend` | Friend domain: tìm user theo tên/id, gửi/chấp nhận/từ chối lời mời kết bạn, danh sách bạn bè, xóa bạn | API kết bạn đầy đủ, chống request trùng, chỉ user đăng nhập mới thao tác được | ⚪ Chưa bắt đầu |
-| 7.2 | `feature/p7-social-friends-frontend` | `FriendsPage/FriendsPanel`, `UserMiniProfilePopover`, `FriendButton`, `FriendRequestsPanel` | User xem danh sách bạn bè; click bạn để xem thông tin, nhắn tin, xóa bạn | ⚪ Chưa bắt đầu |
+| 7.1 | `feature/p7-social-friends-backend` | Friend domain: tìm user theo tên/id, gửi/chấp nhận/từ chối lời mời kết bạn, danh sách bạn bè, xóa bạn | API kết bạn đầy đủ, chống request trùng, chỉ user đăng nhập mới thao tác được | 🟢 Done |
+| 7.2 | `feature/p7-social-friends-frontend` | `FriendsPage/FriendsPanel`, `UserMiniProfilePopover`, `FriendButton`, `FriendRequestsPanel` | User xem danh sách bạn bè; click bạn để xem thông tin, nhắn tin, xóa bạn | 🟢 Done |
 | 7.3 | `feature/p7-chat-social-actions` | Tích hợp kết bạn trong Global Chat và Room Chat: click tên/avatar mở popover, kết bạn trực tiếp từ tin nhắn hoặc thành viên phòng | Kết bạn qua khung chat thế giới, kết bạn trong phòng battle sau khi join | ⚪ Chưa bắt đầu |
 | 7.4 | `feature/p7-battle-friend-invite` | Mời bạn bè vào phòng battle, popup invite realtime cho người được mời, host kick người trong hàng chờ trước khi start | Chủ phòng mời bạn bè thi đấu; người được mời thấy ô mời trên màn hình với nút tham gia/từ chối; chủ phòng kick được member ở WAITING | ⚪ Chưa bắt đầu |
 

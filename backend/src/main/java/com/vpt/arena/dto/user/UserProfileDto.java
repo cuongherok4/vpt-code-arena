@@ -11,6 +11,7 @@ import java.util.UUID;
 @Builder
 public class UserProfileDto {
     private UUID id;
+    private String publicId;
     private String email;
     private String name;
     private Role role;

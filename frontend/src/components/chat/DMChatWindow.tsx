@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, MessagesSquare } from 'lucide-react';
 import { chatApi, type ChatMessage } from '@/api/chat.api';
@@ -9,10 +8,11 @@ import { OnlineIndicator } from '@/components/chat/OnlineIndicator';
 type DMChatWindowProps = {
   connected: boolean;
   selectedUserId: string;
+  selectedUserName?: string;
+  selectedUserEmail?: string | null;
   onlineUserIds: Set<string>;
   liveMessages: ChatMessage[];
   currentUserId?: string;
-  onSelectUser: (userId: string) => void;
   sendDirect: (toUserId: string, message: string) => Promise<{ success: boolean; message?: unknown }>;
   onError: (message: string) => void;
 };
@@ -20,14 +20,14 @@ type DMChatWindowProps = {
 export const DMChatWindow = ({
   connected,
   selectedUserId,
+  selectedUserName,
+  selectedUserEmail,
   onlineUserIds,
   liveMessages,
   currentUserId,
-  onSelectUser,
   sendDirect,
   onError,
 }: DMChatWindowProps) => {
-  const [manualUserId, setManualUserId] = useState('');
   const activeUserId = selectedUserId.trim();
   const historyQuery = useQuery({
     queryKey: ['chat-dm', activeUserId],
@@ -45,34 +45,19 @@ export const DMChatWindow = ({
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <MessagesSquare size={18} className="shrink-0 text-cyan-300" />
-          <h2 className="truncate font-semibold text-white">Direct Message</h2>
+          <div className="min-w-0">
+            <h2 className="truncate font-semibold text-white">{selectedUserName ?? 'Chọn bạn bè để nhắn tin'}</h2>
+            {selectedUserEmail && <p className="truncate text-xs text-slate-500">{selectedUserEmail}</p>}
+          </div>
         </div>
         {activeUserId && <OnlineIndicator online={onlineUserIds.has(activeUserId)} />}
       </div>
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          const userId = manualUserId.trim();
-          if (userId) onSelectUser(userId);
-        }}
-        className="mb-3 flex gap-2"
-      >
-        <input
-          value={manualUserId}
-          onChange={(event) => setManualUserId(event.target.value)}
-          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50"
-          placeholder="User UUID để bắt đầu DM"
-        />
-        <button
-          type="submit"
-          className="rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5"
-        >
-          Mở
-        </button>
-      </form>
-
-      {historyQuery.isLoading ? (
+      {!activeUserId ? (
+        <div className="flex flex-1 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-slate-400">
+          Chọn một người bạn ở danh sách bên trái để bắt đầu nhắn tin.
+        </div>
+      ) : historyQuery.isLoading ? (
         <div className="flex flex-1 items-center justify-center gap-2 text-sm text-slate-400">
           <Loader2 size={18} className="animate-spin text-cyan-300" />
           Đang tải...

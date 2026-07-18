@@ -41,7 +41,8 @@ public class AuthService {
 
         User user = new User();
         user.setEmail(email);
-        user.setName(request.getName().trim());
+        user.setPublicId(generateUniquePublicId());
+        user.setName(email);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
         user.setEmailVerified(false);
@@ -181,6 +182,7 @@ public class AuthService {
     private UserSummaryDto toSummary(User user) {
         return UserSummaryDto.builder()
             .id(user.getId())
+            .publicId(user.getPublicId())
             .email(user.getEmail())
             .name(user.getName())
             .role(user.getRole())
@@ -209,21 +211,31 @@ public class AuthService {
         user.setOauthProvider(provider);
         user.setOauthId(providerId);
         user.setEmailVerified(true);
-        if (name != null && !name.isBlank()) {
-            user.setName(name.trim());
+        if (user.getPublicId() == null || user.getPublicId().isBlank()) {
+            user.setPublicId(generateUniquePublicId());
         }
+        user.setName(user.getEmail());
         return user;
     }
 
     private User createOAuthUser(String provider, String providerId, String email, String name) {
         User user = new User();
         user.setEmail(email);
-        user.setName(name == null || name.isBlank() ? email.substring(0, email.indexOf('@')) : name.trim());
+        user.setPublicId(generateUniquePublicId());
+        user.setName(email);
         user.setRole(Role.USER);
         user.setEmailVerified(true);
         user.setBanned(false);
         user.setOauthProvider(provider);
         user.setOauthId(providerId);
         return user;
+    }
+
+    private String generateUniquePublicId() {
+        String value;
+        do {
+            value = String.format("%010d", Math.abs(java.util.concurrent.ThreadLocalRandom.current().nextLong(10_000_000_000L)));
+        } while (userRepository.existsByPublicId(value));
+        return value;
     }
 }

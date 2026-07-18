@@ -13,6 +13,7 @@ export default function OAuthCallbackPage() {
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
     const userId = searchParams.get('userId');
+    const publicId = searchParams.get('publicId') ?? undefined;
     const email = searchParams.get('email');
     const name = searchParams.get('name');
     const role = searchParams.get('role') as Role | null;
@@ -28,6 +29,7 @@ export default function OAuthCallbackPage() {
       expiresIn: Number(searchParams.get('expiresIn') || 900),
       user: {
         id: userId,
+        publicId,
         email,
         name,
         role,
