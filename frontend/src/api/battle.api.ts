@@ -67,6 +67,14 @@ export type BattleRoomDto = {
   problems: BattleProblemDto[];
 };
 
+export type BattleInviteDto = {
+  roomId: string;
+  roomName: string;
+  inviterId: string;
+  inviterName: string;
+  inviteeId: string;
+};
+
 export type BattleRoomCreateRequest = {
   name: string;
   isPublic: boolean;
@@ -84,6 +92,10 @@ export const battleApi = {
   joinRoom: (roomId: string) => apiClient.post<BattleRoomDto>(`/battle/rooms/${roomId}/join`).then(r => r.data),
   leaveRoom: (roomId: string) => apiClient.post<BattleRoomDto | void>(`/battle/rooms/${roomId}/leave`).then(r => r.data),
   startRoom: (roomId: string) => apiClient.post<BattleRoomDto>(`/battle/rooms/${roomId}/start`).then(r => r.data),
+  inviteFriend: (roomId: string, userId: string) =>
+    apiClient.post<BattleInviteDto>(`/battle/rooms/${roomId}/invites/${userId}`).then(r => r.data),
+  kickMember: (roomId: string, userId: string) =>
+    apiClient.delete<BattleRoomDto>(`/battle/rooms/${roomId}/members/${userId}`).then(r => r.data),
   finishRoom: (roomId: string) =>
     apiClient.post<BattleLeaderboardEntryDto[]>(`/battle/rooms/${roomId}/finish`).then(r => r.data),
   submit: (roomId: string, problemId: string, sourceCode: string, language: BattleLanguage) =>

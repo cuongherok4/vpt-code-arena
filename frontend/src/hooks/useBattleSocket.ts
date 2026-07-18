@@ -37,10 +37,19 @@ type MemberEvent = {
   memberCount: number;
 };
 
+export type BattleInviteEvent = {
+  roomId: string;
+  roomName: string;
+  inviterId: string;
+  inviterName?: string;
+  invitedAt: string;
+};
+
 type BattleSocketOptions = {
   roomId?: string;
   onJoined?: () => void;
   onMemberChange?: (event: MemberEvent) => void;
+  onKicked?: (event: { roomId: string; userId: string }) => void;
   onReadyUpdate?: (event: ReadyUpdate) => void;
   onStarted?: () => void;
   onTick?: (remainingSeconds: number) => void;
@@ -56,6 +65,7 @@ export function useBattleSocket({
   roomId,
   onJoined,
   onMemberChange,
+  onKicked,
   onReadyUpdate,
   onStarted,
   onTick,
@@ -97,6 +107,8 @@ export function useBattleSocket({
     });
     socket.on('battle:member-joined', onMemberChange || (() => undefined));
     socket.on('battle:member-left', onMemberChange || (() => undefined));
+    socket.on('battle:member-kicked', onMemberChange || (() => undefined));
+    socket.on('battle:kicked', (event: { roomId: string; userId: string }) => onKicked?.(event));
     socket.on('battle:ready-update', onReadyUpdate || (() => undefined));
     socket.on('battle:started', () => onStarted?.());
     socket.on('battle:tick', (event: { remainingSeconds?: number }) => {
@@ -119,6 +131,7 @@ export function useBattleSocket({
     user?.id,
     onJoined,
     onMemberChange,
+    onKicked,
     onReadyUpdate,
     onStarted,
     onTick,
@@ -133,5 +146,15 @@ export function useBattleSocket({
     socketRef.current.emit('battle:ready', { roomId, ready });
   }, [roomId]);
 
-  return { connected, setReady };
+  const sendInvite = useCallback((toUserId: string, roomName: string) => {
+    if (!roomId || !socketRef.current?.connected) return;
+    socketRef.current.emit('battle:invite', { roomId, toUserId, roomName });
+  }, [roomId]);
+
+  const notifyKick = useCallback((userId: string) => {
+    if (!roomId || !socketRef.current?.connected) return;
+    socketRef.current.emit('battle:kick-member', { roomId, userId });
+  }, [roomId]);
+
+  return { connected, setReady, sendInvite, notifyKick };
 }

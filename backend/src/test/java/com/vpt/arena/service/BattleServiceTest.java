@@ -10,6 +10,7 @@ import com.vpt.arena.entity.User;
 import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.entity.enums.RoomStatus;
 import com.vpt.arena.repository.BattleRoomProblemRepository;
+import com.vpt.arena.repository.FriendshipRepository;
 import com.vpt.arena.repository.ProblemRepository;
 import com.vpt.arena.repository.RoomMemberRepository;
 import com.vpt.arena.repository.RoomRepository;
@@ -47,6 +48,7 @@ class BattleServiceTest {
     @Mock private ProblemRepository problemRepository;
     @Mock private UserRepository userRepository;
     @Mock private BattleRealtimeNotifier battleRealtimeNotifier;
+    @Mock private FriendshipRepository friendshipRepository;
 
     @InjectMocks
     private BattleService battleService;
@@ -357,6 +359,53 @@ class BattleServiceTest {
                 .hasMessageContaining("Room already started");
 
             verify(roomRepository, never()).delete(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("invite/kick")
+    class InviteKick {
+        @Test
+        @DisplayName("Creator có thể mời bạn bè vào phòng WAITING")
+        void shouldInviteFriendToWaitingRoom() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            User bob = user(UUID.randomUUID(), "Bob");
+            Room room = room(roomId, creator, RoomStatus.WAITING);
+            when(roomRepository.findDetailedById(roomId)).thenReturn(Optional.of(room));
+            when(friendshipRepository.existsByUserIdAndFriendId(creator.getId(), bob.getId())).thenReturn(true);
+            when(roomMemberRepository.existsByRoomIdAndUserId(roomId, bob.getId())).thenReturn(false);
+            when(roomMemberRepository.countByRoomId(roomId)).thenReturn(1L);
+            when(userRepository.findById(bob.getId())).thenReturn(Optional.of(bob));
+
+            var invite = battleService.inviteFriend(roomId, creator.getId(), bob.getId());
+
+            assertThat(invite.getRoomId()).isEqualTo(roomId);
+            assertThat(invite.getInviteeId()).isEqualTo(bob.getId());
+            assertThat(invite.getInviterId()).isEqualTo(creator.getId());
+        }
+
+        @Test
+        @DisplayName("Creator có thể kick member khi phòng còn WAITING")
+        void shouldKickMemberFromWaitingRoom() {
+            UUID roomId = UUID.randomUUID();
+            User creator = user(UUID.randomUUID(), "Alice");
+            User bob = user(UUID.randomUUID(), "Bob");
+            Room room = room(roomId, creator, RoomStatus.WAITING);
+            RoomMember creatorMember = member(room, creator, true);
+            RoomMember bobMember = member(room, bob, false);
+            room.getMembers().add(creatorMember);
+            room.getMembers().add(bobMember);
+            when(roomRepository.findDetailedByIdForUpdate(roomId)).thenReturn(Optional.of(room));
+            when(roomMemberRepository.findByRoomIdAndUserId(roomId, bob.getId())).thenReturn(Optional.of(bobMember));
+            when(roomRepository.save(room)).thenReturn(room);
+            when(battleRoomProblemRepository.findByRoomIdOrderByOrderAsc(roomId)).thenReturn(List.of());
+
+            BattleRoomDto dto = battleService.kickMember(roomId, creator.getId(), bob.getId());
+
+            assertThat(dto.getMemberCount()).isEqualTo(1);
+            assertThat(dto.getMembers()).noneMatch(member -> member.getUserId().equals(bob.getId()));
+            verify(roomMemberRepository).delete(bobMember);
         }
     }
 

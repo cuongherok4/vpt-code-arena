@@ -3,6 +3,7 @@ package com.vpt.arena.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vpt.arena.config.AppConfig;
 import com.vpt.arena.config.SecurityConfig;
+import com.vpt.arena.dto.battle.BattleInviteDto;
 import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
 import com.vpt.arena.dto.battle.BattleRoomCreateRequest;
 import com.vpt.arena.dto.battle.BattleRoomDto;
@@ -148,6 +149,36 @@ class BattleControllerTest {
             .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
 
         verify(battleService).startRoom(ROOM_ID, USER_ID);
+    }
+
+    @Test
+    @DisplayName("POST /rooms/{id}/invites/{userId} mời bạn vào phòng")
+    void shouldInviteFriendToBattleRoom() throws Exception {
+        UUID friendId = UUID.randomUUID();
+        when(battleService.inviteFriend(ROOM_ID, USER_ID, friendId))
+            .thenReturn(new BattleInviteDto(ROOM_ID, "Battle Room", USER_ID, "Alice", friendId));
+
+        mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/invites/" + friendId)
+                .with(authenticatedUser()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.roomId").value(ROOM_ID.toString()))
+            .andExpect(jsonPath("$.inviteeId").value(friendId.toString()));
+
+        verify(battleService).inviteFriend(ROOM_ID, USER_ID, friendId);
+    }
+
+    @Test
+    @DisplayName("DELETE /rooms/{id}/members/{userId} kick member khỏi phòng")
+    void shouldKickBattleMember() throws Exception {
+        UUID memberId = UUID.randomUUID();
+        when(battleService.kickMember(ROOM_ID, USER_ID, memberId)).thenReturn(roomDto());
+
+        mockMvc.perform(delete(BASE + "/rooms/" + ROOM_ID + "/members/" + memberId)
+                .with(authenticatedUser()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(ROOM_ID.toString()));
+
+        verify(battleService).kickMember(ROOM_ID, USER_ID, memberId);
     }
 
     @Test

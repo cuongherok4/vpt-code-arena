@@ -3,6 +3,7 @@ package com.vpt.arena.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
+import com.vpt.arena.dto.battle.BattleInviteDto;
 import com.vpt.arena.dto.battle.BattleRoomDto;
 import com.vpt.arena.dto.battle.BattleSubmissionDto;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,23 @@ public class BattleRealtimeNotifier {
         publish("finished", roomId, null, Map.of(
             "roomId", roomId,
             "finalLeaderboard", finalLeaderboard
+        ));
+    }
+
+    public void publishInvite(BattleInviteDto invite) {
+        publish("invite", invite.getRoomId(), invite.getInviteeId(), Map.of(
+            "roomId", invite.getRoomId(),
+            "roomName", invite.getRoomName(),
+            "inviterId", invite.getInviterId(),
+            "inviterName", invite.getInviterName(),
+            "inviteeId", invite.getInviteeId()
+        ));
+    }
+
+    public void publishMemberKicked(UUID roomId, UUID userId) {
+        publish("member-kicked", roomId, userId, Map.of(
+            "roomId", roomId,
+            "userId", userId
         ));
     }
 

@@ -388,43 +388,26 @@ Rời phòng.
 { "left": true }
 ```
 
-### POST /battle/rooms/:id/invites *(auth required — chủ phòng/member được phép mời)*
-Mời bạn bè vào phòng battle đang WAITING.
+### POST /battle/rooms/:id/invites/:userId *(auth required — chủ phòng)*
+Validate lời mời bạn bè vào phòng battle đang WAITING. Chỉ chủ phòng được mời, người được mời phải là bạn bè và chưa ở trong phòng.
 ```json
-// Request
-{ "userId": "uuid" }
-
-// Response 202
+// Response 200
 {
-  "inviteId": "uuid",
-  "invited": true,
   "roomId": "uuid",
-  "receiverId": "uuid",
-  "expiresAt": "2026-07-19T01:30:00Z"
+  "roomName": "Battle nhanh",
+  "inviterId": "uuid",
+  "inviterName": "alice@example.com",
+  "inviteeId": "uuid"
 }
 ```
 
-Nếu người được mời đang online, backend/websocket gửi realtime event để FE hiện popup invite toàn cục.
-
-### POST /battle/rooms/invites/:inviteId/accept *(auth required)*
-Chấp nhận lời mời battle và join phòng nếu phòng còn WAITING/chưa đầy.
-```json
-// Response 200
-{ "accepted": true, "roomId": "uuid" }
-```
-
-### POST /battle/rooms/invites/:inviteId/reject *(auth required)*
-Từ chối lời mời battle.
-```json
-// Response 200
-{ "rejected": true }
-```
+Sau khi API validate thành công, FE gửi socket event `battle:invite`; người được mời đang online nhận `battle:invite-received` và thấy popup tham gia/từ chối.
 
 ### DELETE /battle/rooms/:id/members/:userId *(auth required — chủ phòng)*
 Kick một thành viên khỏi hàng chờ trước khi phòng start.
 ```json
 // Response 200
-{ "kicked": true, "roomId": "uuid", "userId": "uuid" }
+{ "id": "uuid", "status": "WAITING", "members": [] }
 ```
 
 ### POST /battle/rooms/:id/ready *(auth required)*
