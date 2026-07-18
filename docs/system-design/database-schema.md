@@ -16,6 +16,7 @@ CREATE TYPE difficulty_type AS ENUM ('EASY', 'MEDIUM', 'HARD');
 CREATE TYPE judge_result    AS ENUM ('PENDING', 'AC', 'WA', 'TLE', 'RE', 'CE');
 CREATE TYPE room_status     AS ENUM ('WAITING', 'IN_PROGRESS', 'FINISHED');
 CREATE TYPE message_type    AS ENUM ('TEXT', 'SYSTEM');
+CREATE TYPE friend_request_status AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED');
 
 -- ─────────────────────────────────────────
 -- USER MANAGEMENT
@@ -232,6 +233,48 @@ CREATE TABLE direct_messages (
 
 CREATE INDEX idx_direct_messages_conversation ON direct_messages(sender_id, receiver_id, created_at);
 CREATE INDEX idx_direct_messages_unread        ON direct_messages(receiver_id, is_read);
+
+-- ─────────────────────────────────────────
+-- SOCIAL / FRIENDS (Backlog sau Phase 6)
+-- ─────────────────────────────────────────
+CREATE TABLE friend_requests (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    sender_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status      friend_request_status NOT NULL DEFAULT 'PENDING',
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CHECK (sender_id <> receiver_id),
+    UNIQUE(sender_id, receiver_id)
+);
+
+CREATE INDEX idx_friend_requests_receiver_status ON friend_requests(receiver_id, status);
+CREATE INDEX idx_friend_requests_sender_status   ON friend_requests(sender_id, status);
+
+CREATE TABLE friendships (
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    friend_id  UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CHECK (user_id <> friend_id),
+    UNIQUE(user_id, friend_id)
+);
+
+CREATE INDEX idx_friendships_user ON friendships(user_id);
+
+CREATE TABLE battle_room_invites (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    room_id     UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+    sender_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status      VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    expires_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    responded_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE(room_id, receiver_id)
+);
+
+CREATE INDEX idx_battle_room_invites_receiver_status ON battle_room_invites(receiver_id, status);
 ```
 
 ---
@@ -351,6 +394,8 @@ public enum MessageType { TEXT, SYSTEM }
 | Flyway migration | Mọi thay đổi schema → tạo file `V{n}__{mô_tả}.sql` mới, không sửa file cũ |
 | `password_hash = NULL` | Cho user đăng nhập Google/GitHub không có mật khẩu |
 | `chat_messages.room_id = NULL` | Quy ước Global Chat |
+| `friendships` | Lưu 2 dòng cho mỗi quan hệ bạn bè để query danh sách bạn bè O(1) theo `user_id` |
+| Host kick battle | Chỉ cho phép khi `rooms.status = WAITING`; member bị kick khỏi `room_members` |
 | Soft delete | Dùng `is_banned` với User; không xóa submission và room_results |
 | JSONB cho test_cases | Linh hoạt, query được qua PostgreSQL JSONB operators |
 

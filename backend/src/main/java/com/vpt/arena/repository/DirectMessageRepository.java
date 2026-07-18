@@ -13,6 +13,17 @@ import java.util.UUID;
 
 @Repository
 public interface DirectMessageRepository extends JpaRepository<DirectMessage, UUID> {
+    default List<DirectMessage> findConversation(
+        UUID currentUserId,
+        UUID otherUserId,
+        OffsetDateTime before,
+        Pageable pageable
+    ) {
+        return before == null
+            ? findRecentConversation(currentUserId, otherUserId, pageable)
+            : findConversationBefore(currentUserId, otherUserId, before, pageable);
+    }
+
     @Query("""
         SELECT m
         FROM DirectMessage m
@@ -22,10 +33,27 @@ public interface DirectMessageRepository extends JpaRepository<DirectMessage, UU
             (m.sender.id = :currentUserId AND m.receiver.id = :otherUserId)
             OR (m.sender.id = :otherUserId AND m.receiver.id = :currentUserId)
         )
-          AND (:before IS NULL OR m.createdAt < :before)
         ORDER BY m.createdAt DESC
         """)
-    List<DirectMessage> findConversation(
+    List<DirectMessage> findRecentConversation(
+        @Param("currentUserId") UUID currentUserId,
+        @Param("otherUserId") UUID otherUserId,
+        Pageable pageable
+    );
+
+    @Query("""
+        SELECT m
+        FROM DirectMessage m
+        JOIN FETCH m.sender
+        JOIN FETCH m.receiver
+        WHERE (
+            (m.sender.id = :currentUserId AND m.receiver.id = :otherUserId)
+            OR (m.sender.id = :otherUserId AND m.receiver.id = :currentUserId)
+        )
+          AND m.createdAt < :before
+        ORDER BY m.createdAt DESC
+        """)
+    List<DirectMessage> findConversationBefore(
         @Param("currentUserId") UUID currentUserId,
         @Param("otherUserId") UUID otherUserId,
         @Param("before") OffsetDateTime before,

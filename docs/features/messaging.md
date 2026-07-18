@@ -10,6 +10,7 @@
 - Lưu lịch sử tin nhắn, hiển thị online status.
 - Notification khi nhận tin nhắn mới.
 - Entry point: nút "Send DM" từ trang hồ sơ người dùng.
+- Sau khi có Social/Friends: ưu tiên DM với bạn bè, nhưng vẫn cho mở DM từ profile/chat nếu quyền riêng tư cho phép.
 
 ## 3. Room Chat (Chat trong phòng Battle)
 - Chat 1-N, chỉ hoạt động trong phạm vi 1 phòng Battle đang diễn ra.
@@ -20,3 +21,9 @@
 - Bảng `chat_messages` dùng chung cho Global Chat và Room Chat (phân biệt qua `room_id`); Private Message cân nhắc tách bảng riêng nếu cần tối ưu truy vấn hộp thư.
 - WebSocket events để broadcast tin nhắn theo đúng phạm vi (global / room / 1-1).
 - API report + admin xử lý report, mute/ban user spam ở Global Chat.
+
+## Backlog Social/Friends liên quan Messaging
+- Click tên/avatar trong Global Chat mở `UserMiniProfilePopover`.
+- Từ popover có thể: xem hồ sơ, gửi lời mời kết bạn, nhắn DM, mời vào phòng battle đang sở hữu.
+- Trong Room Chat/Battle Waiting list có nút kết bạn nhanh với thành viên cùng phòng.
+- Danh sách bạn bè hiển thị online/offline, có action xem thông tin, nhắn tin, xóa bạn.

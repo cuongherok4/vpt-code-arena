@@ -66,6 +66,29 @@ Broadcast khi có người thay đổi trạng thái sẵn sàng.
 }
 ```
 
+**Server → Client: `battle:invite-received`**
+Gửi riêng cho người được mời. FE phải hiển thị popup/ô mời toàn cục, kể cả khi user đang ở trang khác.
+```json
+{
+  "inviteId": "uuid",
+  "roomId": "uuid",
+  "roomName": "Java Challenge",
+  "senderId": "uuid",
+  "senderName": "User Host",
+  "expiresAt": "2026-07-19T01:30:00.000Z"
+}
+```
+
+Popup invite có tối thiểu 2 action:
+- [Tham gia] → gọi `POST /battle/rooms/invites/:inviteId/accept`, rồi navigate vào phòng.
+- [Từ chối] → gọi `POST /battle/rooms/invites/:inviteId/reject`, đóng popup.
+
+**Server → Client: `battle:invite-expired`**
+Gửi riêng khi lời mời hết hạn, phòng đã start, phòng đầy, hoặc host hủy phòng.
+```json
+{ "inviteId": "uuid", "roomId": "uuid", "reason": "ROOM_STARTED" }
+```
+
 #### 1.3 Bắt đầu trận
 
 **Server → Client: `battle:started`**
@@ -275,6 +298,8 @@ Gửi riêng cho từng user.
   "createdAt": "..."
 }
 ```
+
+Với `type = "BATTLE_INVITE"`, FE hiển thị popup ưu tiên cao thay vì chỉ toast thường.
 
 ---
 
