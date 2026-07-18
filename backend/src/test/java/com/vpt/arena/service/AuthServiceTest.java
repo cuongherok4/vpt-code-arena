@@ -181,6 +181,8 @@ class AuthServiceTest {
         AuthResponse response = authService.oauthLogin("google", "google-123", "Alice@Example.com", "Alice OAuth");
 
         assertThat(response.getUser().getEmail()).isEqualTo("alice@example.com");
+        assertThat(response.getUser().getName()).isEqualTo("alice@example.com");
+        assertThat(response.getUser().getPublicId()).hasSize(10);
         assertThat(response.getUser().isEmailVerified()).isTrue();
         assertThat(response.getAccessToken()).isNotBlank();
         verify(refreshTokenService).save(response.getUser().getId(), response.getRefreshToken());
@@ -196,7 +198,7 @@ class AuthServiceTest {
 
         AuthResponse response = authService.oauthLogin("github", "42", "alice@example.com", "Alice GitHub");
 
-        assertThat(response.getUser().getName()).isEqualTo("Alice GitHub");
+        assertThat(response.getUser().getName()).isEqualTo("alice@example.com");
         assertThat(response.getUser().isEmailVerified()).isTrue();
         assertThat(user.getOauthProvider()).isEqualTo("github");
         assertThat(user.getOauthId()).isEqualTo("42");
@@ -282,6 +284,7 @@ class AuthServiceTest {
         User user = new User();
         user.setId(id);
         user.setEmail("alice@example.com");
+        user.setPublicId("1000000001");
         user.setName("Alice");
         user.setRole(Role.USER);
         user.setPasswordHash(passwordHash);

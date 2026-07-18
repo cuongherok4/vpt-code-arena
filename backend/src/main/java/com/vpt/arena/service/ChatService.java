@@ -13,6 +13,7 @@ import com.vpt.arena.entity.enums.Role;
 import com.vpt.arena.repository.ChatMessageRepository;
 import com.vpt.arena.repository.ChatMuteRepository;
 import com.vpt.arena.repository.DirectMessageRepository;
+import com.vpt.arena.repository.FriendshipRepository;
 import com.vpt.arena.repository.MessageReportRepository;
 import com.vpt.arena.repository.RoomRepository;
 import com.vpt.arena.repository.UserRepository;
@@ -43,6 +44,7 @@ public class ChatService {
     private final MessageReportRepository messageReportRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
+    private final FriendshipRepository friendshipRepository;
 
     @Transactional(readOnly = true)
     public List<ChatMessageDto> globalHistory(UUID currentUserId, OffsetDateTime before, int limit) {
@@ -67,6 +69,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public List<ChatMessageDto> directHistory(UUID currentUserId, UUID otherUserId, OffsetDateTime before, int limit) {
         ensureUserExists(otherUserId);
+        ensureFriends(currentUserId, otherUserId);
         return directMessageRepository.findConversation(currentUserId, otherUserId, before, page(limit)).stream()
             .sorted(Comparator.comparing(DirectMessage::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
             .map(message -> toDto(message, currentUserId))
@@ -120,6 +123,7 @@ public class ChatService {
         }
         User sender = findUser(senderId);
         User receiver = findUser(receiverId);
+        ensureFriends(senderId, receiverId);
         DirectMessage message = new DirectMessage();
         message.setSender(sender);
         message.setReceiver(receiver);
@@ -213,6 +217,12 @@ public class ChatService {
     private void ensureUserExists(UUID userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+    }
+
+    private void ensureFriends(UUID currentUserId, UUID otherUserId) {
+        if (!friendshipRepository.existsByUserIdAndFriendId(currentUserId, otherUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Direct messages are only available between friends");
         }
     }
 

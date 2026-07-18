@@ -11,6 +11,7 @@ export type Role = 'USER' | 'ADMIN';
 
 export type AuthUser = {
   id: string;
+  publicId?: string;
   email: string;
   name: string;
   role: Role;

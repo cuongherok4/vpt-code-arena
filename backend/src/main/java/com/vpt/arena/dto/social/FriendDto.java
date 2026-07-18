@@ -10,6 +10,7 @@ import java.util.UUID;
 @Builder
 public class FriendDto {
     private UUID id;
+    private String publicId;
     private String name;
     private String email;
     private String avatar;

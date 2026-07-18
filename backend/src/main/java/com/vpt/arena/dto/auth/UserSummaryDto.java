@@ -10,6 +10,7 @@ import java.util.UUID;
 @Builder
 public class UserSummaryDto {
     private UUID id;
+    private String publicId;
     private String email;
     private String name;
     private Role role;

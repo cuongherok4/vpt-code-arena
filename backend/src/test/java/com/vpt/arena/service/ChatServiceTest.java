@@ -11,6 +11,7 @@ import com.vpt.arena.entity.enums.Role;
 import com.vpt.arena.repository.ChatMessageRepository;
 import com.vpt.arena.repository.ChatMuteRepository;
 import com.vpt.arena.repository.DirectMessageRepository;
+import com.vpt.arena.repository.FriendshipRepository;
 import com.vpt.arena.repository.MessageReportRepository;
 import com.vpt.arena.repository.RoomRepository;
 import com.vpt.arena.repository.UserRepository;
@@ -45,6 +46,7 @@ class ChatServiceTest {
     @Mock private MessageReportRepository messageReportRepository;
     @Mock private UserRepository userRepository;
     @Mock private RoomRepository roomRepository;
+    @Mock private FriendshipRepository friendshipRepository;
 
     private ChatService chatService;
     private User alice;
@@ -58,7 +60,8 @@ class ChatServiceTest {
             chatMuteRepository,
             messageReportRepository,
             userRepository,
-            roomRepository
+            roomRepository,
+            friendshipRepository
         );
         alice = user("Alice", Role.USER);
         bob = user("Bob", Role.USER);
@@ -102,6 +105,20 @@ class ChatServiceTest {
         assertThatThrownBy(() -> chatService.sendDirect(alice.getId(), alice.getId(), "hello"))
             .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining("Cannot send direct message to yourself");
+
+        verify(directMessageRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Không cho gửi DM nếu chưa kết bạn")
+    void shouldRejectDirectMessageWhenUsersAreNotFriends() {
+        when(userRepository.findById(alice.getId())).thenReturn(Optional.of(alice));
+        when(userRepository.findById(bob.getId())).thenReturn(Optional.of(bob));
+        when(friendshipRepository.existsByUserIdAndFriendId(alice.getId(), bob.getId())).thenReturn(false);
+
+        assertThatThrownBy(() -> chatService.sendDirect(alice.getId(), bob.getId(), "hello"))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Direct messages are only available between friends");
 
         verify(directMessageRepository, never()).save(any());
     }

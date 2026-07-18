@@ -89,6 +89,9 @@ export default function ProfilePage() {
                 <div>
                   <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
                   <p className="text-sm text-slate-400">{profile.email}</p>
+                  <p className="mt-1 inline-flex rounded-md border border-cyan-400/20 bg-cyan-400/10 px-2 py-1 text-xs font-semibold text-cyan-200">
+                    ID {profile.publicId ?? '----------'}
+                  </p>
                 </div>
               </div>
               <button
@@ -102,6 +105,7 @@ export default function ProfilePage() {
             </div>
 
             <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat label="ID" value={profile.publicId ?? '----------'} />
               <Stat label="Role" value={profile.role} icon={<Shield className="h-4 w-4" />} />
               <Stat label="Submissions" value={stats.total.toString()} />
               <Stat label="Accepted" value={stats.accepted.toString()} />

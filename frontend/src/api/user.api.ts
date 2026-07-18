@@ -23,6 +23,7 @@ export type UserSubmissionHistory = {
 
 const toAuthUser = (profile: UserProfile): AuthUser => ({
   id: profile.id,
+  publicId: profile.publicId,
   email: profile.email,
   name: profile.name,
   role: profile.role as Role,

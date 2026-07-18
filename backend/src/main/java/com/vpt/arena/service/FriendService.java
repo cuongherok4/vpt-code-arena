@@ -38,8 +38,8 @@ public class FriendService {
     public List<UserSearchResultDto> searchUsers(UUID currentUserId, String query) {
         String normalized = normalizeQuery(query);
         Map<UUID, User> candidates = new LinkedHashMap<>();
-        parseUuid(normalized)
-            .flatMap(userRepository::findById)
+        parsePublicId(normalized)
+            .flatMap(userRepository::findByPublicId)
             .filter(user -> !user.getId().equals(currentUserId))
             .ifPresent(user -> candidates.put(user.getId(), user));
         userRepository.searchForFriends(currentUserId, normalized, PageRequest.of(0, SEARCH_LIMIT))
@@ -181,6 +181,7 @@ public class FriendService {
     private UserSearchResultDto toSearchDto(UUID currentUserId, User user) {
         return UserSearchResultDto.builder()
             .id(user.getId())
+            .publicId(user.getPublicId())
             .name(user.getName())
             .email(maskEmail(user.getEmail()))
             .friendStatus(friendStatus(currentUserId, user.getId()))
@@ -190,6 +191,7 @@ public class FriendService {
     private FriendDto toFriendDto(User user, OffsetDateTime friendsSince) {
         return FriendDto.builder()
             .id(user.getId())
+            .publicId(user.getPublicId())
             .name(user.getName())
             .email(maskEmail(user.getEmail()))
             .avatar(null)
@@ -203,6 +205,7 @@ public class FriendService {
             .requestId(request.getId())
             .user(UserSearchResultDto.builder()
                 .id(user.getId())
+                .publicId(user.getPublicId())
                 .name(user.getName())
                 .email(maskEmail(user.getEmail()))
                 .friendStatus(null)
@@ -234,12 +237,8 @@ public class FriendService {
         return query.trim();
     }
 
-    private java.util.Optional<UUID> parseUuid(String value) {
-        try {
-            return java.util.Optional.of(UUID.fromString(value));
-        } catch (IllegalArgumentException e) {
-            return java.util.Optional.empty();
-        }
+    private java.util.Optional<String> parsePublicId(String value) {
+        return value.matches("\\d{10}") ? java.util.Optional.of(value) : java.util.Optional.empty();
     }
 
     private String maskEmail(String email) {

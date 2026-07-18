@@ -512,7 +512,10 @@ Lấy tin nhắn Global Chat (pagination ngược thời gian).
 Lấy lịch sử chat phòng Battle.
 
 ### GET /chat/dm/:userId?page=0&size=50 *(auth required)*
-Lấy lịch sử Private Message với 1 user.
+Lấy lịch sử Private Message với 1 user. Chỉ cho phép khi hai user đã là bạn bè.
+
+### POST /chat/dm/:userId *(auth required)*
+Gửi tin nhắn riêng cho bạn bè. Nếu chưa kết bạn, trả về `403 FORBIDDEN`.
 
 ### GET /chat/dm/conversations *(auth required)*
 Danh sách các cuộc hội thoại DM.

@@ -64,6 +64,7 @@ public class UserProfileService {
     private UserProfileDto toProfile(User user) {
         return UserProfileDto.builder()
             .id(user.getId())
+            .publicId(user.getPublicId())
             .email(user.getEmail())
             .name(user.getName())
             .role(user.getRole())

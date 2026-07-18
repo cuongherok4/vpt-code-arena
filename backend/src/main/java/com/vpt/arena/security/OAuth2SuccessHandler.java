@@ -56,6 +56,7 @@ public class OAuth2SuccessHandler extends org.springframework.security.web.authe
             .queryParam("refreshToken", response.getRefreshToken())
             .queryParam("expiresIn", response.getExpiresIn())
             .queryParam("userId", user.getId())
+            .queryParam("publicId", user.getPublicId())
             .queryParam("email", user.getEmail())
             .queryParam("name", user.getName())
             .queryParam("role", user.getRole())

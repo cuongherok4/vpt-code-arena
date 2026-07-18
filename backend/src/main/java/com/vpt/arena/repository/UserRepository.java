@@ -14,13 +14,17 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
+    Optional<User> findByPublicId(String publicId);
     boolean existsByEmail(String email);
+    boolean existsByPublicId(String publicId);
 
     @Query("""
         SELECT u
         FROM User u
         WHERE u.id <> :currentUserId
           AND (
+            u.publicId = :query
+            OR
             LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%'))
             OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
           )
