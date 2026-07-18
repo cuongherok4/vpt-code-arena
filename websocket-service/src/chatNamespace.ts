@@ -29,6 +29,7 @@ export function registerChatNamespace(
     const user = requireUser(socket);
     socket.data.joinedChatRooms = new Set<string>();
     await socket.join(userChannel(user.userId));
+    await socket.join(GLOBAL_ROOM);
 
     const becameOnline = await presenceStore.addSocket(user.userId, socket.id);
     if (becameOnline) {
@@ -79,7 +80,7 @@ export function registerChatNamespace(
     socket.on('chat:send-global', async (payload, ack) => {
       try {
         const message = await persist(socket, '/api/v1/chat/global', { message: requireMessage(payload?.message) });
-        chat.to(GLOBAL_ROOM).emit('chat:message', message);
+        chat.emit('chat:message', message);
         ack?.({ success: true, message });
       } catch (error) {
         fail(socket, ack, error);

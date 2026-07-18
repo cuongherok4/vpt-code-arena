@@ -55,10 +55,11 @@ export function verifyHs256Jwt(token: string, secret: string): JwtPayload | null
   const [headerPart, payloadPart, signaturePart] = parts;
   try {
     const header = JSON.parse(base64UrlDecode(headerPart).toString('utf8')) as { alg?: string };
-    if (header.alg !== 'HS256') return null;
+    const hmacAlgorithm = hmacAlgorithmForJwt(header.alg);
+    if (!hmacAlgorithm) return null;
 
     const expectedSignature = crypto
-      .createHmac('sha256', secret)
+      .createHmac(hmacAlgorithm, secret)
       .update(`${headerPart}.${payloadPart}`)
       .digest('base64url');
     if (!timingSafeEqual(signaturePart, expectedSignature)) return null;
@@ -71,6 +72,13 @@ export function verifyHs256Jwt(token: string, secret: string): JwtPayload | null
   } catch {
     return null;
   }
+}
+
+function hmacAlgorithmForJwt(alg: string | undefined): string | null {
+  if (alg === 'HS256') return 'sha256';
+  if (alg === 'HS384') return 'sha384';
+  if (alg === 'HS512') return 'sha512';
+  return null;
 }
 
 function base64UrlDecode(value: string): Buffer {

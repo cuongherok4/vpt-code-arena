@@ -4,8 +4,11 @@ import { Redis } from 'ioredis';
 import { Server } from 'socket.io';
 import { registerBattleNamespace, type BattleEvent } from './battleNamespace.js';
 import { registerChatNamespace } from './chatNamespace.js';
+import { loadLocalEnv, redisUrlFromEnv } from './env.js';
 import { RedisBattleStore } from './redisBattleStore.js';
 import { RedisChatPresenceStore } from './redisChatPresenceStore.js';
+
+loadLocalEnv();
 
 const app = express();
 app.use(express.json());
@@ -19,7 +22,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redisUrl = redisUrlFromEnv();
 const redis = new Redis(redisUrl);
 const subscriber = new Redis(redisUrl);
 const battleStore = new RedisBattleStore(redis);

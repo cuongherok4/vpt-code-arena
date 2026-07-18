@@ -11,7 +11,7 @@
 | 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | 🟢 Hoàn thành | 100% |
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟡 Đang thực hiện | 66% |
+| 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 7 | 14–15 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
 | 8 | 16–17 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 9 | 18–19 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
@@ -155,13 +155,13 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 6 — Messaging (Tuần 12–13) 🟡 66%
+### Phase 6 — Messaging (Tuần 12–13) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 6.1 | `feature/p6-chat-backend` | `ChatController` (history global/room/dm/conversations), lưu tin nhắn từ WS pub/sub, API report/delete/mute | API lấy lịch sử chat hoạt động, tin nhắn được lưu DB, có thể report/xóa | 🟢 Done |
 | 6.2 | `feature/p6-chat-websocket` | `/chat` namespace, handlers (global/room/dm send), online status Redis Set, broadcast `user:online/offline` | Nhắn tin real-time không delay, online indicator hiển thị đúng | 🟢 Done |
-| 6.3 | `feature/p6-chat-frontend` | `GlobalChatPanel`, `RoomChatPanel`, `DMChatWindow`, `DMConversationList`, `OnlineIndicator`, `useChatSocket` hook | UI chat đầy đủ: global/phòng/DM, biết ai đang online | ⚪ Chưa bắt đầu |
+| 6.3 | `feature/p6-chat-frontend` | `GlobalChatPanel`, `RoomChatPanel`, `DMChatWindow`, `DMConversationList`, `OnlineIndicator`, `useChatSocket` hook | UI chat đầy đủ: global/phòng/DM, biết ai đang online | 🟢 Done |
 
 **Thứ tự thực hiện:** 6.1 → 6.2 (song song) → 6.3 → merge `develop`
 
