@@ -63,7 +63,7 @@ export const DMChatWindow = ({
           Đang tải...
         </div>
       ) : (
-        <MessageList messages={messages} currentUserId={currentUserId} />
+        <MessageList messages={messages} currentUserId={currentUserId} onError={onError} />
       )}
 
       <ChatComposer disabled={!connected || !activeUserId} placeholder="Nhắn riêng..." onSend={async (message) => {
