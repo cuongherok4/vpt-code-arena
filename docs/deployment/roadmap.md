@@ -2,7 +2,7 @@
 
 ---
 
-## 1. Lộ trình 11 Phase
+## 1. Lộ trình 13 Phase
 
 | Phase | Tuần | Nội dung | Deliverable | Trạng thái | % |
 |---|---|---|---|---|---|
@@ -13,10 +13,12 @@
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
-| 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟡 Đang thực hiện | 50% |
-| 9 | 18–19 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
-| 10 | 20–21 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
-| 11 | 22 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
+| 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟢 Hoàn thành | 100% |
+| 9 | 18–19 | Admin Panel & Moderation | Dashboard admin, quản lý user/problem/chat/stats | ⚪ Chưa bắt đầu | 0% |
+| 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | ⚪ Chưa bắt đầu | 0% |
+| 11 | 22–23 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
+| 12 | 24–25 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
+| 13 | 26 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
 
 ---
 
@@ -209,18 +211,58 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 9 — UI/UX Polish (Tuần 18–19) ⚪ 0%
+### Phase 9 — Admin Panel & Moderation (Tuần 18–19) ⚪ 0%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 9.1 | `feature/p9-responsive` | Responsive design toàn bộ pages, mobile-friendly breakpoints | Giao diện dùng được trên mobile/tablet, không bị overflow | ⚪ Chưa bắt đầu |
-| 9.2 | `feature/p9-darkmode` | Dark mode toggle (Tailwind `dark:`), persist localStorage | Chuyển dark/light mode 1 click, nhớ lựa chọn sau khi reload | ⚪ Chưa bắt đầu |
-| 9.3 | `feature/p9-ux-enhancement` | Loading skeleton, Error boundary + fallback UI, Code splitting (React.lazy + Suspense) | Không còn blank screen khi load, lỗi hiển thị thân thiện thay vì crash | ⚪ Chưa bắt đầu |
-| 9.4 | `feature/p9-performance` | Lighthouse audit, tối ưu bundle size, lazy load images, đạt score > 80 | Lighthouse Performance > 80, bundle < 500KB gzipped | ⚪ Chưa bắt đầu |
+| 9.1 | `feature/p9-admin-backend-users` | `AdminController`, API `GET /admin/users`, `PUT /admin/users/{id}/ban`, xóa account nếu cần, chỉ role ADMIN | Admin xem danh sách user, tìm kiếm, ban/unban user, endpoint được bảo vệ theo role | ⚪ Chưa bắt đầu |
+| 9.2 | `feature/p9-admin-backend-problems` | API CRUD đề bài: tạo/sửa/xóa/publish problem, quản lý test cases, độ khó, chủ đề | Admin quản lý ngân hàng đề thi trực tiếp từ backend | ⚪ Chưa bắt đầu |
+| 9.3 | `feature/p9-admin-backend-moderation` | API moderation: xóa message, mute/ban spam, xem/review report, log hoạt động | Admin kiểm duyệt chat và xử lý report | ⚪ Chưa bắt đầu |
+| 9.4 | `feature/p9-admin-backend-stats` | API `GET /admin/stats`: total users, active users, total problems, submissions, battle rooms | Admin xem thống kê hệ thống tổng quan | ⚪ Chưa bắt đầu |
+| 9.5 | `feature/p9-admin-frontend` | `/admin`, `AdminPage` tabs Users/Problems/Moderation/Stats, `UserManagementTable`, `ProblemForm`, `ModerationFeed`, `SystemStatsCards` | Admin có dashboard đầy đủ, chỉ role ADMIN truy cập được | ⚪ Chưa bắt đầu |
 
-**Thứ tự thực hiện:** 9.1 || 9.2 || 9.3 → 9.4 → merge `develop`
+**Thứ tự thực hiện:** 9.1 → 9.2 → 9.3 → 9.4 → 9.5 → merge `develop`
 
 **🎯 Phase 9 hoàn thành — Hệ thống có thể:**
+- Quản lý user: xem danh sách, tìm kiếm, ban/unban, xóa account nếu cần
+- Quản lý đề bài và test cases từ giao diện admin
+- Kiểm duyệt chat: xóa message, mute/ban spam, xử lý report
+- Xem thống kê hệ thống: users, submissions, problems, active users, battle rooms
+
+---
+
+### Phase 10 — Frontend Redesign (Tuần 20–21) ⚪ 0%
+
+| # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
+|---|---|---|---|---|
+| 10.1 | `feature/p10-fe-design-system` | Chuẩn hóa design tokens, màu, typography, spacing, button/input/table/card/modal states | FE có hệ design thống nhất, dễ tái sử dụng, không lệch style giữa các module | ⚪ Chưa bắt đầu |
+| 10.2 | `feature/p10-fe-layout-navigation` | Làm lại layout tổng thể, navbar/sidebar, page shell, responsive navigation | Điều hướng rõ ràng, bố cục nhất quán trên toàn app | ⚪ Chưa bắt đầu |
+| 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language | Các màn hình chính đồng bộ, gọn, dễ dùng, không dư UI gây nặng | ⚪ Chưa bắt đầu |
+| 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Moderation/Stats | Admin dashboard chuyên nghiệp, thao tác nhanh, dữ liệu dễ scan | ⚪ Chưa bắt đầu |
+| 10.5 | `feature/p10-fe-accessibility-polish` | Kiểm tra accessibility cơ bản: focus state, contrast, keyboard navigation, empty/loading/error states | Giao diện dễ dùng hơn, ít lỗi trải nghiệm, sẵn sàng polish/performance | ⚪ Chưa bắt đầu |
+
+**Thứ tự thực hiện:** 10.1 → 10.2 → 10.3 → 10.4 → 10.5 → merge `develop`
+
+**🎯 Phase 10 hoàn thành — Hệ thống có thể:**
+- Có giao diện FE mới thống nhất trên toàn bộ app
+- Các module Learn/Exam/Battle/Chat/Social/Leaderboard/Profile dùng chung design system
+- Admin Panel có giao diện quản trị rõ ràng, phù hợp thao tác lặp lại
+- FE sẵn sàng bước polish responsive/performance ở phase sau
+
+---
+
+### Phase 11 — UI/UX Polish (Tuần 22–23) ⚪ 0%
+
+| # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
+|---|---|---|---|---|
+| 11.1 | `feature/p11-responsive` | Responsive design toàn bộ pages, mobile-friendly breakpoints | Giao diện dùng được trên mobile/tablet, không bị overflow | ⚪ Chưa bắt đầu |
+| 11.2 | `feature/p11-darkmode` | Dark mode toggle (Tailwind `dark:`), persist localStorage | Chuyển dark/light mode 1 click, nhớ lựa chọn sau khi reload | ⚪ Chưa bắt đầu |
+| 11.3 | `feature/p11-ux-enhancement` | Loading skeleton, Error boundary + fallback UI, Code splitting (React.lazy + Suspense) | Không còn blank screen khi load, lỗi hiển thị thân thiện thay vì crash | ⚪ Chưa bắt đầu |
+| 11.4 | `feature/p11-performance` | Lighthouse audit, tối ưu bundle size, lazy load images, đạt score > 80 | Lighthouse Performance > 80, bundle < 500KB gzipped | ⚪ Chưa bắt đầu |
+
+**Thứ tự thực hiện:** 11.1 || 11.2 || 11.3 → 11.4 → merge `develop`
+
+**🎯 Phase 11 hoàn thành — Hệ thống có thể:**
 - Dùng tốt trên mọi thiết bị (desktop/tablet/mobile)
 - Chuyển dark/light mode
 - Tải nhanh, Lighthouse score > 80
@@ -228,18 +270,18 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 10 — Testing & QA (Tuần 20–21) ⚪ 0%
+### Phase 12 — Testing & QA (Tuần 24–25) ⚪ 0%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 10.1 | `feature/p10-backend-coverage` | Bổ sung unit/integration tests để đạt JaCoCo > 80%, fix các gap | JaCoCo report ≥ 80% line coverage, không còn uncovered critical path | ⚪ Chưa bắt đầu |
-| 10.2 | `feature/p10-e2e-playwright` | E2E Playwright: happy paths cho 4 module (Learn, Exam, Battle, Auth, Chat) | 5 happy path test chạy xanh hoàn toàn trên CI | ⚪ Chưa bắt đầu |
-| 10.3 | `feature/p10-load-test` | Load test k6/Artillery: 20 users cùng vào 1 phòng Battle, 100 concurrent users | P95 latency < 500ms, không crash dưới 100 concurrent users | ⚪ Chưa bắt đầu |
-| 10.4 | `feature/p10-security-audit` | OWASP Top 10 checklist, fix các bugs từ QA, security hardening | Không còn lỗ hổng CRITICAL/HIGH theo OWASP checklist | ⚪ Chưa bắt đầu |
+| 12.1 | `feature/p12-backend-coverage` | Bổ sung unit/integration tests để đạt JaCoCo > 80%, fix các gap | JaCoCo report ≥ 80% line coverage, không còn uncovered critical path | ⚪ Chưa bắt đầu |
+| 12.2 | `feature/p12-e2e-playwright` | E2E Playwright: happy paths cho 4 module (Learn, Exam, Battle, Auth, Chat) | 5 happy path test chạy xanh hoàn toàn trên CI | ⚪ Chưa bắt đầu |
+| 12.3 | `feature/p12-load-test` | Load test k6/Artillery: 20 users cùng vào 1 phòng Battle, 100 concurrent users | P95 latency < 500ms, không crash dưới 100 concurrent users | ⚪ Chưa bắt đầu |
+| 12.4 | `feature/p12-security-audit` | OWASP Top 10 checklist, fix các bugs từ QA, security hardening | Không còn lỗ hổng CRITICAL/HIGH theo OWASP checklist | ⚪ Chưa bắt đầu |
 
-**Thứ tự thực hiện:** 10.1 || 10.2 || 10.3 → 10.4 → merge `develop`
+**Thứ tự thực hiện:** 12.1 || 12.2 || 12.3 → 12.4 → merge `develop`
 
-**🎯 Phase 10 hoàn thành — Hệ thống có thể:**
+**🎯 Phase 12 hoàn thành — Hệ thống có thể:**
 - Vượt 80% test coverage backend
 - E2E test tự động chạy xanh trên CI
 - Chịu tải 100 concurrent users không crash
@@ -247,18 +289,18 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 11 — Deploy & Documentation (Tuần 22) ⚪ 0%
+### Phase 13 — Deploy & Documentation (Tuần 26) ⚪ 0%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 11.1 | `feature/p11-docker-prod` | `docker-compose.prod.yml`, Nginx config (`infrastructure/nginx/nginx.conf`) | Stack production chạy được bằng 1 lệnh, Nginx reverse proxy đúng | ⚪ Chưa bắt đầu |
-| 11.2 | `feature/p11-ci-cd-deploy` | GitHub Actions deploy to AWS/DigitalOcean, domain + HTTPS (Let's Encrypt) | Push lên `main` → tự động deploy, HTTPS bật, không có HTTP exposed | ⚪ Chưa bắt đầu |
-| 11.3 | `feature/p11-monitoring` | Spring Actuator + Prometheus + Grafana dashboard, alerting | Dashboard Grafana hiển thị CPU/RAM/request rate, alert khi có sự cố | ⚪ Chưa bắt đầu |
-| 11.4 | `feature/p11-docs-final` | README.md hoàn chỉnh, API docs public (Swagger), go-live checklist | README đủ để người mới setup được, Swagger public truy cập được | ⚪ Chưa bắt đầu |
+| 13.1 | `feature/p13-docker-prod` | `docker-compose.prod.yml`, Nginx config (`infrastructure/nginx/nginx.conf`) | Stack production chạy được bằng 1 lệnh, Nginx reverse proxy đúng | ⚪ Chưa bắt đầu |
+| 13.2 | `feature/p13-ci-cd-deploy` | GitHub Actions deploy to AWS/DigitalOcean, domain + HTTPS (Let's Encrypt) | Push lên `main` → tự động deploy, HTTPS bật, không có HTTP exposed | ⚪ Chưa bắt đầu |
+| 13.3 | `feature/p13-monitoring` | Spring Actuator + Prometheus + Grafana dashboard, alerting | Dashboard Grafana hiển thị CPU/RAM/request rate, alert khi có sự cố | ⚪ Chưa bắt đầu |
+| 13.4 | `feature/p13-docs-final` | README.md hoàn chỉnh, API docs public (Swagger), go-live checklist | README đủ để người mới setup được, Swagger public truy cập được | ⚪ Chưa bắt đầu |
 
-**Thứ tự thực hiện:** 11.1 → 11.2 → 11.3 → 11.4 → merge `develop` → merge `main` + tag `v1.0.0`
+**Thứ tự thực hiện:** 13.1 → 13.2 → 13.3 → 13.4 → merge `develop` → merge `main` + tag `v1.0.0`
 
-**🎯 Phase 11 hoàn thành — Hệ thống có thể:**
+**🎯 Phase 13 hoàn thành — Hệ thống có thể:**
 - Deploy production tự động qua CI/CD khi push lên `main`
 - Truy cập qua domain thật với HTTPS
 - Theo dõi health/performance qua Grafana
@@ -288,7 +330,7 @@ git branch -d feature/<phase>-<feature-name>
 
 ## 6. Checklist trước khi launch
 
-- [ ] Cả 11 phase hoàn thành
+- [ ] Cả 13 phase hoàn thành
 - [ ] Test coverage > 80% (backend) + E2E pass
 - [ ] Load test: 100 concurrent users không crash
 - [ ] Security audit: không có lỗ hổng CRITICAL/HIGH
