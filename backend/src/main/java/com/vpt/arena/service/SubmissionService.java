@@ -51,6 +51,7 @@ public class SubmissionService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final LeaderboardService leaderboardService;
+    private final UserStatsService userStatsService;
 
     @Value("${judge0.url}")
     private String judge0Url;
@@ -134,6 +135,10 @@ public class SubmissionService {
         submission.setErrorOutput(errorOutput);
         Submission saved = submissionRepository.save(submission);
         leaderboardService.evictExamLeaderboard(saved.getProblem().getId(), saved.getLanguage());
+        if (saved.getResult() == JudgeResult.AC) {
+            leaderboardService.evictGlobalLeaderboard(saved.getLanguage());
+            userStatsService.refreshAfterAccepted(saved.getUser().getId());
+        }
         return toDto(saved);
     }
 

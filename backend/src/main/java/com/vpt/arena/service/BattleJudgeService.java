@@ -67,6 +67,8 @@ public class BattleJudgeService {
     private final ObjectMapper objectMapper;
     private final BattleRealtimeNotifier battleRealtimeNotifier;
     private final TransactionTemplate transactionTemplate;
+    private final LeaderboardService leaderboardService;
+    private final UserStatsService userStatsService;
 
     @Value("${judge0.url}")
     private String judge0Url;
@@ -166,6 +168,10 @@ public class BattleJudgeService {
         submission.setPoints(points);
         BattleSubmission saved = battleSubmissionRepository.save(submission);
         BattleSubmissionDto dto = toDto(saved);
+        if (saved.getResult() == JudgeResult.AC) {
+            leaderboardService.evictGlobalLeaderboard(saved.getLanguage());
+            userStatsService.refreshAfterAccepted(saved.getUser().getId());
+        }
         battleRealtimeNotifier.publishSubmissionResult(dto);
         battleRealtimeNotifier.publishLeaderboard(saved.getRoom().getId(), calculateLeaderboard(saved.getRoom().getId()));
         return dto;

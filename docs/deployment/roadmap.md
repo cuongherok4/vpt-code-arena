@@ -13,7 +13,7 @@
 | 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
-| 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
+| 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟡 Đang thực hiện | 50% |
 | 9 | 18–19 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 10 | 20–21 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
 | 11 | 22 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
@@ -193,11 +193,11 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 8 — Leaderboard & Analytics (Tuần 16–17) ⚪ 0%
+### Phase 8 — Leaderboard & Analytics (Tuần 16–17) 🟡 50%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 8.1 | `feature/p8-leaderboard-backend` | `LeaderboardController` (GET /leaderboard/global, filter type/language), update `UserStats` async sau AC, Redis cache TTL 5 phút | Leaderboard global trả về < 100ms, tự cập nhật sau mỗi AC submission | ⚪ Chưa bắt đầu |
+| 8.1 | `feature/p8-leaderboard-backend` | `LeaderboardController` (GET /leaderboard/global, filter type/language), update `UserStats` async sau AC, Redis cache TTL 5 phút | Leaderboard global cache 5 phút, filter language/type, evict cache và refresh stats sau AC | 🟢 Done |
 | 8.2 | `feature/p8-leaderboard-frontend` | `LeaderboardPage` với filter tabs, `StatsCard`, `ActivityCalendar` trong ProfilePage | User thấy bảng xếp hạng, filter theo ngôn ngữ/loại, thấy calendar hoạt động của bản thân | ⚪ Chưa bắt đầu |
 
 **Thứ tự thực hiện:** 8.1 → 8.2 → merge `develop`
