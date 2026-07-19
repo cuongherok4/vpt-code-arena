@@ -77,6 +77,47 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         Pageable pageable
     );
 
+    @Query(value = """
+        SELECT
+            u.id AS userId,
+            u.public_id AS publicId,
+            u.name AS userName,
+            COALESCE(SUM(best.points), 0) AS totalPoints,
+            COUNT(best.item_key) AS totalAccepted,
+            MAX(best.last_accepted_at) AS lastAcceptedAt
+        FROM users u
+        JOIN (
+            SELECT
+                s.user_id,
+                'exam:' || s.problem_id::text AS item_key,
+                MAX(s.points) AS points,
+                MIN(s.submitted_at) AS last_accepted_at
+            FROM submissions s
+            WHERE CAST(:type AS text) IN ('all', 'exam')
+              AND s.result = 'AC'
+              AND (:language IS NULL OR s.language = :language)
+            GROUP BY s.user_id, s.problem_id
+            UNION ALL
+            SELECT
+                bs.user_id,
+                'battle:' || bs.room_id::text || ':' || bs.problem_id::text AS item_key,
+                MAX(bs.points) AS points,
+                MIN(bs.submitted_at) AS last_accepted_at
+            FROM battle_submissions bs
+            WHERE CAST(:type AS text) IN ('all', 'battle')
+              AND bs.result = 'AC'
+              AND (:language IS NULL OR bs.language = :language)
+            GROUP BY bs.user_id, bs.room_id, bs.problem_id
+        ) best ON best.user_id = u.id
+        GROUP BY u.id, u.public_id, u.name
+        ORDER BY totalPoints DESC, totalAccepted DESC, lastAcceptedAt ASC
+        """, nativeQuery = true)
+    List<GlobalLeaderboardRow> findGlobalLeaderboardRows(
+        @Param("type") String type,
+        @Param("language") String language,
+        Pageable pageable
+    );
+
     interface ExamLeaderboardRow {
         UUID getUserId();
         String getUserName();
@@ -85,5 +126,14 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         Integer getMemoryUsed();
         OffsetDateTime getSubmittedAt();
         Long getAcceptedCount();
+    }
+
+    interface GlobalLeaderboardRow {
+        UUID getUserId();
+        String getPublicId();
+        String getUserName();
+        Integer getTotalPoints();
+        Long getTotalAccepted();
+        OffsetDateTime getLastAcceptedAt();
     }
 }

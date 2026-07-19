@@ -579,18 +579,23 @@ Xóa bạn.
 ## Leaderboard
 
 ### GET /leaderboard/global
-Bảng xếp hạng toàn hệ thống.
+Bảng xếp hạng toàn hệ thống, cache Redis 5 phút.
 ```
-Query params: type=EXAM|BATTLE, lang=java, page=0, size=50
+Query params: type=all|exam|battle, language=all|java|python|c, limit=50
 ```
 ```json
 // Response 200
-{
-  "content": [
-    { "rank": 1, "userId": "uuid", "name": "...", "avatar": "...", "totalPoints": 5000 }
-  ],
-  "myRank": 15
-}
+[
+  {
+    "rank": 1,
+    "userId": "uuid",
+    "publicId": "1000000001",
+    "userName": "alice@example.com",
+    "totalPoints": 500,
+    "totalAccepted": 3,
+    "lastAcceptedAt": "2026-07-20T02:30:00Z"
+  }
+]
 ```
 
 ---

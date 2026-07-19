@@ -2,6 +2,7 @@ package com.vpt.arena.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vpt.arena.dto.exam.ExamLeaderboardEntryDto;
+import com.vpt.arena.dto.leaderboard.GlobalLeaderboardEntryDto;
 import com.vpt.arena.entity.enums.JudgeResult;
 import com.vpt.arena.repository.ProblemRepository;
 import com.vpt.arena.repository.SubmissionRepository;
@@ -111,6 +112,41 @@ class LeaderboardServiceTest {
         verify(stringRedisTemplate).delete("exam:leaderboard:" + problemId + ":python");
     }
 
+    @Test
+    @DisplayName("Global leaderboard đọc từ cache khi có")
+    void shouldReturnCachedGlobalLeaderboard() throws Exception {
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("leaderboard:global:all:all")).thenReturn("""
+            [{"rank":1,"userId":"11111111-1111-4111-8111-111111111111","publicId":"1000000001","userName":"Alice","totalPoints":300,"totalAccepted":2,"lastAcceptedAt":null}]
+            """);
+
+        List<GlobalLeaderboardEntryDto> result = leaderboardService.getGlobalLeaderboard("all", null, 50);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getPublicId()).isEqualTo("1000000001");
+        assertThat(result.getFirst().getTotalPoints()).isEqualTo(300);
+        verify(submissionRepository, never()).findGlobalLeaderboardRows(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Global leaderboard query DB và cache khi miss")
+    void shouldQueryGlobalLeaderboardWhenCacheMiss() {
+        UUID userId = UUID.randomUUID();
+        OffsetDateTime lastAcceptedAt = OffsetDateTime.now();
+        SubmissionRepository.GlobalLeaderboardRow row = globalRow(userId, "1000000002", "Bob", 500, 3L, lastAcceptedAt);
+
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("leaderboard:global:exam:python")).thenReturn(null);
+        when(submissionRepository.findGlobalLeaderboardRows(eq("exam"), eq("python"), any(Pageable.class))).thenReturn(List.of(row));
+
+        List<GlobalLeaderboardEntryDto> result = leaderboardService.getGlobalLeaderboard("exam", "python", 10);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getRank()).isEqualTo(1);
+        assertThat(result.getFirst().getTotalAccepted()).isEqualTo(3);
+        verify(valueOperations).set(eq("leaderboard:global:exam:python"), anyString(), any(java.time.Duration.class));
+    }
+
     private SubmissionRepository.ExamLeaderboardRow row(
             UUID userId,
             String userName,
@@ -127,6 +163,23 @@ class LeaderboardServiceTest {
             @Override public Integer getMemoryUsed() { return memoryUsed; }
             @Override public OffsetDateTime getSubmittedAt() { return submittedAt; }
             @Override public Long getAcceptedCount() { return acceptedCount; }
+        };
+    }
+
+    private SubmissionRepository.GlobalLeaderboardRow globalRow(
+            UUID userId,
+            String publicId,
+            String userName,
+            Integer totalPoints,
+            Long totalAccepted,
+            OffsetDateTime lastAcceptedAt) {
+        return new SubmissionRepository.GlobalLeaderboardRow() {
+            @Override public UUID getUserId() { return userId; }
+            @Override public String getPublicId() { return publicId; }
+            @Override public String getUserName() { return userName; }
+            @Override public Integer getTotalPoints() { return totalPoints; }
+            @Override public Long getTotalAccepted() { return totalAccepted; }
+            @Override public OffsetDateTime getLastAcceptedAt() { return lastAcceptedAt; }
         };
     }
 }
