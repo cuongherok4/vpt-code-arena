@@ -14,7 +14,7 @@
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
 | 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 9 | 18–19 | Admin Panel & Moderation | Dashboard admin, quản lý user/problem/chat/stats | 🟡 Đang thực hiện | 20% |
+| 9 | 18–19 | Admin Panel | Dashboard admin, quản lý user/problem/stats | 🟡 Đang thực hiện | 60% |
 | 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | ⚪ Chưa bắt đầu | 0% |
 | 11 | 22–23 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 12 | 24–25 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
@@ -162,7 +162,7 @@ git branch -d feature/<phase>-<feature-name>
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 6.1 | `feature/p6-chat-backend` | `ChatController` (history global/room/dm/conversations), lưu tin nhắn từ WS pub/sub, API report/delete/mute | API lấy lịch sử chat hoạt động, tin nhắn được lưu DB, có thể report/xóa | 🟢 Done |
+| 6.1 | `feature/p6-chat-backend` | `ChatController` (history global/room/dm/conversations), lưu tin nhắn từ WS pub/sub | API lấy lịch sử chat hoạt động, tin nhắn được lưu DB | 🟢 Done |
 | 6.2 | `feature/p6-chat-websocket` | `/chat` namespace, handlers (global/room/dm send), online status Redis Set, broadcast `user:online/offline` | Nhắn tin real-time không delay, online indicator hiển thị đúng | 🟢 Done |
 | 6.3 | `feature/p6-chat-frontend` | `GlobalChatPanel`, `RoomChatPanel`, `DMChatWindow`, `DMConversationList`, `OnlineIndicator`, `useChatSocket` hook | UI chat đầy đủ: global/phòng/DM, biết ai đang online | 🟢 Done |
 
@@ -211,22 +211,22 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 9 — Admin Panel & Moderation (Tuần 18–19) 🟡 40%
+### Phase 9 — Admin Panel (Tuần 18–19) 🟡 60%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 9.1 | `feature/p9-admin-backend-users` | `AdminController`, API `GET /admin/users`, `PUT /admin/users/{id}/ban`, xóa account nếu cần, chỉ role ADMIN | Admin xem danh sách user, tìm kiếm, ban/unban user, endpoint được bảo vệ theo role | 🟢 Done |
 | 9.2 | `feature/p9-admin-backend-problems` | API CRUD đề bài: tạo/sửa/xóa/publish problem, quản lý test cases, độ khó, chủ đề | Admin quản lý ngân hàng đề thi trực tiếp từ backend | 🟢 Done |
-| 9.3 | `feature/p9-admin-backend-moderation` | API moderation: xóa message, mute/ban spam, xem/review report, log hoạt động | Admin kiểm duyệt chat và xử lý report | ⚪ Chưa bắt đầu |
+| 9.3 | `feature/p9-admin-no-chat-moderation` | Bỏ phạm vi admin moderation cho chat; không xây API xóa message/mute/report review | Chat được giữ tự do, admin panel không mang thêm luồng kiểm duyệt gây nặng hệ thống | 🟢 Done |
 | 9.4 | `feature/p9-admin-backend-stats` | API `GET /admin/stats`: total users, active users, total problems, submissions, battle rooms | Admin xem thống kê hệ thống tổng quan | ⚪ Chưa bắt đầu |
-| 9.5 | `feature/p9-admin-frontend` | `/admin`, `AdminPage` tabs Users/Problems/Moderation/Stats, `UserManagementTable`, `ProblemForm`, `ModerationFeed`, `SystemStatsCards` | Admin có dashboard đầy đủ, chỉ role ADMIN truy cập được | ⚪ Chưa bắt đầu |
+| 9.5 | `feature/p9-admin-frontend` | `/admin`, `AdminPage` tabs Users/Problems/Stats, `UserManagementTable`, `ProblemForm`, `SystemStatsCards` | Admin có dashboard gọn, tập trung quản user/problem/stats, chỉ role ADMIN truy cập được | ⚪ Chưa bắt đầu |
 
 **Thứ tự thực hiện:** 9.1 → 9.2 → 9.3 → 9.4 → 9.5 → merge `develop`
 
 **🎯 Phase 9 hoàn thành — Hệ thống có thể:**
 - Quản lý user: xem danh sách, tìm kiếm, ban/unban, xóa account nếu cần
 - Quản lý đề bài và test cases từ giao diện admin
-- Kiểm duyệt chat: xóa message, mute/ban spam, xử lý report
+- Không có admin moderation cho chat; giữ chat tự do, tránh thêm luồng kiểm duyệt không cần thiết
 - Xem thống kê hệ thống: users, submissions, problems, active users, battle rooms
 
 ---
@@ -238,7 +238,7 @@ git branch -d feature/<phase>-<feature-name>
 | 10.1 | `feature/p10-fe-design-system` | Chuẩn hóa design tokens, màu, typography, spacing, button/input/table/card/modal states | FE có hệ design thống nhất, dễ tái sử dụng, không lệch style giữa các module | ⚪ Chưa bắt đầu |
 | 10.2 | `feature/p10-fe-layout-navigation` | Làm lại layout tổng thể, navbar/sidebar, page shell, responsive navigation | Điều hướng rõ ràng, bố cục nhất quán trên toàn app | ⚪ Chưa bắt đầu |
 | 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language | Các màn hình chính đồng bộ, gọn, dễ dùng, không dư UI gây nặng | ⚪ Chưa bắt đầu |
-| 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Moderation/Stats | Admin dashboard chuyên nghiệp, thao tác nhanh, dữ liệu dễ scan | ⚪ Chưa bắt đầu |
+| 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Stats | Admin dashboard chuyên nghiệp, thao tác nhanh, dữ liệu dễ scan | ⚪ Chưa bắt đầu |
 | 10.5 | `feature/p10-fe-accessibility-polish` | Kiểm tra accessibility cơ bản: focus state, contrast, keyboard navigation, empty/loading/error states | Giao diện dễ dùng hơn, ít lỗi trải nghiệm, sẵn sàng polish/performance | ⚪ Chưa bắt đầu |
 
 **Thứ tự thực hiện:** 10.1 → 10.2 → 10.3 → 10.4 → 10.5 → merge `develop`
