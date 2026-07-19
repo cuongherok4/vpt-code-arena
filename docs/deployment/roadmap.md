@@ -211,12 +211,12 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 9 — Admin Panel & Moderation (Tuần 18–19) ⚪ 0%
+### Phase 9 — Admin Panel & Moderation (Tuần 18–19) 🟡 40%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 9.1 | `feature/p9-admin-backend-users` | `AdminController`, API `GET /admin/users`, `PUT /admin/users/{id}/ban`, xóa account nếu cần, chỉ role ADMIN | Admin xem danh sách user, tìm kiếm, ban/unban user, endpoint được bảo vệ theo role | 🟢 Done |
-| 9.2 | `feature/p9-admin-backend-problems` | API CRUD đề bài: tạo/sửa/xóa/publish problem, quản lý test cases, độ khó, chủ đề | Admin quản lý ngân hàng đề thi trực tiếp từ backend | ⚪ Chưa bắt đầu |
+| 9.2 | `feature/p9-admin-backend-problems` | API CRUD đề bài: tạo/sửa/xóa/publish problem, quản lý test cases, độ khó, chủ đề | Admin quản lý ngân hàng đề thi trực tiếp từ backend | 🟢 Done |
 | 9.3 | `feature/p9-admin-backend-moderation` | API moderation: xóa message, mute/ban spam, xem/review report, log hoạt động | Admin kiểm duyệt chat và xử lý report | ⚪ Chưa bắt đầu |
 | 9.4 | `feature/p9-admin-backend-stats` | API `GET /admin/stats`: total users, active users, total problems, submissions, battle rooms | Admin xem thống kê hệ thống tổng quan | ⚪ Chưa bắt đầu |
 | 9.5 | `feature/p9-admin-frontend` | `/admin`, `AdminPage` tabs Users/Problems/Moderation/Stats, `UserManagementTable`, `ProblemForm`, `ModerationFeed`, `SystemStatsCards` | Admin có dashboard đầy đủ, chỉ role ADMIN truy cập được | ⚪ Chưa bắt đầu |

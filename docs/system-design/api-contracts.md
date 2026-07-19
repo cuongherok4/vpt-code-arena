@@ -635,7 +635,39 @@ Ban/unban user.
 { "banned": true, "reason": "Spam" }
 ```
 
-### GET /admin/problems
+### GET /admin/problems?page=0&size=20&search=sum&difficulty=EASY&published=true
+Danh sách problem cho admin, bao gồm cả bài chưa publish.
+```json
+// Response 200
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Two Sum",
+      "description": "# Markdown...",
+      "difficulty": "EASY",
+      "topic": "Array",
+      "timeLimitMs": 2000,
+      "memoryLimitKb": 256000,
+      "testCases": [
+        { "input": "1 2", "expectedOutput": "3", "isHidden": false }
+      ],
+      "solutionCode": "print(3)",
+      "published": true,
+      "createdAt": "2026-07-20T03:30:00Z",
+      "updatedAt": "2026-07-20T03:30:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 1,
+  "totalPages": 1
+}
+```
+
+### GET /admin/problems/:id
+Chi tiết problem cho admin.
+
 ### POST /admin/problems
 Tạo bài tập mới.
 ```json
@@ -648,13 +680,18 @@ Tạo bài tập mới.
   "testCases": [
     { "input": "1 2", "expectedOutput": "3", "isHidden": false }
   ],
-  "timeLimit": 2000,
-  "memoryLimit": 256
+  "timeLimitMs": 2000,
+  "memoryLimitKb": 256000,
+  "solutionCode": "print(3)",
+  "published": true
 }
 ```
 
 ### PUT /admin/problems/:id
+Sửa toàn bộ thông tin problem theo request giống `POST /admin/problems`.
+
 ### DELETE /admin/problems/:id
+Xóa problem. Nếu problem đã có dữ liệu liên quan như submissions/battle thì trả `409 Conflict`.
 
 ### GET /admin/stats
 Thống kê hệ thống.
