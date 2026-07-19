@@ -701,6 +701,7 @@ Thống kê hệ thống.
   "totalUsers": 1500,
   "activeUsersToday": 120,
   "totalProblems": 200,
+  "publishedProblems": 180,
   "totalSubmissions": 50000,
   "totalBattleRooms": 300
 }

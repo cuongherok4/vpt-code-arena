@@ -20,6 +20,16 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
 
     List<Submission> findTop20ByUserIdAndProblemIdOrderBySubmittedAtDesc(UUID userId, UUID problemId);
 
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM (
+            SELECT user_id FROM submissions WHERE submitted_at >= :start AND submitted_at < :end
+            UNION
+            SELECT user_id FROM battle_submissions WHERE submitted_at >= :start AND submitted_at < :end
+        ) active_users
+        """, nativeQuery = true)
+    long countActiveUsersBetween(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
+
     @Query("""
         SELECT s
         FROM Submission s
