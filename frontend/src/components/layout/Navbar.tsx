@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User, UsersRound, X } from 'lucide-react';
+import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User, UsersRound, X, Medal } from 'lucide-react';
 import { battleApi } from '@/api/battle.api';
 import { friendsApi } from '@/api/friends.api';
 import { useBattleInviteSocket, type BattleInviteEvent } from '@/hooks/useBattleInviteSocket';
@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { to: '/battle', icon: Trophy, label: 'Thách đấu' },
   { to: '/chat', icon: MessageSquare, label: 'Cộng đồng' },
   { to: '/friends', icon: UsersRound, label: 'Bạn bè' },
+  { to: '/leaderboard', icon: Medal, label: 'BXH' },
 ];
 
 export const Navbar = () => {
