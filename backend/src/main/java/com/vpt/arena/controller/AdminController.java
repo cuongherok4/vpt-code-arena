@@ -4,11 +4,13 @@ import com.vpt.arena.dto.admin.AdminBanUserRequest;
 import com.vpt.arena.dto.admin.AdminProblemDto;
 import com.vpt.arena.dto.admin.AdminProblemListResponse;
 import com.vpt.arena.dto.admin.AdminProblemRequest;
+import com.vpt.arena.dto.admin.AdminStatsDto;
 import com.vpt.arena.dto.admin.AdminUserDto;
 import com.vpt.arena.dto.admin.AdminUserListResponse;
 import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.security.CustomUserDetails;
 import com.vpt.arena.service.AdminProblemService;
+import com.vpt.arena.service.AdminStatsService;
 import com.vpt.arena.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,6 +38,7 @@ import java.util.UUID;
 public class AdminController {
     private final AdminUserService adminUserService;
     private final AdminProblemService adminProblemService;
+    private final AdminStatsService adminStatsService;
 
     @GetMapping("/users")
     @Operation(summary = "List users for admin")
@@ -101,5 +104,11 @@ public class AdminController {
             @AuthenticationPrincipal CustomUserDetails principal,
             @PathVariable UUID problemId) {
         adminProblemService.deleteProblem(principal, problemId);
+    }
+
+    @GetMapping("/stats")
+    @Operation(summary = "Get admin system stats")
+    public AdminStatsDto stats(@AuthenticationPrincipal CustomUserDetails principal) {
+        return adminStatsService.overview(principal);
     }
 }

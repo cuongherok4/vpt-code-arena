@@ -8,6 +8,7 @@ import com.vpt.arena.dto.admin.AdminProblemDto;
 import com.vpt.arena.dto.admin.AdminProblemListResponse;
 import com.vpt.arena.dto.admin.AdminProblemRequest;
 import com.vpt.arena.dto.admin.AdminProblemTestCaseDto;
+import com.vpt.arena.dto.admin.AdminStatsDto;
 import com.vpt.arena.dto.admin.AdminUserDto;
 import com.vpt.arena.dto.admin.AdminUserListResponse;
 import com.vpt.arena.entity.User;
@@ -15,6 +16,7 @@ import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.entity.enums.Role;
 import com.vpt.arena.security.CustomUserDetails;
 import com.vpt.arena.service.AdminProblemService;
+import com.vpt.arena.service.AdminStatsService;
 import com.vpt.arena.service.AdminUserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,6 +55,7 @@ class AdminControllerTest {
 
     @MockitoBean AdminUserService adminUserService;
     @MockitoBean AdminProblemService adminProblemService;
+    @MockitoBean AdminStatsService adminStatsService;
 
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID PROBLEM_ID = UUID.randomUUID();
@@ -133,6 +136,26 @@ class AdminControllerTest {
         mockMvc.perform(delete("/api/v1/admin/problems/" + PROBLEM_ID)
                 .with(authenticated(Role.ADMIN)))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("GET /admin/stats trả thống kê tổng quan")
+    void shouldGetStats() throws Exception {
+        when(adminStatsService.overview(any())).thenReturn(AdminStatsDto.builder()
+            .totalUsers(10)
+            .activeUsersToday(3)
+            .totalProblems(20)
+            .publishedProblems(15)
+            .totalSubmissions(140)
+            .totalBattleRooms(7)
+            .build());
+
+        mockMvc.perform(get("/api/v1/admin/stats").with(authenticated(Role.ADMIN)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalUsers").value(10))
+            .andExpect(jsonPath("$.activeUsersToday").value(3))
+            .andExpect(jsonPath("$.publishedProblems").value(15))
+            .andExpect(jsonPath("$.totalSubmissions").value(140));
     }
 
     private AdminUserDto adminUser(boolean banned) {
