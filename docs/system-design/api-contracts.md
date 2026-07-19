@@ -604,6 +604,29 @@ Query params: type=all|exam, language=all|java|python|c, limit=50
 
 ### GET /admin/users?page=0&size=20&search=email
 Danh sách users.
+```json
+// Response 200
+{
+  "items": [
+    {
+      "id": "uuid",
+      "publicId": "1000000001",
+      "email": "alice@example.com",
+      "name": "Alice",
+      "role": "USER",
+      "emailVerified": true,
+      "banned": false,
+      "oauthProvider": null,
+      "createdAt": "2026-07-20T03:30:00Z",
+      "updatedAt": "2026-07-20T03:30:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 1,
+  "totalPages": 1
+}
+```
 
 ### PUT /admin/users/:id/ban
 Ban/unban user.
