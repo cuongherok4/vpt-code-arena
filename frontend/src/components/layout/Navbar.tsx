@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User, UsersRound, X, Medal } from 'lucide-react';
+import { Code2, Trophy, BookOpen, MessageSquare, LogIn, User, UsersRound, X, Medal, Shield } from 'lucide-react';
 import { battleApi } from '@/api/battle.api';
 import { friendsApi } from '@/api/friends.api';
 import { useBattleInviteSocket, type BattleInviteEvent } from '@/hooks/useBattleInviteSocket';
@@ -81,7 +81,7 @@ export const Navbar = () => {
         </Link>
 
         <div className="flex items-center space-x-1 text-sm font-medium">
-          {NAV_LINKS.map(({ to, icon: Icon, label }) => {
+          {[...NAV_LINKS, ...(user?.role === 'ADMIN' ? [{ to: '/admin', icon: Shield, label: 'Admin' }] : [])].map(({ to, icon: Icon, label }) => {
             const active = pathname.startsWith(to);
             return (
               <Link

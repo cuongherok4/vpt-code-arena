@@ -7,6 +7,16 @@
   }
 }
 
+@layer components {
+  .admin-field {
+    @apply w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50;
+  }
+
+  .icon-action {
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-slate-300 hover:bg-white/5 hover:text-white disabled:opacity-50;
+  }
+}
+
 /* Prose overrides for dark theme content rendering */
 .prose-invert h1, .prose-invert h2, .prose-invert h3 {
   color: #f1f5f9;
