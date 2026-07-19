@@ -1,6 +1,7 @@
 package com.vpt.arena.repository;
 
 import com.vpt.arena.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,17 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByPublicId(String publicId);
     boolean existsByEmail(String email);
     boolean existsByPublicId(String publicId);
+
+    @Query("""
+        SELECT u
+        FROM User u
+        WHERE :search IS NULL
+          OR u.publicId = :search
+          OR LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%'))
+          OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))
+        ORDER BY u.createdAt DESC
+        """)
+    Page<User> searchForAdmin(@Param("search") String search, Pageable pageable);
 
     @Query("""
         SELECT u

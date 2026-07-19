@@ -14,7 +14,7 @@
 | 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
 | 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 9 | 18–19 | Admin Panel & Moderation | Dashboard admin, quản lý user/problem/chat/stats | ⚪ Chưa bắt đầu | 0% |
+| 9 | 18–19 | Admin Panel & Moderation | Dashboard admin, quản lý user/problem/chat/stats | 🟡 Đang thực hiện | 20% |
 | 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | ⚪ Chưa bắt đầu | 0% |
 | 11 | 22–23 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 12 | 24–25 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
@@ -215,7 +215,7 @@ git branch -d feature/<phase>-<feature-name>
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 9.1 | `feature/p9-admin-backend-users` | `AdminController`, API `GET /admin/users`, `PUT /admin/users/{id}/ban`, xóa account nếu cần, chỉ role ADMIN | Admin xem danh sách user, tìm kiếm, ban/unban user, endpoint được bảo vệ theo role | ⚪ Chưa bắt đầu |
+| 9.1 | `feature/p9-admin-backend-users` | `AdminController`, API `GET /admin/users`, `PUT /admin/users/{id}/ban`, xóa account nếu cần, chỉ role ADMIN | Admin xem danh sách user, tìm kiếm, ban/unban user, endpoint được bảo vệ theo role | 🟢 Done |
 | 9.2 | `feature/p9-admin-backend-problems` | API CRUD đề bài: tạo/sửa/xóa/publish problem, quản lý test cases, độ khó, chủ đề | Admin quản lý ngân hàng đề thi trực tiếp từ backend | ⚪ Chưa bắt đầu |
 | 9.3 | `feature/p9-admin-backend-moderation` | API moderation: xóa message, mute/ban spam, xem/review report, log hoạt động | Admin kiểm duyệt chat và xử lý report | ⚪ Chưa bắt đầu |
 | 9.4 | `feature/p9-admin-backend-stats` | API `GET /admin/stats`: total users, active users, total problems, submissions, battle rooms | Admin xem thống kê hệ thống tổng quan | ⚪ Chưa bắt đầu |
