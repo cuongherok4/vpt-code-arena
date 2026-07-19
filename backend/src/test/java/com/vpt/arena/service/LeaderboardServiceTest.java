@@ -125,7 +125,7 @@ class LeaderboardServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getPublicId()).isEqualTo("1000000001");
         assertThat(result.getFirst().getTotalPoints()).isEqualTo(300);
-        verify(submissionRepository, never()).findGlobalLeaderboardRows(any(), any(), any());
+        verify(submissionRepository, never()).findGlobalExamLeaderboardRows(any(), any(), any());
     }
 
     @Test
@@ -137,7 +137,7 @@ class LeaderboardServiceTest {
 
         when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get("leaderboard:global:exam:python")).thenReturn(null);
-        when(submissionRepository.findGlobalLeaderboardRows(eq("exam"), eq("python"), any(Pageable.class))).thenReturn(List.of(row));
+        when(submissionRepository.findGlobalExamLeaderboardRows(eq(JudgeResult.AC), eq("python"), any(Pageable.class))).thenReturn(List.of(row));
 
         List<GlobalLeaderboardEntryDto> result = leaderboardService.getGlobalLeaderboard("exam", "python", 10);
 
@@ -170,14 +170,14 @@ class LeaderboardServiceTest {
             UUID userId,
             String publicId,
             String userName,
-            Integer totalPoints,
+            Number totalPoints,
             Long totalAccepted,
             OffsetDateTime lastAcceptedAt) {
         return new SubmissionRepository.GlobalLeaderboardRow() {
             @Override public UUID getUserId() { return userId; }
             @Override public String getPublicId() { return publicId; }
             @Override public String getUserName() { return userName; }
-            @Override public Integer getTotalPoints() { return totalPoints; }
+            @Override public Number getTotalPoints() { return totalPoints; }
             @Override public Long getTotalAccepted() { return totalAccepted; }
             @Override public OffsetDateTime getLastAcceptedAt() { return lastAcceptedAt; }
         };

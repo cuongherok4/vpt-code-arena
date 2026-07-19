@@ -56,7 +56,6 @@ class BattleJudgeServiceTest {
     @Mock private ObjectMapper objectMapper;
     @Mock private BattleRealtimeNotifier battleRealtimeNotifier;
     @Mock private TransactionTemplate transactionTemplate;
-    @Mock private LeaderboardService leaderboardService;
     @Mock private UserStatsService userStatsService;
 
     @InjectMocks

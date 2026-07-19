@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
-import { CheckCircle2, Edit3, Loader2, LogOut, Save, Shield, User, XCircle } from 'lucide-react';
+import { CheckCircle2, Edit3, Loader2, LogOut, Save, Shield, Target, Trophy, User, XCircle } from 'lucide-react';
 import { userApi, type UserProfile, type UserSubmissionHistory } from '@/api/user.api';
+import { ActivityCalendar } from '@/components/leaderboard/ActivityCalendar';
+import { StatsCard } from '@/components/leaderboard/StatsCard';
 import { useAuthStore } from '@/stores/authStore';
 
 const resultClass: Record<UserSubmissionHistory['result'], string> = {
@@ -104,13 +106,17 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat label="ID" value={profile.publicId ?? '----------'} />
-              <Stat label="Role" value={profile.role} icon={<Shield className="h-4 w-4" />} />
-              <Stat label="Submissions" value={stats.total.toString()} />
-              <Stat label="Accepted" value={stats.accepted.toString()} />
-              <Stat label="Points" value={stats.points.toString()} />
+            <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <StatsCard label="ID" value={profile.publicId ?? '----------'} />
+              <StatsCard label="Role" value={profile.role} icon={<Shield className="h-4 w-4" />} />
+              <StatsCard label="Submissions" value={stats.total.toString()} icon={<Target className="h-4 w-4" />} />
+              <StatsCard label="Accepted" value={stats.accepted.toString()} icon={<CheckCircle2 className="h-4 w-4" />} />
+              <StatsCard label="Points" value={stats.points.toString()} icon={<Trophy className="h-4 w-4" />} />
             </dl>
+
+            <div className="mt-6">
+              <ActivityCalendar history={history} />
+            </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
               <section className="border border-white/10 bg-white/[0.03] p-5">
@@ -201,15 +207,6 @@ export default function ProfilePage() {
         )}
       </section>
     </main>
-  );
-}
-
-function Stat({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
-  return (
-    <div className="border border-white/10 bg-white/[0.03] p-4">
-      <dt className="flex items-center gap-2 text-sm text-slate-400">{icon}{label}</dt>
-      <dd className="mt-1 text-xl font-semibold text-white">{value}</dd>
-    </div>
   );
 }
 

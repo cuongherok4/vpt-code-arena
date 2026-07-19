@@ -579,9 +579,9 @@ Xóa bạn.
 ## Leaderboard
 
 ### GET /leaderboard/global
-Bảng xếp hạng toàn hệ thống, cache Redis 5 phút.
+Bảng xếp hạng kỳ thi toàn hệ thống, cache Redis 5 phút.
 ```
-Query params: type=all|exam|battle, language=all|java|python|c, limit=50
+Query params: type=all|exam, language=all|java|python|c, limit=50
 ```
 ```json
 // Response 200

@@ -193,17 +193,17 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 8 — Leaderboard & Analytics (Tuần 16–17) 🟡 50%
+### Phase 8 — Leaderboard & Analytics (Tuần 16–17) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 8.1 | `feature/p8-leaderboard-backend` | `LeaderboardController` (GET /leaderboard/global, filter type/language), update `UserStats` async sau AC, Redis cache TTL 5 phút | Leaderboard global cache 5 phút, filter language/type, evict cache và refresh stats sau AC | 🟢 Done |
-| 8.2 | `feature/p8-leaderboard-frontend` | `LeaderboardPage` với filter tabs, `StatsCard`, `ActivityCalendar` trong ProfilePage | User thấy bảng xếp hạng, filter theo ngôn ngữ/loại, thấy calendar hoạt động của bản thân | ⚪ Chưa bắt đầu |
+| 8.1 | `feature/p8-leaderboard-backend` | `LeaderboardController` (GET /leaderboard/global, filter type/language), update `UserStats` async sau AC, Redis cache TTL 5 phút | Leaderboard kỳ thi cache 5 phút, filter ngôn ngữ, evict cache và refresh stats sau AC | 🟢 Done |
+| 8.2 | `feature/p8-leaderboard-frontend` | `LeaderboardPage` với filter tabs, `StatsCard`, `ActivityCalendar` trong ProfilePage | User thấy bảng xếp hạng kỳ thi, filter theo ngôn ngữ, thấy calendar hoạt động của bản thân | 🟢 Done |
 
 **Thứ tự thực hiện:** 8.1 → 8.2 → merge `develop`
 
 **🎯 Phase 8 hoàn thành — Hệ thống có thể:**
-- Hiển thị bảng xếp hạng toàn server, filter được theo ngôn ngữ/loại bài
+- Hiển thị bảng xếp hạng kỳ thi toàn server, filter được theo ngôn ngữ
 - Tự cập nhật thống kê sau mỗi submission AC
 - Hiển thị activity calendar (GitHub-style) trên trang profile
 

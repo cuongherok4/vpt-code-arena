@@ -24,6 +24,7 @@ const BattleLobbyPage = lazy(() => import('@/pages/battle/BattleLobbyPage'));
 const BattleRoomPage = lazy(() => import('@/pages/battle/BattleRoomPage'));
 const ChatPage = lazy(() => import('@/pages/chat/ChatPage'));
 const FriendsPage = lazy(() => import('@/pages/social/FriendsPage'));
+const LeaderboardPage = lazy(() => import('@/pages/leaderboard/LeaderboardPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       { path: 'battle/rooms/:roomId', element: LazyLoad(BattleRoomPage) },
       { path: 'chat', element: LazyLoad(ChatPage) },
       { path: 'friends', element: LazyLoad(FriendsPage) },
+      { path: 'leaderboard', element: LazyLoad(LeaderboardPage) },
       { path: 'login', element: LazyLoad(LoginPage) },
       { path: 'register', element: LazyLoad(RegisterPage) },
       { path: 'forgot-password', element: LazyLoad(ForgotPasswordPage) },

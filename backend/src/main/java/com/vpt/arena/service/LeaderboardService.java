@@ -46,27 +46,23 @@ public class LeaderboardService {
         String normalizedLanguage = normalizeLanguage(language);
         int limit = normalizeLimit(requestedLimit);
         String cacheKey = cacheKey(problemId, normalizedLanguage);
-        String cached = stringRedisTemplate.opsForValue().get(cacheKey);
+        String cached = getCached(cacheKey);
         if (cached != null && !cached.isBlank()) {
             try {
                 return limit(objectMapper.readValue(cached, EXAM_LEADERBOARD_TYPE), limit);
             } catch (JsonProcessingException e) {
                 log.warn("Invalid exam leaderboard cache for {}: {}", problemId, e.getMessage());
-                stringRedisTemplate.delete(cacheKey);
+                deleteCache(cacheKey);
             }
         }
 
         List<ExamLeaderboardEntryDto> leaderboard = buildLeaderboard(problemId, normalizedLanguage, MAX_LIMIT);
-        try {
-            stringRedisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(leaderboard), EXAM_LEADERBOARD_TTL);
-        } catch (JsonProcessingException e) {
-            log.warn("Could not cache exam leaderboard for {}: {}", problemId, e.getMessage());
-        }
+        setCache(cacheKey, leaderboard, EXAM_LEADERBOARD_TTL);
         return limit(leaderboard, limit);
     }
 
     public void evictExamLeaderboard(UUID problemId, String language) {
-        stringRedisTemplate.delete(cacheKey(problemId, normalizeLanguage(language)));
+        deleteCache(cacheKey(problemId, normalizeLanguage(language)));
     }
 
     public List<GlobalLeaderboardEntryDto> getGlobalLeaderboard(String type, String language, int requestedLimit) {
@@ -74,34 +70,28 @@ public class LeaderboardService {
         String normalizedLanguage = normalizeOptionalLanguage(language);
         int limit = normalizeLimit(requestedLimit);
         String cacheKey = globalCacheKey(normalizedType, normalizedLanguage);
-        String cached = stringRedisTemplate.opsForValue().get(cacheKey);
+        String cached = getCached(cacheKey);
         if (cached != null && !cached.isBlank()) {
             try {
                 return limit(objectMapper.readValue(cached, GLOBAL_LEADERBOARD_TYPE), limit);
             } catch (JsonProcessingException e) {
                 log.warn("Invalid global leaderboard cache {}: {}", cacheKey, e.getMessage());
-                stringRedisTemplate.delete(cacheKey);
+                deleteCache(cacheKey);
             }
         }
 
         List<GlobalLeaderboardEntryDto> leaderboard = buildGlobalLeaderboard(normalizedType, normalizedLanguage, MAX_LIMIT);
-        try {
-            stringRedisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(leaderboard), GLOBAL_LEADERBOARD_TTL);
-        } catch (JsonProcessingException e) {
-            log.warn("Could not cache global leaderboard {}: {}", cacheKey, e.getMessage());
-        }
+        setCache(cacheKey, leaderboard, GLOBAL_LEADERBOARD_TTL);
         return limit(leaderboard, limit);
     }
 
     public void evictGlobalLeaderboard(String language) {
         String normalizedLanguage = normalizeOptionalLanguage(language);
-        stringRedisTemplate.delete(List.of(
+        deleteCache(List.of(
             globalCacheKey("all", null),
             globalCacheKey("exam", null),
-            globalCacheKey("battle", null),
             globalCacheKey("all", normalizedLanguage),
-            globalCacheKey("exam", normalizedLanguage),
-            globalCacheKey("battle", normalizedLanguage)
+            globalCacheKey("exam", normalizedLanguage)
         ));
     }
 
@@ -126,7 +116,7 @@ public class LeaderboardService {
 
     private List<GlobalLeaderboardEntryDto> buildGlobalLeaderboard(String type, String language, int limit) {
         List<SubmissionRepository.GlobalLeaderboardRow> rows =
-            submissionRepository.findGlobalLeaderboardRows(type, language, PageRequest.of(0, limit));
+            submissionRepository.findGlobalExamLeaderboardRows(JudgeResult.AC, language, PageRequest.of(0, limit));
 
         int[] rank = {1};
         return rows.stream()
@@ -135,11 +125,15 @@ public class LeaderboardService {
                 row.getUserId(),
                 row.getPublicId(),
                 row.getUserName(),
-                row.getTotalPoints() == null ? 0 : row.getTotalPoints(),
+                intValue(row.getTotalPoints()),
                 row.getTotalAccepted() == null ? 0 : row.getTotalAccepted().intValue(),
                 row.getLastAcceptedAt()
             ))
             .toList();
+    }
+
+    private int intValue(Number value) {
+        return value == null ? 0 : value.intValue();
     }
 
     private int normalizeLimit(int requestedLimit) {
@@ -162,10 +156,45 @@ public class LeaderboardService {
         return "leaderboard:global:" + type + ":" + (language == null ? "all" : language);
     }
 
+    private String getCached(String key) {
+        try {
+            return stringRedisTemplate.opsForValue().get(key);
+        } catch (RuntimeException e) {
+            log.warn("Could not read leaderboard cache {}: {}", key, e.getMessage());
+            return null;
+        }
+    }
+
+    private void setCache(String key, Object value, Duration ttl) {
+        try {
+            stringRedisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(value), ttl);
+        } catch (JsonProcessingException e) {
+            log.warn("Could not serialize leaderboard cache {}: {}", key, e.getMessage());
+        } catch (RuntimeException e) {
+            log.warn("Could not write leaderboard cache {}: {}", key, e.getMessage());
+        }
+    }
+
+    private void deleteCache(String key) {
+        try {
+            stringRedisTemplate.delete(key);
+        } catch (RuntimeException e) {
+            log.warn("Could not delete leaderboard cache {}: {}", key, e.getMessage());
+        }
+    }
+
+    private void deleteCache(List<String> keys) {
+        try {
+            stringRedisTemplate.delete(keys);
+        } catch (RuntimeException e) {
+            log.warn("Could not delete leaderboard cache keys: {}", e.getMessage());
+        }
+    }
+
     private String normalizeType(String type) {
         if (type == null || type.isBlank()) return "all";
         String normalized = type.trim().toLowerCase(Locale.ROOT);
-        if (normalized.equals("all") || normalized.equals("exam") || normalized.equals("battle")) return normalized;
+        if (normalized.equals("all") || normalized.equals("exam")) return normalized;
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported leaderboard type");
     }
 

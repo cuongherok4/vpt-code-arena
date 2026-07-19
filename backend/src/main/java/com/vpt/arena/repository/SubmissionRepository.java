@@ -77,43 +77,37 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         Pageable pageable
     );
 
-    @Query(value = """
+    @Query("""
         SELECT
-            u.id AS userId,
-            u.public_id AS publicId,
-            u.name AS userName,
-            COALESCE(SUM(best.points), 0) AS totalPoints,
-            COUNT(best.item_key) AS totalAccepted,
-            MAX(best.last_accepted_at) AS lastAcceptedAt
-        FROM users u
-        JOIN (
-            SELECT
-                s.user_id,
-                'exam:' || s.problem_id::text AS item_key,
-                MAX(s.points) AS points,
-                MIN(s.submitted_at) AS last_accepted_at
-            FROM submissions s
-            WHERE CAST(:type AS text) IN ('all', 'exam')
-              AND s.result = 'AC'
-              AND (:language IS NULL OR s.language = :language)
-            GROUP BY s.user_id, s.problem_id
-            UNION ALL
-            SELECT
-                bs.user_id,
-                'battle:' || bs.room_id::text || ':' || bs.problem_id::text AS item_key,
-                MAX(bs.points) AS points,
-                MIN(bs.submitted_at) AS last_accepted_at
-            FROM battle_submissions bs
-            WHERE CAST(:type AS text) IN ('all', 'battle')
-              AND bs.result = 'AC'
-              AND (:language IS NULL OR bs.language = :language)
-            GROUP BY bs.user_id, bs.room_id, bs.problem_id
-        ) best ON best.user_id = u.id
-        GROUP BY u.id, u.public_id, u.name
-        ORDER BY totalPoints DESC, totalAccepted DESC, lastAcceptedAt ASC
-        """, nativeQuery = true)
-    List<GlobalLeaderboardRow> findGlobalLeaderboardRows(
-        @Param("type") String type,
+            s.user.id AS userId,
+            s.user.publicId AS publicId,
+            s.user.name AS userName,
+            SUM(s.points) AS totalPoints,
+            COUNT(s.problem.id) AS totalAccepted,
+            MAX(s.submittedAt) AS lastAcceptedAt
+        FROM Submission s
+        WHERE s.result = :result
+          AND (:language IS NULL OR s.language = :language)
+          AND NOT EXISTS (
+              SELECT better.id
+              FROM Submission better
+              WHERE better.user.id = s.user.id
+                AND better.problem.id = s.problem.id
+                AND better.result = :result
+                AND (:language IS NULL OR better.language = :language)
+                AND (
+                    better.points > s.points
+                    OR (
+                        better.points = s.points
+                        AND better.submittedAt < s.submittedAt
+                    )
+                )
+          )
+        GROUP BY s.user.id, s.user.publicId, s.user.name
+        ORDER BY SUM(s.points) DESC, COUNT(s.problem.id) DESC, MAX(s.submittedAt) ASC
+        """)
+    List<GlobalLeaderboardRow> findGlobalExamLeaderboardRows(
+        @Param("result") JudgeResult result,
         @Param("language") String language,
         Pageable pageable
     );
@@ -132,7 +126,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         UUID getUserId();
         String getPublicId();
         String getUserName();
-        Integer getTotalPoints();
+        Number getTotalPoints();
         Long getTotalAccepted();
         OffsetDateTime getLastAcceptedAt();
     }

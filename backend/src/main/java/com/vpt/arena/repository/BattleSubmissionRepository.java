@@ -55,4 +55,5 @@ public interface BattleSubmissionRepository extends JpaRepository<BattleSubmissi
         ORDER BY s.submittedAt ASC
         """)
     List<BattleSubmission> findLeaderboardSubmissions(@Param("roomId") UUID roomId);
+
 }
