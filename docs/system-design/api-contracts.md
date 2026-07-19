@@ -706,8 +706,4 @@ Thống kê hệ thống.
 }
 ```
 
-### DELETE /admin/chat/:messageId
-Xóa tin nhắn chat.
-
-### PUT /admin/users/:id/mute
-Mute user trong Global Chat.
+> Chat không có admin moderation endpoint. Admin panel chỉ quản Users, Problems và Stats theo phạm vi Phase 9.

@@ -231,7 +231,7 @@
 
 | Page | Route | Mô tả |
 |---|---|---|
-| `AdminPage` | `/admin` | Dashboard admin (tabs: Users / Problems / Moderation / Stats) |
+| `AdminPage` | `/admin` | Dashboard admin (tabs: Users / Problems / Stats) |
 
 ### Components
 
@@ -239,7 +239,6 @@
 |---|---|---|
 | `UserManagementTable` | AdminPage | Danh sách user + nút Ban/Unban |
 | `ProblemForm` | AdminPage | Form tạo/sửa đề bài (Markdown editor + test cases) |
-| `ModerationFeed` | AdminPage | Danh sách tin nhắn bị report + nút Delete/Mute |
 | `SystemStatsCards` | AdminPage | Cards thống kê: total users, submissions, active rooms |
 
 ---

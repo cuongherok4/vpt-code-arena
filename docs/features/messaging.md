@@ -3,7 +3,7 @@
 ## 1. Global Chat (Chat toàn cầu)
 - **1 kênh duy nhất** cho toàn hệ thống, mọi người dùng đều nhắn được (ví dụ dùng để mời người khác join phòng Battle).
 - Timestamp cho mỗi tin nhắn, hỗ trợ @mention.
-- Moderation: mute, block, report, admin delete message.
+- Không có admin moderation cho chat; ưu tiên trải nghiệm chat tự do.
 
 ## 2. Private Message (Chat riêng)
 - Chat 1-1 giữa 2 người dùng.
@@ -20,7 +20,7 @@
 ## Phạm vi API/Backend cần có
 - Bảng `chat_messages` dùng chung cho Global Chat và Room Chat (phân biệt qua `room_id`); Private Message cân nhắc tách bảng riêng nếu cần tối ưu truy vấn hộp thư.
 - WebSocket events để broadcast tin nhắn theo đúng phạm vi (global / room / 1-1).
-- API report + admin xử lý report, mute/ban user spam ở Global Chat.
+- Không xây API admin xử lý report/delete/mute trong phạm vi hiện tại.
 
 ## Backlog Social/Friends liên quan Messaging
 - Click tên/avatar trong Global Chat mở `UserMiniProfilePopover`.
