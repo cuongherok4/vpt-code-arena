@@ -1,86 +1,353 @@
 # VPT Code Arena
 
-## 📖 Tổng quan hệ thống (Project Overview)
+> **Modern Online Judge Platform for Learning, Practicing and Competitive Programming**
 
-**Ngày khởi tạo dự án:** 11/07/2026
+**Ngày khởi tạo dự án:** 11/07/2026  
 
-**VPT Code Arena** là một nền tảng thực hành, học tập và thi đấu lập trình trực tuyến (Online Judge) hiện đại. Hệ thống cung cấp một môi trường trực quan để người dùng luyện tập giải quyết các bài toán thuật toán, tham gia vào các phòng thi đấu code trực tiếp (real-time coding arena) cùng bạn bè, và được hệ thống đánh giá, chấm điểm code hoàn toàn tự động.
-
-Dự án được xây dựng theo kiến trúc hệ thống hiện đại, chú trọng vào trải nghiệm người dùng, tốc độ phản hồi và khả năng mở rộng:
-- **Trải nghiệm IDE nguyên bản:** Cung cấp trình soạn thảo mã nguồn mạnh mẽ trực tiếp trên trình duyệt.
-- **Thực thi an toàn (Sandboxed Execution):** Mã nguồn của người dùng được chạy và kiểm thử trong môi trường an toàn, đánh giá độ chính xác, thời gian chạy và bộ nhớ.
-- **Đồng bộ hóa Real-time:** Ứng dụng WebSockets để cập nhật trạng thái người chơi, phòng đấu, và kết quả chấm điểm ngay lập tức.
 
 ---
 
-## 🚀 Tính năng chính (Key Features)
+# 📖 Tổng Quan
 
-- **Code Editor Chuyên Nghiệp**: Tích hợp Monaco Editor (lõi của VS Code) mang lại cảm giác code tự nhiên.
-- **Hệ Thống Chấm Điểm (Auto Judging)**: Tự động đánh giá các bài nộp code thông qua các test cases chuẩn xác.
-- **Tương tác Real-time**: Hỗ trợ WebSocket qua Socket.io giúp tạo phòng thi đấu, chat và cập nhật trạng thái bài nộp theo thời gian thực.
-- **Xác Thực (Authentication)**: Đăng nhập bảo mật sử dụng JWT & OAuth2 (Google/Github login).
-- **Kiểm Soát Lưu Lượng (Rate Limiting)**: Bảo vệ hệ thống API với Bucket4j và Redis nhằm ngăn chặn lạm dụng.
+**VPT Code Arena** là nền tảng học tập, luyện giải thuật và thi đấu lập trình trực tuyến (Online Judge) được xây dựng nhằm mang đến trải nghiệm gần giống các hệ thống như Codeforces, LeetCode hay AtCoder.
 
-## 💻 Công nghệ sử dụng (Tech Stack)
+Người dùng có thể học theo lộ trình, luyện tập các bài toán thuật toán, tham gia các phòng thi đấu thời gian thực với bạn bè và nhận kết quả chấm bài hoàn toàn tự động.
 
-### Frontend
-- **Framework & Build Tool:** React 19, Vite
-- **Styling:** Tailwind CSS 4
-- **State Management:** Zustand, React Query
-- **Thành phần cốt lõi:** Monaco Editor (Trình soạn thảo), Socket.io-client (WebSockets)
+Hệ thống được thiết kế theo kiến trúc microservices, tập trung vào khả năng mở rộng, hiệu năng và trải nghiệm người dùng.
 
-### Backend
-- **Core Framework:** Java 21, Spring Boot 3
-- **Database:** PostgreSQL (Quản lý schema bằng Flyway)
-- **Caching & Rate Limiting:** Redis + Bucket4j
-- **Bảo mật:** Spring Security, JWT, OAuth2 Client
-- **API Docs:** SpringDoc OpenAPI (Swagger)
+### Điểm nổi bật
+
+- 💻 Monaco Editor (VS Code Editor)
+- ⚡ Chấm bài tự động qua Judge0
+- 🔥 Battle Realtime bằng WebSocket
+- 👥 Chat và Friend System
+- 📈 Leaderboard & Activity Tracking
+- 🔒 JWT + OAuth2 Authentication
+- 🚀 Kiến trúc Microservices
+- 🐳 Docker Development Environment
 
 ---
 
-## 🛠️ Yêu cầu môi trường (Prerequisites)
+# 🚀 Chức Năng Chính
 
-Để chạy dự án, máy tính của bạn cần cài đặt sẵn:
-- **Node.js** (Phiên bản v18 trở lên)
-- **Java JDK** (Phiên bản 21)
-- **PostgreSQL**
-- **Redis**
+## 👤 Authentication
 
-## 🏃 Hướng dẫn cài đặt (Getting Started)
+- Đăng ký tài khoản
+- Đăng nhập Email/Password
+- Đăng nhập Google & GitHub OAuth2
+- Xác thực Email
+- Quên mật khẩu / Đặt lại mật khẩu
+- JWT Authentication
+- Refresh Token
 
-### 1. Clone mã nguồn dự án
+---
+
+## 📚 Learning
+
+- Học theo chương và bài học
+- Theo dõi tiến độ học tập
+- Chạy thử code trực tiếp
+- Submit challenge
+- Nhận kết quả chấm tự động
+
+---
+
+## 💯 Online Judge
+
+- Danh sách bài tập
+- Lọc theo độ khó
+- Lọc theo chủ đề
+- Tìm kiếm bài
+- Đọc đề bài
+- Sample Test
+- Submit code
+- Xem lịch sử submit
+
+Kết quả chấm bài hỗ trợ:
+
+- Accepted (AC)
+- Wrong Answer (WA)
+- Runtime Error (RE)
+- Time Limit Exceeded (TLE)
+- Compilation Error (CE)
+
+---
+
+## ⚔️ Battle Arena
+
+- Tạo phòng đấu
+- Tham gia phòng
+- Ready trước trận
+- Đồng hồ đếm ngược
+- Submit realtime
+- Leaderboard realtime
+- Kết quả cuối trận
+- Mời bạn bè
+- Kick người chơi chờ
+
+---
+
+## 💬 Social
+
+- Chat Global
+- Chat Battle Room
+- Chat cá nhân
+- Friend Request
+- Online Status
+- Tìm bạn bằng:
+  - Email
+  - Username
+  - Public ID
+- Hồ sơ cá nhân
+- Activity Calendar
+
+---
+
+## 🏆 Leaderboard
+
+- Xếp hạng toàn hệ thống
+- Xếp hạng theo ngôn ngữ
+- Thống kê cá nhân
+- Redis Cache tăng hiệu năng
+
+---
+
+## 🛠️ Admin Panel
+
+- Dashboard thống kê
+- Quản lý User
+- Ban / Unban User
+- Quản lý Problem
+- Publish / Unpublish Problem
+- Quản lý Test Cases
+- Quản lý Difficulty
+- Quản lý Topic
+
+---
+
+# 🏗️ Kiến Trúc Hệ Thống
+
+```
+                    React + Vite
+                         │
+              REST API / WebSocket
+                         │
+        ┌────────────────┴────────────────┐
+        │                                 │
+ Spring Boot API                 WebSocket Service
+        │                                 │
+        └──────────────┬──────────────────┘
+                       │
+                    Redis Pub/Sub
+                       │
+                 Judge Service
+                       │
+                    Judge0 API
+                       │
+                  PostgreSQL
+```
+
+---
+
+# 💻 Tech Stack
+
+## Frontend
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS 4
+- React Router
+- TanStack React Query
+- Zustand
+- Monaco Editor
+- Socket.IO Client
+- Lucide React
+
+---
+
+## Backend
+
+- Java 21
+- Spring Boot 3
+- Spring Security
+- JWT Authentication
+- OAuth2 Client
+- Spring Data JPA
+- Hibernate
+- PostgreSQL
+- Flyway
+- Redis
+- Bucket4j
+- SpringDoc OpenAPI
+- JUnit
+- Mockito
+- MockMvc
+
+---
+
+## Realtime
+
+- Node.js
+- TypeScript
+- Socket.IO
+- Redis Pub/Sub
+
+---
+
+## Judge
+
+- Node.js
+- Bull Queue
+- Judge0
+
+---
+
+## DevOps
+
+- Docker
+- Docker Compose
+- GitHub Actions
+- Maven Wrapper
+
+---
+
+# 📂 Cấu Trúc Dự Án
+
+```text
+vpt-code-arena/
+├── backend/                # Spring Boot REST API
+├── frontend/               # React + Vite
+├── websocket-service/      # Socket.IO Service
+├── judge-service/          # Judge Queue Worker
+├── infrastructure/         # Docker Compose
+├── docs/                   # Documentation
+└── .github/workflows/      # CI/CD
+```
+
+---
+
+# ⚙️ Yêu Cầu
+
+- Java JDK 21
+- Node.js 18+
+- Docker Desktop
+- PostgreSQL
+- Redis
+
+Khuyến nghị sử dụng Docker Compose để khởi động PostgreSQL, Redis và Judge0.
+
+---
+
+# 🚀 Chạy Dự Án
+
+## 1. Clone Repository
+
 ```bash
 git clone https://github.com/cuongherok4/vpt-code-arena.git
 cd vpt-code-arena
 ```
 
-### 2. Cài đặt Backend
-Mở một terminal mới và di chuyển vào thư mục backend:
+---
+
+## 2. Khởi động hạ tầng
+
+```bash
+cd infrastructure
+docker compose up -d
+```
+
+---
+
+## 3. Backend
+
 ```bash
 cd backend
-```
-> **Lưu ý:** Hãy đảm bảo cơ sở dữ liệu PostgreSQL và Redis đang hoạt động. Bạn cần cập nhật thông tin kết nối trong file cấu hình `application-local.yml`.
-
-Khởi chạy server backend (với Maven):
-```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
-```
-Hoặc đối với môi trường Windows, có thể sử dụng script có sẵn:
-```bash
-.\run-local.ps1
+./mvnw spring-boot:run
 ```
 
-### 3. Cài đặt Frontend
-Mở một terminal khác, di chuyển vào thư mục frontend:
+Windows
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Backend
+
+```
+http://localhost:8080
+```
+
+Swagger
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+---
+
+## 4. Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Truy cập ứng dụng frontend trên trình duyệt theo địa chỉ được Vite cung cấp (thường là http://localhost:5173).
+
+```
+http://localhost:5173
+```
 
 ---
 
-## 📜 Giấy phép (License)
+## 5. WebSocket Service
 
-Dự án được phân phối dưới giấy phép MIT License.
+```bash
+cd websocket-service
+npm install
+npm run dev
+```
+
+---
+
+## 6. Judge Service
+
+```bash
+cd judge-service
+npm install
+npm run dev
+```
+
+---
+
+# ✅ Testing
+
+## Backend
+
+```bash
+cd backend
+./mvnw test
+```
+
+## Frontend
+
+```bash
+cd frontend
+npm run build
+npm run lint
+```
+
+---
+
+# 📌 Lưu Ý
+
+- Không commit file `.env`.
+- Không commit JWT Secret, OAuth Secret, Mail Password.
+- Tài khoản Admin cần được cấp role `ADMIN` trong database.
+- Sau khi đổi role, người dùng cần đăng nhập lại để JWT được cập nhật.
+
+---
+
+# 📄 License
+
+Distributed under the **MIT License**.
