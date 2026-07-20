@@ -2,7 +2,7 @@
 
 ## 📖 Tổng quan hệ thống (Project Overview)
 
-**Ngày khởi tạo dự án:** 20/05/2026
+**Ngày khởi tạo dự án:** 11/07/2026
 
 **VPT Code Arena** là một nền tảng thực hành, học tập và thi đấu lập trình trực tuyến (Online Judge) hiện đại. Hệ thống cung cấp một môi trường trực quan để người dùng luyện tập giải quyết các bài toán thuật toán, tham gia vào các phòng thi đấu code trực tiếp (real-time coding arena) cùng bạn bè, và được hệ thống đánh giá, chấm điểm code hoàn toàn tự động.
 
