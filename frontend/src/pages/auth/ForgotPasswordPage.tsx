@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-slate-950 px-4 py-12">
+    <main className="min-h-screen bg-slate-950 px-4 py-12">
       <section className="mx-auto max-w-md">
         <h1 className="text-3xl font-bold text-white">Quen mat khau</h1>
         <p className="mt-2 text-sm text-slate-400">Nhap email tai khoan de nhan link dat lai mat khau.</p>

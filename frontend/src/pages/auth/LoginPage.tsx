@@ -32,7 +32,7 @@ export default function LoginPage() {
   const errorMsg = error || searchParams.get('oauthError');
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-stretch">
+    <div className="flex min-h-screen items-stretch">
       {/* ── Left Panel — Branding ── */}
       <div className="relative hidden flex-col justify-between overflow-hidden border-r border-white/10 bg-slate-950/70 p-10 lg:flex lg:w-[45%]">
         <div className="pointer-events-none absolute inset-0">

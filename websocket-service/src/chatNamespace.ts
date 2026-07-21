@@ -6,6 +6,7 @@ const GLOBAL_ROOM = 'chat:global';
 const ROOM_PREFIX = 'chat:room:';
 const USER_PREFIX = 'chat:user:';
 const UUID_PATTERN = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+const PRESENCE_HEARTBEAT_MS = 1_000;
 
 export type ChatNamespaceOptions = {
   jwtSecret: string;
@@ -36,6 +37,9 @@ export function registerChatNamespace(
       chat.emit('chat:user-online', publicUser(user));
     }
     socket.emit('chat:online-users', { userIds: await presenceStore.onlineUsers() });
+    const presenceHeartbeat = setInterval(() => {
+      presenceStore.touchSocket(user.userId, socket.id).catch(() => undefined);
+    }, PRESENCE_HEARTBEAT_MS);
 
     socket.on('chat:join-global', async (_payload, ack) => {
       try {
@@ -77,6 +81,16 @@ export function registerChatNamespace(
       }
     });
 
+    socket.on('chat:get-online-users', async (_payload, ack) => {
+      try {
+        const userIds = await presenceStore.onlineUsers();
+        socket.emit('chat:online-users', { userIds });
+        ack?.({ success: true, userIds });
+      } catch (error) {
+        fail(socket, ack, error);
+      }
+    });
+
     socket.on('chat:send-global', async (payload, ack) => {
       try {
         const message = await persist(socket, '/api/v1/chat/global', { message: requireMessage(payload?.message) });
@@ -110,6 +124,7 @@ export function registerChatNamespace(
     });
 
     socket.on('disconnect', async () => {
+      clearInterval(presenceHeartbeat);
       const wentOffline = await presenceStore.removeSocket(user.userId, socket.id);
       if (wentOffline) {
         chat.emit('chat:user-offline', publicUser(user));

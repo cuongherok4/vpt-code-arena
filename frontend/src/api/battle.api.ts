@@ -5,6 +5,7 @@ export type RoomStatus = 'WAITING' | 'IN_PROGRESS' | 'FINISHED' | 'CANCELLED';
 
 export type BattleMemberDto = {
   userId: string;
+  publicId?: string;
   name: string;
   ready: boolean;
   creator: boolean;
@@ -50,9 +51,11 @@ export type JudgeResult = 'PENDING' | 'AC' | 'WA' | 'TLE' | 'RE' | 'CE';
 
 export type BattleRoomDto = {
   id: string;
+  code: string;
   name: string;
   status: RoomStatus;
   isPublic: boolean;
+  locked: boolean;
   maxMembers: number;
   numProblems: number;
   timeLimitMin: number;
@@ -77,6 +80,7 @@ export type BattleInviteDto = {
 
 export type BattleRoomCreateRequest = {
   name: string;
+  password?: string;
   isPublic: boolean;
   maxMembers: number;
   numProblems: number;
@@ -88,8 +92,11 @@ export type BattleRoomCreateRequest = {
 export const battleApi = {
   getRooms: () => apiClient.get<BattleRoomDto[]>('/battle/rooms').then(r => r.data),
   getRoom: (roomId: string) => apiClient.get<BattleRoomDto>(`/battle/rooms/${roomId}`).then(r => r.data),
+  getRoomByCode: (code: string) => apiClient.get<BattleRoomDto>(`/battle/rooms/code/${code}`).then(r => r.data),
   createRoom: (payload: BattleRoomCreateRequest) => apiClient.post<BattleRoomDto>('/battle/rooms', payload).then(r => r.data),
   joinRoom: (roomId: string) => apiClient.post<BattleRoomDto>(`/battle/rooms/${roomId}/join`).then(r => r.data),
+  joinRoomByCode: (code: string, password?: string) =>
+    apiClient.post<BattleRoomDto>(`/battle/rooms/code/${code}/join`, { password: password || null }).then(r => r.data),
   leaveRoom: (roomId: string) => apiClient.post<BattleRoomDto | void>(`/battle/rooms/${roomId}/leave`).then(r => r.data),
   startRoom: (roomId: string) => apiClient.post<BattleRoomDto>(`/battle/rooms/${roomId}/start`).then(r => r.data),
   inviteFriend: (roomId: string, userId: string) =>

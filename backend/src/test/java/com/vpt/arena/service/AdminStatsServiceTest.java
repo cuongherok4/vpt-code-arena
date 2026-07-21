@@ -1,6 +1,7 @@
 package com.vpt.arena.service;
 
 import com.vpt.arena.entity.User;
+import com.vpt.arena.entity.enums.RoomStatus;
 import com.vpt.arena.entity.enums.Role;
 import com.vpt.arena.repository.BattleSubmissionRepository;
 import com.vpt.arena.repository.ProblemRepository;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +43,9 @@ class AdminStatsServiceTest {
         when(problemRepository.countByIsPublishedTrue()).thenReturn(15L);
         when(submissionRepository.count()).thenReturn(100L);
         when(battleSubmissionRepository.count()).thenReturn(40L);
-        when(roomRepository.count()).thenReturn(7L);
+        when(roomRepository.countByStatusIn(argThat(statuses ->
+            statuses.contains(RoomStatus.WAITING) && statuses.contains(RoomStatus.IN_PROGRESS) && !statuses.contains(RoomStatus.FINISHED)
+        ))).thenReturn(7L);
         when(submissionRepository.countActiveUsersBetween(any(OffsetDateTime.class), any(OffsetDateTime.class))).thenReturn(3L);
 
         var result = service.overview(principal(Role.ADMIN));

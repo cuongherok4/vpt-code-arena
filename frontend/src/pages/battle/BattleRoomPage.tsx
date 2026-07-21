@@ -1,17 +1,19 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Copy, Loader2, Lock, LogOut, Play, Radio, Shield, Swords, Trophy, UserMinus, UserPlus, Users } from 'lucide-react';
 import { battleApi, type BattleLeaderboardEntryDto, type BattleMemberDto, type BattleRoomDto, type BattleSubmissionDto } from '@/api/battle.api';
-import { friendsApi } from '@/api/friends.api';
+import { friendsApi, type FriendStatus } from '@/api/friends.api';
+import { FriendButton } from '@/components/social/FriendButton';
 import { useBattleSocket } from '@/hooks/useBattleSocket';
+import { useChatSocket } from '@/hooks/useChatSocket';
 import BattleArenaPage from './BattleArenaPage';
 import CountdownTimer from '@/components/battle/CountdownTimer';
 import RealTimeLeaderboard from '@/components/battle/RealTimeLeaderboard';
 import { useAuthStore } from '@/stores/authStore';
 
 export const BattleRoomPage = () => {
-  const roomId = getRoomIdFromPath();
+  const { roomId } = useParams<{ roomId: string }>();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
@@ -19,15 +21,19 @@ export const BattleRoomPage = () => {
   const [readyByUser, setReadyByUser] = useState<Record<string, boolean>>({});
   const [socketError, setSocketError] = useState('');
   const [leaveError, setLeaveError] = useState('');
+  const [joinPassword, setJoinPassword] = useState('');
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [liveLeaderboard, setLiveLeaderboard] = useState<BattleLeaderboardEntryDto[]>([]);
   const [latestSubmission, setLatestSubmission] = useState<BattleSubmissionDto | undefined>();
   const [finalLeaderboard, setFinalLeaderboard] = useState<BattleLeaderboardEntryDto[] | null>(null);
+  const { onlineUserIds } = useChatSocket({ enabled: isAuthenticated });
 
   const roomQuery = useQuery({
     queryKey: ['battle-room', roomId],
     queryFn: () => battleApi.getRoom(roomId!),
     enabled: !!roomId && isAuthenticated,
+    refetchInterval: 1000,
+    refetchIntervalInBackground: true,
   });
 
   const leaderboardQuery = useQuery({
@@ -40,14 +46,22 @@ export const BattleRoomPage = () => {
   const friendsQuery = useQuery({
     queryKey: ['friends'],
     queryFn: friendsApi.friends,
-    enabled: !!roomId && isAuthenticated && roomQuery.data?.status === 'WAITING' && roomQuery.data?.creatorId === currentUserId,
-    refetchInterval: 5000,
+    enabled: !!roomId && isAuthenticated,
+    refetchInterval: 1000,
+    refetchIntervalInBackground: true,
+  });
+
+  const requestsQuery = useQuery({
+    queryKey: ['friend-requests'],
+    queryFn: friendsApi.requests,
+    enabled: !!roomId && isAuthenticated,
+    refetchInterval: 1000,
     refetchIntervalInBackground: true,
   });
 
   const refreshRoom = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['battle-room', roomId] });
-    queryClient.invalidateQueries({ queryKey: ['battle-rooms'] });
+    queryClient.refetchQueries({ queryKey: ['battle-room', roomId], type: 'active' });
+    queryClient.refetchQueries({ queryKey: ['battle-rooms'], type: 'active' });
   }, [queryClient, roomId]);
 
   const handleReadyUpdate = useCallback((event: { userId: string; isReady: boolean }) => {
@@ -132,8 +146,17 @@ export const BattleRoomPage = () => {
   });
 
   const joinMutation = useMutation({
-    mutationFn: () => battleApi.joinRoom(roomId!),
-    onSuccess: refreshRoom,
+    mutationFn: () => {
+      if (room?.locked) {
+        return battleApi.joinRoomByCode(room.code, joinPassword.trim());
+      }
+      return battleApi.joinRoom(roomId!);
+    },
+    onSuccess: () => {
+      setJoinPassword('');
+      refreshRoom();
+    },
+    onError: (error) => setSocketError(apiErrorMessage(error, 'Không thể vào phòng. Kiểm tra mật khẩu phòng.')),
   });
 
   const startMutation = useMutation({
@@ -179,6 +202,9 @@ export const BattleRoomPage = () => {
   const canStart = !!room && room.status === 'WAITING' && isCreator && room.memberCount >= 2;
   const invitedFriendIds = new Set(members.map(member => member.userId));
   const invitableFriends = (friendsQuery.data ?? []).filter(friend => !invitedFriendIds.has(friend.id));
+  const friendIds = useMemo(() => new Set((friendsQuery.data ?? []).map(friend => friend.id)), [friendsQuery.data]);
+  const incomingRequestIds = useMemo(() => new Set((requestsQuery.data?.incoming ?? []).map(request => request.user.id)), [requestsQuery.data]);
+  const outgoingRequestIds = useMemo(() => new Set((requestsQuery.data?.outgoing ?? []).map(request => request.user.id)), [requestsQuery.data]);
   const shownRemainingSeconds = remainingSeconds ?? secondsUntil(room?.endTime);
   const maxBattlePoints = totalBattlePoints(room?.problems ?? []);
 
@@ -272,14 +298,15 @@ export const BattleRoomPage = () => {
             </div>
             <div className="mt-3 flex max-w-full flex-wrap items-center gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Mã phòng</span>
-              <code className="break-all rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-cyan-100">
-                {room.id}
+              <code className="rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 font-mono text-base font-bold text-cyan-100">
+                {room.code || 'Chưa có mã'}
               </code>
             </div>
           </div>
           <button
             type="button"
-            onClick={() => navigator.clipboard?.writeText(room.id)}
+            onClick={() => room.code && navigator.clipboard?.writeText(room.code)}
+            disabled={!room.code}
             className="app-button app-button-secondary"
           >
             <Copy size={16} />
@@ -337,8 +364,10 @@ export const BattleRoomPage = () => {
                 current={member.userId === currentUserId}
                 canKick={isCreator && member.userId !== currentUserId && room.status === 'WAITING'}
                 kicking={kickMutation.isPending}
+                friendStatus={getFriendStatus(member.userId, currentUserId, friendIds, incomingRequestIds, outgoingRequestIds)}
+                onFriendError={setSocketError}
                 onKick={() => {
-                  if (window.confirm(`Kick ${member.name || member.userId} khỏi phòng?`)) {
+                  if (window.confirm(`Kick ${member.name || member.publicId || 'thành viên này'} khỏi phòng?`)) {
                     kickMutation.mutate(member.userId);
                   }
                 }}
@@ -365,38 +394,67 @@ export const BattleRoomPage = () => {
                 </div>
               ) : (
                 <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
-                  {invitableFriends.map(friend => (
-                    <div key={friend.id} className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-white">{friend.name}</p>
-                        <p className="truncate text-xs text-slate-500">ID {friend.publicId}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => inviteMutation.mutate(friend.id)}
-                        disabled={inviteMutation.isPending}
-                        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-cyan-500 px-2 py-1.5 text-xs font-semibold text-slate-950 hover:bg-cyan-400 disabled:opacity-50"
+                  {invitableFriends.map(friend => {
+                    const online = onlineUserIds.has(friend.id) || friend.online;
+                    return (
+                      <div
+                        key={friend.id}
+                        className={`flex items-center justify-between gap-2 rounded-lg border p-2 ${
+                          online
+                            ? 'border-emerald-400/25 bg-emerald-400/[0.06]'
+                            : 'border-white/10 bg-white/[0.03]'
+                        }`}
                       >
-                        <UserPlus size={13} />
-                        Mời
-                      </button>
-                    </div>
-                  ))}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`h-2 w-2 rounded-full ${online ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+                            <p className={`truncate text-sm font-medium ${online ? 'text-emerald-100' : 'text-white'}`}>
+                              {friend.name}
+                            </p>
+                          </div>
+                          <p className="mt-1 truncate text-xs text-slate-500">ID {friend.publicId}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => inviteMutation.mutate(friend.id)}
+                          disabled={inviteMutation.isPending || !online}
+                          className={`inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${
+                            online
+                              ? 'bg-emerald-400 text-slate-950 hover:bg-emerald-300'
+                              : 'border border-white/10 text-slate-500'
+                          }`}
+                          title={online ? 'Mời vào phòng' : 'Bạn này đang offline'}
+                        >
+                          <UserPlus size={13} />
+                          {online ? 'Mời' : 'Offline'}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
           )}
           <>
               {!me && (
-                <button
-                  type="button"
-                  onClick={() => joinMutation.mutate()}
-                  disabled={joinMutation.isPending}
-                  className="app-button app-button-primary w-full py-2.5"
-                >
-                  {joinMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Swords size={16} />}
-                  Join phòng
-                </button>
+                <div className="space-y-2">
+                  <input
+                    type="password"
+                    value={joinPassword}
+                    onChange={event => setJoinPassword(event.target.value)}
+                    className={`app-field border-amber-300/40 bg-amber-300/[0.04] ${room.locked ? 'block' : 'hidden'}`}
+                    placeholder="Nhập mật khẩu phòng"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => joinMutation.mutate()}
+                    disabled={joinMutation.isPending || (room.locked && !joinPassword.trim())}
+                    className="app-button app-button-primary w-full py-2.5"
+                  >
+                    {joinMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Swords size={16} />}
+                    Join phòng
+                  </button>
+                </div>
               )}
 
               {me && (
@@ -464,9 +522,18 @@ function mergeReady(room: BattleRoomDto | undefined, readyByUser: Record<string,
   }));
 }
 
-function getRoomIdFromPath(): string | undefined {
-  const match = window.location.pathname.match(/\/battle\/rooms\/([^/]+)/);
-  return match?.[1];
+function getFriendStatus(
+  userId: string,
+  currentUserId: string,
+  friendIds: Set<string>,
+  incomingRequestIds: Set<string>,
+  outgoingRequestIds: Set<string>,
+): FriendStatus {
+  if (userId === currentUserId) return 'SELF';
+  if (friendIds.has(userId)) return 'FRIENDS';
+  if (incomingRequestIds.has(userId)) return 'PENDING_INCOMING';
+  if (outgoingRequestIds.has(userId)) return 'PENDING_OUTGOING';
+  return 'NONE';
 }
 
 function secondsUntil(endTime?: string | null): number {
@@ -554,22 +621,26 @@ const MemberRow = ({
   current,
   canKick,
   kicking,
+  friendStatus,
+  onFriendError,
   onKick,
 }: {
   member: BattleMemberDto;
   current: boolean;
   canKick?: boolean;
   kicking?: boolean;
+  friendStatus: FriendStatus;
+  onFriendError?: (message: string) => void;
   onKick?: () => void;
 }) => (
   <div className="flex items-center justify-between gap-3 p-4">
     <div className="min-w-0">
       <div className="flex items-center gap-2">
-        <p className="truncate font-medium text-white">{member.name || member.userId}</p>
+        <p className="truncate font-medium text-white">{member.name || 'Người dùng VPT'}</p>
         {current && <span className="rounded border border-white/10 px-1.5 py-0.5 text-[11px] text-slate-400">Bạn</span>}
         {member.creator && <Shield size={14} className="text-amber-300" />}
       </div>
-      <p className="mt-1 truncate text-xs text-slate-500">{member.userId}</p>
+      <p className="mt-1 truncate text-xs text-slate-500">ID {member.publicId ?? '----------'}</p>
     </div>
     <div className="flex shrink-0 items-center gap-2">
       <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${
@@ -577,6 +648,14 @@ const MemberRow = ({
       }`}>
         {member.ready ? 'Ready' : 'Waiting'}
       </span>
+      {!current && (
+        <FriendButton
+          userId={member.userId}
+          status={friendStatus}
+          size="sm"
+          onError={onFriendError}
+        />
+      )}
       {canKick && (
         <button
           type="button"

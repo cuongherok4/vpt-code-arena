@@ -16,6 +16,8 @@ app.use(express.json());
 const httpServer = createServer(app);
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*').split(',').map((origin) => origin.trim());
 const io = new Server(httpServer, {
+  pingInterval: Number(process.env.WS_PING_INTERVAL_MS || 1000),
+  pingTimeout: Number(process.env.WS_PING_TIMEOUT_MS || 2500),
   cors: {
     origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
     methods: ['GET', 'POST']
@@ -29,7 +31,8 @@ const battleStore = new RedisBattleStore(redis);
 const chatPresenceStore = new RedisChatPresenceStore(redis);
 const battleNamespace = registerBattleNamespace(io, battleStore, {
   jwtSecret: process.env.JWT_SECRET || '',
-  authDisabled: process.env.WS_AUTH_DISABLED === 'true'
+  authDisabled: process.env.WS_AUTH_DISABLED === 'true',
+  backendUrl: process.env.BACKEND_URL || 'http://localhost:8080'
 });
 registerChatNamespace(io, chatPresenceStore, {
   jwtSecret: process.env.JWT_SECRET || '',

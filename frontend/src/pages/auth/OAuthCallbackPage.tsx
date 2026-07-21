@@ -42,7 +42,7 @@ export default function OAuthCallbackPage() {
   }, [acceptOAuth, navigate, searchParams]);
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-950 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
       <div className="flex items-center gap-3 text-slate-300">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span>Dang hoan tat dang nhap...</span>

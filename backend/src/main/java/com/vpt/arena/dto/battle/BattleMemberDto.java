@@ -12,6 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class BattleMemberDto {
     private UUID userId;
+    private String publicId;
     private String name;
     private boolean ready;
     private boolean creator;

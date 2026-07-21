@@ -1,6 +1,7 @@
 package com.vpt.arena.service;
 
 import com.vpt.arena.dto.admin.AdminStatsDto;
+import com.vpt.arena.entity.enums.RoomStatus;
 import com.vpt.arena.entity.enums.Role;
 import com.vpt.arena.repository.BattleSubmissionRepository;
 import com.vpt.arena.repository.ProblemRepository;
@@ -16,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class AdminStatsService {
             .totalProblems(problemRepository.count())
             .publishedProblems(problemRepository.countByIsPublishedTrue())
             .totalSubmissions(submissionRepository.count() + battleSubmissionRepository.count())
-            .totalBattleRooms(roomRepository.count())
+            .totalBattleRooms(roomRepository.countByStatusIn(List.of(RoomStatus.WAITING, RoomStatus.IN_PROGRESS)))
             .build();
     }
 

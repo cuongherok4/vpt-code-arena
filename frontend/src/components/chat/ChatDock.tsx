@@ -143,12 +143,12 @@ export function ChatDock() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex h-12 min-w-12 items-center justify-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400 px-4 text-sm font-bold text-slate-950 shadow-[var(--shadow-app-popover)] transition-colors hover:bg-cyan-300"
+        className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-cyan-300/25 bg-slate-950/92 px-4 text-sm font-semibold text-cyan-100 shadow-[var(--shadow-app-popover)] backdrop-blur transition-colors hover:border-cyan-200/45 hover:bg-slate-900"
         title={open ? 'Thu nhỏ chat' : 'Mở chat nhanh'}
       >
         <span className="relative inline-flex">
           <MessageSquare size={20} />
-          <span className={`absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full ring-2 ring-cyan-400 ${chatSocket.connected ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+          <span className={`absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full ring-2 ring-slate-950 ${chatSocket.connected ? 'bg-emerald-400' : 'bg-slate-500'}`} />
         </span>
         <span className="hidden sm:inline">{open ? 'Đóng' : 'Chat'}</span>
       </button>

@@ -3,6 +3,7 @@ package com.vpt.arena.controller;
 import com.vpt.arena.dto.battle.BattleInviteDto;
 import com.vpt.arena.dto.battle.BattleRoomCreateRequest;
 import com.vpt.arena.dto.battle.BattleRoomDto;
+import com.vpt.arena.dto.battle.BattleRoomJoinRequest;
 import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
 import com.vpt.arena.dto.battle.BattleSubmissionDto;
 import com.vpt.arena.dto.battle.BattleSubmitRequest;
@@ -43,13 +44,19 @@ public class BattleController {
     @GetMapping("/rooms")
     @Operation(summary = "List public waiting battle rooms")
     public ResponseEntity<List<BattleRoomDto>> rooms() {
-        return ResponseEntity.ok(battleService.listPublicWaitingRooms());
+        return ResponseEntity.ok(battleService.listWaitingRooms());
     }
 
     @GetMapping("/rooms/{roomId}")
     @Operation(summary = "Get battle room detail")
     public ResponseEntity<BattleRoomDto> room(@PathVariable UUID roomId) {
         return ResponseEntity.ok(battleService.getRoom(roomId));
+    }
+
+    @GetMapping("/rooms/code/{code}")
+    @Operation(summary = "Get battle room detail by numeric code")
+    public ResponseEntity<BattleRoomDto> roomByCode(@PathVariable String code) {
+        return ResponseEntity.ok(battleService.getRoomByCode(code));
     }
 
     @PostMapping("/rooms")
@@ -66,6 +73,15 @@ public class BattleController {
             @PathVariable UUID roomId,
             @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(battleService.joinRoom(roomId, requireUserId(principal)));
+    }
+
+    @PostMapping("/rooms/code/{code}/join")
+    @Operation(summary = "Join a waiting battle room by numeric code")
+    public ResponseEntity<BattleRoomDto> joinByCode(
+            @PathVariable String code,
+            @RequestBody(required = false) BattleRoomJoinRequest request,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(battleService.joinRoomByCode(code, requireUserId(principal), request == null ? null : request.getPassword()));
     }
 
     @PostMapping("/rooms/{roomId}/leave")
