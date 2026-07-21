@@ -64,6 +64,10 @@ Các class dùng lại trong `@layer components`:
 - Các thông báo realtime như friend request và battle invite dùng vị trí `fixed`, có `max-width` để không tràn màn hình nhỏ.
 - `ChatDock` nằm trong `PageLayout`, mở/đóng ở góc dưới để người dùng vừa thao tác trên trang hiện tại vừa nhắn global chat hoặc DM bạn bè.
 - `ChatDock` ẩn tại route `/chat` để tránh trùng trải nghiệm với trang chat đầy đủ.
+- Kỳ thi dùng pattern “learning path”: mỗi problem là một node số lớn theo lộ trình, giúp người dùng có cảm giác đang mở từng chặng luyện tập.
+- Trang làm bài có điều hướng `Bài trước`/`Bài tiếp`; bài tiếp chỉ mở khi user đã có submission ở bài hiện tại.
+- Learn, Chat, Battle, Friends, Leaderboard và Profile ưu tiên `app-page`, `app-panel`, `app-card`, `app-button`, `app-field`, `app-table` để giữ cùng visual language.
+- Chat page đầy đủ giữ Global/DM dạng tab; ChatDock là entry nhanh khi user đang ở Learn/Exam/Battle/Profile.
 
 ## Quy ước
 

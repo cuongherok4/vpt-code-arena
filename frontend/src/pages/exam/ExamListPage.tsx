@@ -1,7 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Code2, Loader2, Medal, Search, SlidersHorizontal } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  Code2,
+  Loader2,
+  Medal,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+} from 'lucide-react';
 import { examApi, type Difficulty } from '@/api/exam.api';
 import ProblemStatement from '@/components/exam/ProblemStatement';
 
@@ -16,6 +26,12 @@ const difficultyClass = {
   EASY: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30',
   MEDIUM: 'text-amber-300 bg-amber-500/10 border-amber-500/30',
   HARD: 'text-rose-300 bg-rose-500/10 border-rose-500/30',
+};
+
+const difficultyNodeClass = {
+  EASY: 'border-emerald-300/40 bg-emerald-400 text-slate-950 shadow-emerald-400/20',
+  MEDIUM: 'border-amber-300/40 bg-amber-400 text-slate-950 shadow-amber-400/20',
+  HARD: 'border-rose-300/40 bg-rose-400 text-slate-950 shadow-rose-400/20',
 };
 
 const formatMemory = (kb: number) => `${Math.round(kb / 1024)} MB`;
@@ -42,11 +58,11 @@ export const ExamListPage = () => {
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#0B0F19]">
-      <aside className={`${id ? 'hidden md:block' : 'block'} w-full shrink-0 border-r border-white/10 bg-slate-950/40 md:w-96`}>
+      <aside className={`${id ? 'hidden md:block' : 'block'} w-full shrink-0 border-r border-white/10 bg-slate-950/40 md:w-[420px]`}>
         <div className="border-b border-white/10 bg-slate-950/80 p-4">
           <div className="mb-4 flex items-center gap-2">
-            <Code2 size={19} className="text-violet-300" />
-            <h1 className="text-lg font-semibold text-white">Đề thi lập trình</h1>
+            <Code2 size={19} className="text-cyan-300" />
+            <h1 className="text-lg font-semibold text-white">Lộ trình kỳ thi</h1>
           </div>
 
           <Link
@@ -66,7 +82,7 @@ export const ExamListPage = () => {
               <input
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
-                placeholder="Tìm đề..."
+                placeholder="Tìm chặng thi..."
                 className="min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-slate-500"
               />
             </label>
@@ -74,14 +90,14 @@ export const ExamListPage = () => {
             <div className="flex items-center gap-2">
               <SlidersHorizontal size={16} className="text-slate-500" />
               <div className="grid flex-1 grid-cols-4 gap-1">
-                {difficulties.map(item => (
+                {difficulties.map((item) => (
                   <button
                     key={item.label}
                     type="button"
                     onClick={() => setDifficulty(item.value)}
                     className={`rounded-md border px-2 py-1.5 text-xs font-medium transition-colors ${
                       difficulty === item.value
-                        ? 'border-violet-500/40 bg-violet-500/15 text-violet-200'
+                        ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-100'
                         : 'border-white/10 text-slate-400 hover:bg-white/5 hover:text-white'
                     }`}
                   >
@@ -93,11 +109,11 @@ export const ExamListPage = () => {
           </div>
         </div>
 
-        <div className="h-[calc(100%-145px)] overflow-y-auto p-3">
+        <div className="h-[calc(100%-145px)] overflow-y-auto p-4">
           {problemsQuery.isLoading && (
             <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-400">
-              <Loader2 size={18} className="animate-spin text-violet-400" />
-              Đang tải đề...
+              <Loader2 size={18} className="animate-spin text-cyan-300" />
+              Đang tải lộ trình...
             </div>
           )}
 
@@ -108,33 +124,64 @@ export const ExamListPage = () => {
           )}
 
           {!problemsQuery.isLoading && !problemsQuery.isError && problems.length === 0 && (
-            <div className="py-16 text-center text-sm text-slate-500">Không có đề phù hợp.</div>
+            <div className="py-16 text-center text-sm text-slate-500">Không có chặng phù hợp.</div>
           )}
 
-          <div className="space-y-2">
-            {problems.map(problem => {
+          <div className="relative space-y-4 py-2">
+            {problems.length > 1 && (
+              <div className="absolute bottom-10 left-1/2 top-10 hidden w-px -translate-x-1/2 bg-gradient-to-b from-cyan-400/0 via-cyan-400/25 to-cyan-400/0 sm:block" />
+            )}
+
+            {problems.map((problem, index) => {
               const active = problem.id === id;
+              const side = index % 2 === 0 ? 'pr-10 sm:pr-20' : 'pl-10 sm:pl-20';
               return (
                 <Link
                   key={problem.id}
                   to={`/exam/problems/${problem.id}`}
-                  className={`block rounded-lg border p-3 transition-colors ${
-                    active
-                      ? 'border-violet-500/40 bg-violet-500/15'
-                      : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
-                  }`}
+                  className={`group relative block ${side}`}
                 >
-                  <div className="mb-2 flex items-start justify-between gap-3">
-                    <h2 className="line-clamp-2 text-sm font-semibold text-white">{problem.title}</h2>
-                    <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${difficultyClass[problem.difficulty]}`}>
-                      {problem.difficulty}
-                    </span>
+                  <div className={`rounded-lg border p-3 transition-all ${
+                    active
+                      ? 'border-cyan-300/50 bg-cyan-400/[0.12] shadow-[0_16px_40px_rgba(45,212,191,0.12)]'
+                      : 'border-white/10 bg-white/[0.035] hover:border-cyan-300/30 hover:bg-white/[0.06]'
+                  }`}>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 text-base font-black shadow-lg transition-transform group-hover:scale-105 ${
+                        active ? 'border-cyan-100 bg-cyan-300 text-slate-950 shadow-cyan-300/30' : difficultyNodeClass[problem.difficulty]
+                      }`}>
+                        {index + 1}
+                        {active && (
+                          <span className="absolute -right-1 -top-1 rounded-full bg-slate-950 p-0.5 text-cyan-200 ring-1 ring-cyan-300/40">
+                            <Sparkles size={12} />
+                          </span>
+                        )}
+                      </span>
+
+                      <div className="min-w-0">
+                        <h2 className="line-clamp-2 text-sm font-semibold text-white">{problem.title}</h2>
+                        <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
+                          <span>{problem.topic}</span>
+                          <span>{problem.timeLimitMs} ms</span>
+                          <span>{formatMemory(problem.memoryLimitKb)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${difficultyClass[problem.difficulty]}`}>
+                        {problem.difficulty}
+                      </span>
+                      <span className={`inline-flex items-center gap-1 text-xs font-medium ${active ? 'text-cyan-100' : 'text-slate-500 group-hover:text-cyan-200'}`}>
+                        {active ? <CheckCircle2 size={13} /> : <Code2 size={13} />}
+                        {active ? 'Đang chọn' : 'Bắt đầu'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
-                    <span>{problem.topic}</span>
-                    <span>{problem.timeLimitMs} ms</span>
-                    <span>{formatMemory(problem.memoryLimitKb)}</span>
-                  </div>
+
+                  <span className={`absolute top-6 hidden h-px w-10 bg-cyan-400/20 sm:block ${
+                    index % 2 === 0 ? 'right-8 sm:right-12' : 'left-8 sm:left-12'
+                  }`} />
                 </Link>
               );
             })}
@@ -150,23 +197,25 @@ export const ExamListPage = () => {
               className="mb-5 inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white md:hidden"
             >
               <ArrowLeft size={16} />
-              Danh sách đề
+              Lộ trình đề
             </Link>
           )}
 
           {!id && (
             <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
-              <Code2 size={48} className="mb-4 text-violet-300" />
-              <h2 className="mb-2 text-2xl font-bold text-white">Chọn một đề để bắt đầu</h2>
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full border border-cyan-300/25 bg-cyan-300/10 text-cyan-200 shadow-[0_18px_60px_rgba(45,212,191,0.12)]">
+                <Sparkles size={36} />
+              </div>
+              <h2 className="mb-2 text-2xl font-bold text-white">Chọn một chặng để bắt đầu</h2>
               <p className="max-w-md text-sm leading-6 text-slate-400">
-                Danh sách bên trái đã sẵn sàng để lọc theo độ khó và tìm nhanh theo tên đề.
+                Các đề được sắp thành lộ trình từng bước. Hãy chọn một số trong đường học bên trái để luyện thi.
               </p>
             </div>
           )}
 
           {id && detailQuery.isLoading && (
             <div className="flex items-center justify-center gap-2 py-32 text-sm text-slate-400">
-              <Loader2 size={18} className="animate-spin text-violet-400" />
+              <Loader2 size={18} className="animate-spin text-cyan-300" />
               Đang tải đề bài...
             </div>
           )}

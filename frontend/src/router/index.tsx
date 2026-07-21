@@ -74,7 +74,7 @@ export const router = createBrowserRouter([
       { path: 'chat', element: LazyLoad(ChatPage) },
       { path: 'friends', element: LazyLoad(FriendsPage) },
       { path: 'leaderboard', element: LazyLoad(LeaderboardPage) },
-      { path: 'admin', element: LazyLoad(AdminPage) },
+
       { path: 'login', element: LazyLoad(LoginPage) },
       { path: 'register', element: LazyLoad(RegisterPage) },
       { path: 'forgot-password', element: LazyLoad(ForgotPasswordPage) },
@@ -83,5 +83,9 @@ export const router = createBrowserRouter([
       { path: 'auth/callback', element: LazyLoad(OAuthCallbackPage) },
       { path: 'profile', element: LazyLoad(ProfilePage) },
     ],
+  },
+  {
+    path: '/admin',
+    element: LazyLoad(AdminPage),
   },
 ]);

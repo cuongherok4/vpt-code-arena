@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Loader2, LockKeyhole } from 'lucide-react';
 import { examApi, type ExamLanguage, type SubmissionDto } from '@/api/exam.api';
 import ProblemStatement from '@/components/exam/ProblemStatement';
 import SubmitPanel from '@/components/exam/SubmitPanel';
@@ -17,6 +17,11 @@ export const ExamProblemPage = () => {
     queryKey: ['exam-problem', id],
     queryFn: () => examApi.getProblem(id!),
     enabled: !!id,
+  });
+
+  const problemsQuery = useQuery({
+    queryKey: ['exam-problems', 'path'],
+    queryFn: () => examApi.getProblems(),
   });
 
   const submissionsQuery = useQuery({
@@ -48,6 +53,13 @@ export const ExamProblemPage = () => {
 
   const submissions = submissionsQuery.data ?? [];
   const latestSubmission = submissions[0];
+  const problems = problemsQuery.data ?? [];
+  const currentIndex = problems.findIndex(problem => problem.id === id);
+  const previousProblem = currentIndex > 0 ? problems[currentIndex - 1] : null;
+  const nextProblem = currentIndex >= 0 ? problems[currentIndex + 1] : null;
+  const hasAccepted = submissions.some(submission => submission.result === 'AC');
+  const hasAttempted = submissions.length > 0;
+  const canMoveNext = Boolean(nextProblem && hasAttempted);
 
   if (problemQuery.isLoading) {
     return (
@@ -82,6 +94,70 @@ export const ExamProblemPage = () => {
               Danh sách đề
             </Link>
             <ProblemStatement problem={problemQuery.data} />
+            <div className="flex flex-col gap-3 border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border ${
+                  hasAccepted
+                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+                    : hasAttempted
+                      ? 'border-sky-400/30 bg-sky-400/10 text-sky-200'
+                      : 'border-amber-400/30 bg-amber-400/10 text-amber-200'
+                }`}>
+                  {hasAttempted ? <CheckCircle2 size={18} /> : <LockKeyhole size={18} />}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    {hasAccepted ? 'Đã giải đúng' : hasAttempted ? 'Đã nộp bài' : 'Nộp bài để mở bài tiếp'}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {hasAttempted
+                      ? 'Bạn có thể chuyển sang chặng kế tiếp hoặc quay lại bài trước.'
+                      : 'Sau lần nộp đầu tiên, nút bài tiếp sẽ được mở.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {previousProblem ? (
+                  <Link
+                    to={`/exam/problems/${previousProblem.id}`}
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
+                  >
+                    <ArrowLeft size={16} />
+                    Bài trước
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm font-semibold text-slate-600"
+                  >
+                    <ArrowLeft size={16} />
+                    Bài trước
+                  </button>
+                )}
+
+                {nextProblem && canMoveNext ? (
+                  <Link
+                    to={`/exam/problems/${nextProblem.id}`}
+                    className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400"
+                  >
+                    Bài tiếp
+                    <ArrowRight size={16} />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-500"
+                    title={nextProblem ? 'Nộp bài hiện tại trước khi sang bài tiếp.' : 'Bạn đang ở bài cuối.'}
+                  >
+                    {nextProblem ? 'Bài tiếp' : 'Hết lộ trình'}
+                    <ArrowRight size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </main>
 

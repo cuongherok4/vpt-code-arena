@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { CheckCircle2, Edit3, Loader2, LogOut, MessageSquare, Save, Shield, Target, Trophy, User, UsersRound, XCircle } from 'lucide-react';
+import { CheckCircle2, Edit3, Loader2, LogOut, MessageSquare, Save, Shield, Target, Trophy, User, UsersRound, XCircle, LayoutDashboard } from 'lucide-react';
 import { userApi, type UserProfile, type UserSubmissionHistory } from '@/api/user.api';
 import { ActivityCalendar } from '@/components/leaderboard/ActivityCalendar';
 import { StatsCard } from '@/components/leaderboard/StatsCard';
@@ -37,7 +37,7 @@ export default function ProfilePage() {
         updateUser(userApi.toAuthUser(nextProfile));
       })
       .catch(() => {
-        if (mounted) setError('Khong the tai thong tin profile.');
+        if (mounted) setError('Không thể tải thông tin profile.');
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -66,17 +66,17 @@ export default function ProfilePage() {
       const updated = await userApi.updateMe({ name });
       setProfile(updated);
       updateUser(userApi.toAuthUser(updated));
-      setMessage('Profile da duoc cap nhat.');
+      setMessage('Profile đã được cập nhật.');
     } catch {
-      setError('Khong the cap nhat profile.');
+      setError('Không thể cập nhật profile.');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-slate-950 px-4 py-8">
-      <section className="mx-auto max-w-5xl">
+    <main className="app-page">
+      <section>
         {loading ? (
           <div className="flex items-center justify-center py-24 text-slate-400">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -85,7 +85,7 @@ export default function ProfilePage() {
           <>
             <div className="flex flex-col gap-5 border-b border-white/10 pb-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-md bg-violet-600/20 text-violet-200">
+                <div className="flex h-14 w-14 items-center justify-center rounded-md border border-cyan-400/25 bg-cyan-400/10 text-cyan-200">
                   <User className="h-7 w-7" />
                 </div>
                 <div>
@@ -96,14 +96,26 @@ export default function ProfilePage() {
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => void logout()}
-                className="inline-flex w-fit items-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/5"
-              >
-                <LogOut className="h-4 w-4" />
-                Dang xuat
-              </button>
+              {/* Action buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                {profile.role === 'ADMIN' && (
+                  <Link
+                    to="/admin"
+                    className="inline-flex items-center gap-2 rounded-md border border-[#0066b2]/25 bg-[#0066b2]/[0.06] px-4 py-2 text-sm font-semibold text-[#0066b2] hover:bg-[#0066b2]/[0.12] transition-colors"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void logout()}
+                  className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Đăng xuất
+                </button>
+              </div>
             </div>
 
             <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -120,17 +132,17 @@ export default function ProfilePage() {
 
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
               <div className="space-y-6">
-              <section className="border border-white/10 bg-white/[0.03] p-5">
+              <section className="app-panel p-5">
                 <div className="flex items-center gap-2 text-white">
                   <Edit3 className="h-4 w-4" />
-                  <h2 className="font-semibold">Thong tin ca nhan</h2>
+                  <h2 className="font-semibold">Thông tin cá nhân</h2>
                 </div>
 
                 <form onSubmit={onSubmit} className="mt-5 space-y-4">
                   <label className="block">
-                    <span className="text-sm font-medium text-slate-300">Ten hien thi</span>
+                    <span className="text-sm font-medium text-slate-300">Tên hiển thị</span>
                     <input
-                      className="mt-2 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-white outline-none focus:border-violet-400"
+                      className="app-field mt-2"
                       value={name}
                       maxLength={100}
                       onChange={(event) => setName(event.target.value)}
@@ -141,7 +153,7 @@ export default function ProfilePage() {
                   <div className="space-y-2 text-sm text-slate-400">
                     <p className="flex items-center gap-2">
                       {profile.emailVerified ? <CheckCircle2 className="h-4 w-4 text-emerald-300" /> : <XCircle className="h-4 w-4 text-red-300" />}
-                      {profile.emailVerified ? 'Email da xac thuc' : 'Email chua xac thuc'}
+                      {profile.emailVerified ? 'Email đã xác thực' : 'Email chưa xác thực'}
                     </p>
                     <p>Dang nhap: {profile.oauthProvider ?? 'email/password'}</p>
                   </div>
@@ -152,15 +164,15 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="app-button app-button-primary w-full"
                   >
                     <Save className="h-4 w-4" />
-                    {saving ? 'Dang luu...' : 'Luu thay doi'}
+                    {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
                   </button>
                 </form>
               </section>
 
-              <section className="border border-white/10 bg-white/[0.03] p-5">
+              <section className="app-panel p-5">
                 <div className="flex items-center gap-2 text-white">
                   <UsersRound className="h-4 w-4" />
                   <h2 className="font-semibold">Bạn bè</h2>
@@ -181,41 +193,41 @@ export default function ProfilePage() {
               </section>
               </div>
 
-              <section className="border border-white/10 bg-white/[0.03] p-5">
-                <h2 className="font-semibold text-white">Lich su submit</h2>
+              <section className="app-panel p-5">
+                <h2 className="font-semibold text-white">Lịch sử submit</h2>
                 <div className="mt-4 overflow-x-auto">
-                  <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead className="text-xs uppercase text-slate-500">
+                  <table className="app-table min-w-[640px]">
+                    <thead>
                       <tr>
-                        <th className="py-2 pr-4">Loai</th>
-                        <th className="py-2 pr-4">Bai</th>
-                        <th className="py-2 pr-4">Ngon ngu</th>
-                        <th className="py-2 pr-4">Ket qua</th>
-                        <th className="py-2 pr-4">Diem</th>
-                        <th className="py-2">Thoi gian</th>
+                        <th>Loại</th>
+                        <th>Bài</th>
+                        <th>Ngôn ngữ</th>
+                        <th>Kết quả</th>
+                        <th>Điểm</th>
+                        <th>Thời gian</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/10 text-slate-300">
+                    <tbody>
                       {history.map((item) => (
                         <tr key={`${item.type}-${item.id}`}>
-                          <td className="py-3 pr-4 text-slate-400">{item.type}</td>
-                          <td className="py-3 pr-4">
+                          <td className="text-slate-400">{item.type}</td>
+                          <td>
                             <div className="font-medium text-white">{item.problemTitle}</div>
                             {item.roomName && <div className="text-xs text-slate-500">{item.roomName}</div>}
                           </td>
-                          <td className="py-3 pr-4">{item.language}</td>
-                          <td className="py-3 pr-4">
+                          <td>{item.language}</td>
+                          <td>
                             <span className={`inline-flex rounded px-2 py-1 text-xs font-semibold ${resultClass[item.result]}`}>
                               {item.result}
                             </span>
                           </td>
-                          <td className="py-3 pr-4">{item.points}</td>
-                          <td className="py-3 text-slate-400">{formatDate(item.submittedAt)}</td>
+                          <td>{item.points}</td>
+                          <td className="text-slate-400">{formatDate(item.submittedAt)}</td>
                         </tr>
                       ))}
                       {history.length === 0 && (
                         <tr>
-                          <td className="py-8 text-center text-slate-500" colSpan={6}>Chua co submission nao.</td>
+                          <td className="py-8 text-center text-slate-500" colSpan={6}>Chưa có submission nào.</td>
                         </tr>
                       )}
                     </tbody>
@@ -225,7 +237,7 @@ export default function ProfilePage() {
             </div>
           </>
         ) : (
-          <p className="py-16 text-center text-red-300">{error || 'Khong the tai profile.'}</p>
+          <p className="py-16 text-center text-red-300">{error || 'Không thể tải profile.'}</p>
         )}
       </section>
     </main>

@@ -81,11 +81,11 @@ export const BattleLobbyPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto max-w-xl rounded-lg border border-white/10 bg-slate-950/70 p-6 text-center">
-        <Lock size={32} className="mx-auto mb-3 text-violet-300" />
+      <div className="app-panel mx-auto max-w-xl p-6 text-center">
+        <Lock size={32} className="mx-auto mb-3 text-cyan-300" />
         <h1 className="text-xl font-semibold text-white">Cần đăng nhập để vào đấu trường</h1>
         <p className="mt-2 text-sm text-slate-400">Battle dùng tài khoản thật để tạo phòng, join phòng, ready và submit.</p>
-        <Link to="/login" className="mt-5 inline-flex rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-400">
+        <Link to="/login" className="app-button app-button-primary mt-5">
           Đăng nhập
         </Link>
       </div>
@@ -97,13 +97,17 @@ export const BattleLobbyPage = () => {
       <section className="min-w-0">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-white">Battle Lobby</h1>
-            <p className="mt-1 text-sm text-slate-400">Tạo phòng, vào phòng bằng mã, hoặc chọn một phòng public đang chờ.</p>
+            <div className="app-kicker">
+              <Swords size={18} />
+              Đấu trường
+            </div>
+            <h1 className="app-page-heading">Battle Lobby</h1>
+            <p className="app-page-subtitle">Tạo phòng, vào phòng bằng mã, hoặc chọn một phòng public đang chờ.</p>
           </div>
           <button
             type="button"
             onClick={() => roomsQuery.refetch()}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+            className="app-button app-button-secondary"
           >
             <RefreshCw size={16} className={roomsQuery.isFetching ? 'animate-spin' : ''} />
             Làm mới
@@ -111,8 +115,8 @@ export const BattleLobbyPage = () => {
         </div>
 
         {roomsQuery.isLoading && (
-          <div className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] py-16 text-sm text-slate-400">
-            <Loader2 size={18} className="animate-spin text-violet-300" />
+          <div className="app-panel flex items-center justify-center gap-2 py-16 text-sm text-slate-400">
+            <Loader2 size={18} className="animate-spin text-cyan-300" />
             Đang tải phòng...
           </div>
         )}
@@ -125,8 +129,8 @@ export const BattleLobbyPage = () => {
         )}
 
         {!roomsQuery.isLoading && !roomsQuery.isError && rooms.length === 0 && (
-          <div className="rounded-lg border border-white/10 bg-white/[0.03] py-16 text-center">
-            <Swords size={42} className="mx-auto mb-3 text-violet-300" />
+          <div className="app-panel py-16 text-center">
+            <Swords size={42} className="mx-auto mb-3 text-cyan-300" />
             <p className="font-medium text-white">Chưa có phòng public đang chờ.</p>
             <p className="mt-1 text-sm text-slate-500">Tạo phòng mới để bắt đầu một trận battle.</p>
           </div>
@@ -137,7 +141,7 @@ export const BattleLobbyPage = () => {
             <Link
               key={room.id}
               to={`/battle/rooms/${room.id}`}
-              className="rounded-lg border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-violet-400/40 hover:bg-white/[0.06]"
+              className="app-card p-4 transition-colors hover:border-cyan-400/40 hover:bg-white/[0.06]"
             >
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -160,16 +164,16 @@ export const BattleLobbyPage = () => {
       </section>
 
       <aside className="space-y-4">
-        <form onSubmit={submitCreate} className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
+        <form onSubmit={submitCreate} className="app-panel p-4">
           <div className="mb-4 flex items-center gap-2">
-            <Plus size={18} className="text-violet-300" />
+            <Plus size={18} className="text-cyan-300" />
             <h2 className="font-semibold text-white">Tạo phòng</h2>
           </div>
           <div className="space-y-3">
             <input
               value={form.name}
               onChange={event => setForm(prev => ({ ...prev, name: event.target.value }))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-400/50"
+              className="app-field"
               placeholder="Tên phòng"
               required
             />
@@ -186,7 +190,7 @@ export const BattleLobbyPage = () => {
                   onClick={() => setForm(prev => ({ ...prev, difficulty: item.value || null }))}
                   className={`rounded-md border px-2 py-1.5 text-xs font-medium ${
                     (form.difficulty || '') === item.value
-                      ? 'border-violet-500/40 bg-violet-500/15 text-violet-200'
+                      ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-100'
                       : 'border-white/10 text-slate-400 hover:bg-white/5'
                   }`}
                 >
@@ -197,7 +201,7 @@ export const BattleLobbyPage = () => {
             <input
               value={form.topic || ''}
               onChange={event => setForm(prev => ({ ...prev, topic: event.target.value }))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-400/50"
+              className="app-field"
               placeholder="Topic optional"
             />
             <label className="flex items-center gap-2 text-sm text-slate-300">
@@ -205,14 +209,14 @@ export const BattleLobbyPage = () => {
                 type="checkbox"
                 checked={form.isPublic}
                 onChange={event => setForm(prev => ({ ...prev, isPublic: event.target.checked }))}
-                className="h-4 w-4 accent-violet-500"
+                className="h-4 w-4 accent-cyan-500"
               />
               Phòng public
             </label>
             <button
               type="submit"
               disabled={busy || !form.name.trim()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="app-button app-button-primary w-full"
             >
               {createMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               Tạo phòng
@@ -220,22 +224,22 @@ export const BattleLobbyPage = () => {
           </div>
         </form>
 
-        <form onSubmit={submitJoin} className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
+        <form onSubmit={submitJoin} className="app-panel p-4">
           <div className="mb-4 flex items-center gap-2">
-            <DoorOpen size={18} className="text-violet-300" />
+            <DoorOpen size={18} className="text-cyan-300" />
             <h2 className="font-semibold text-white">Vào bằng mã phòng</h2>
           </div>
           <div className="space-y-3">
             <input
               value={joinCode}
               onChange={event => setJoinCode(event.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-400/50"
+              className="app-field"
               placeholder="Room UUID"
             />
             <button
               type="submit"
               disabled={busy || !joinCode.trim()}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+              className="app-button app-button-secondary w-full"
             >
               {joinMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <DoorOpen size={16} />}
               Join phòng
@@ -268,7 +272,7 @@ const NumberField = ({ label, value, min, max, onChange }: NumberFieldProps) => 
       max={max}
       value={value}
       onChange={event => onChange(Number(event.target.value))}
-      className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-2 text-sm text-white outline-none focus:border-violet-400/50"
+      className="app-field px-2"
     />
   </label>
 );

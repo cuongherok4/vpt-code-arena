@@ -231,13 +231,13 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 10 — Frontend Redesign (Tuần 20–21) 🟡 50%
+### Phase 10 — Frontend Redesign (Tuần 20–21) 🟡 60%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 10.1 | `feature/p10-fe-design-system` | Chuẩn hóa design tokens, màu, typography, spacing, button/input/table/card/modal states | FE có hệ design thống nhất, dễ tái sử dụng, không lệch style giữa các module | 🟢 Done |
 | 10.2 | `feature/p10-fe-layout-navigation` | Làm lại layout tổng thể, navbar/sidebar, page shell, responsive navigation | Điều hướng rõ ràng, bố cục nhất quán trên toàn app | 🟢 Done |
-| 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language; thêm chat dock toàn app | Đã chuẩn hóa nền/palette và thêm chat nổi dùng được ở nhiều trang; các màn hình chính tiếp tục polish theo cùng visual language | 🟡 Đang thực hiện |
+| 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language; thêm chat dock toàn app | Core pages đã dùng chung app shell, token màu, panel/button/input/table states; ChatDock global hỗ trợ Global + DM; Exam có learning path và điều hướng bài trước/bài tiếp theo tiến độ nộp bài | 🟢 Done |
 | 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Stats | Admin dashboard chuyên nghiệp, thao tác nhanh, dữ liệu dễ scan | ⚪ Chưa bắt đầu |
 | 10.5 | `feature/p10-fe-accessibility-polish` | Kiểm tra accessibility cơ bản: focus state, contrast, keyboard navigation, empty/loading/error states | Giao diện dễ dùng hơn, ít lỗi trải nghiệm, sẵn sàng polish/performance | ⚪ Chưa bắt đầu |
 
