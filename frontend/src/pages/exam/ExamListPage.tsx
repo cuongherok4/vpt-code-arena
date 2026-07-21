@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Code2, Loader2, Search, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Code2, Loader2, Medal, Search, SlidersHorizontal } from 'lucide-react';
 import { examApi, type Difficulty } from '@/api/exam.api';
 import ProblemStatement from '@/components/exam/ProblemStatement';
 
@@ -48,6 +48,17 @@ export const ExamListPage = () => {
             <Code2 size={19} className="text-violet-300" />
             <h1 className="text-lg font-semibold text-white">Đề thi lập trình</h1>
           </div>
+
+          <Link
+            to="/leaderboard"
+            className="mb-3 flex items-center justify-between rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-100 transition-colors hover:bg-cyan-400/15"
+          >
+            <span className="flex items-center gap-2">
+              <Medal size={16} />
+              Bảng xếp hạng kỳ thi
+            </span>
+            <span className="text-xs text-cyan-200/70">Top 50</span>
+          </Link>
 
           <div className="space-y-3">
             <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">

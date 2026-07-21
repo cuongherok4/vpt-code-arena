@@ -51,10 +51,24 @@ Các class dùng lại trong `@layer components`:
 | `.app-alert-muted` | Alert loading/empty |
 | `.app-badge` | Badge/pill nhỏ |
 
+## Layout & Navigation
+
+- `PageLayout` dùng top navigation cố định và main content có padding responsive.
+- Desktop (`lg` trở lên): navigation hiển thị trong top bar để thao tác nhanh.
+- Mobile/tablet nhỏ: navigation chuyển xuống bottom bar dạng icon + label ngắn, tránh chen chúc trong header.
+- Bottom bar là phần của `Navbar`, vì vậy page content cần giữ `pb-24` ở mobile để không bị che.
+- Header chỉ giữ các khu chính: Học tập, Kỳ thi, Thách đấu và Admin nếu có quyền.
+- Chat không nằm trong header vì đã có `ChatDock` toàn app.
+- Bạn bè nằm trong trang thông tin cá nhân/Profile; badge lời mời kết bạn hiển thị trên nút profile.
+- Bảng xếp hạng được đặt trong khu Kỳ thi bằng entry point ở `ExamListPage`.
+- Các thông báo realtime như friend request và battle invite dùng vị trí `fixed`, có `max-width` để không tràn màn hình nhỏ.
+- `ChatDock` nằm trong `PageLayout`, mở/đóng ở góc dưới để người dùng vừa thao tác trên trang hiện tại vừa nhắn global chat hoặc DM bạn bè.
+- `ChatDock` ẩn tại route `/chat` để tránh trùng trải nghiệm với trang chat đầy đủ.
+
 ## Quy ước
 
 - Card radius mặc định 8px, icon/button nhỏ 6px.
-- Ưu tiên cyan cho action chính, violet chỉ là accent phụ.
+- Ưu tiên teal/cyan cho action chính, indigo/violet chỉ là accent phụ.
 - Không dùng hero/section marketing cho app surface.
 - Form/table/dashboard cần dense, gọn, dễ thao tác lặp lại.
 - Khi làm mới màn hình, ưu tiên dùng class hệ thống trước khi viết Tailwind dài tại chỗ.

@@ -15,6 +15,7 @@ type DMChatWindowProps = {
   currentUserId?: string;
   sendDirect: (toUserId: string, message: string) => Promise<{ success: boolean; message?: unknown }>;
   onError: (message: string) => void;
+  className?: string;
 };
 
 export const DMChatWindow = ({
@@ -27,6 +28,7 @@ export const DMChatWindow = ({
   currentUserId,
   sendDirect,
   onError,
+  className,
 }: DMChatWindowProps) => {
   const activeUserId = selectedUserId.trim();
   const historyQuery = useQuery({
@@ -41,7 +43,7 @@ export const DMChatWindow = ({
   );
 
   return (
-    <section className="flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4">
+    <section className={`flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4 ${className ?? ''}`}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <MessagesSquare size={18} className="shrink-0 text-cyan-300" />

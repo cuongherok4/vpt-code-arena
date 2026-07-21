@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
-import { CheckCircle2, Edit3, Loader2, LogOut, Save, Shield, Target, Trophy, User, XCircle } from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
+import { CheckCircle2, Edit3, Loader2, LogOut, MessageSquare, Save, Shield, Target, Trophy, User, UsersRound, XCircle } from 'lucide-react';
 import { userApi, type UserProfile, type UserSubmissionHistory } from '@/api/user.api';
 import { ActivityCalendar } from '@/components/leaderboard/ActivityCalendar';
 import { StatsCard } from '@/components/leaderboard/StatsCard';
@@ -119,6 +119,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,360px)_1fr]">
+              <div className="space-y-6">
               <section className="border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex items-center gap-2 text-white">
                   <Edit3 className="h-4 w-4" />
@@ -158,6 +159,27 @@ export default function ProfilePage() {
                   </button>
                 </form>
               </section>
+
+              <section className="border border-white/10 bg-white/[0.03] p-5">
+                <div className="flex items-center gap-2 text-white">
+                  <UsersRound className="h-4 w-4" />
+                  <h2 className="font-semibold">Bạn bè</h2>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  Quản lý danh sách bạn bè, lời mời kết bạn và mở nhắn tin trực tiếp.
+                </p>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                  <Link to="/friends" className="app-button app-button-secondary justify-start">
+                    <UsersRound className="h-4 w-4" />
+                    Danh sách bạn bè
+                  </Link>
+                  <Link to="/chat?tab=dm" className="app-button app-button-secondary justify-start">
+                    <MessageSquare className="h-4 w-4" />
+                    Mở DM đầy đủ
+                  </Link>
+                </div>
+              </section>
+              </div>
 
               <section className="border border-white/10 bg-white/[0.03] p-5">
                 <h2 className="font-semibold text-white">Lich su submit</h2>
