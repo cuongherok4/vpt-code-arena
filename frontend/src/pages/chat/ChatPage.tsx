@@ -22,7 +22,8 @@ export const ChatPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated, user } = useAuthStore();
   const initialDmUserId = searchParams.get('dm') ?? '';
-  const [tab, setTab] = useState<ChatTab>(initialDmUserId ? 'dm' : 'global');
+  const initialTab = searchParams.get('tab') === 'dm' ? 'dm' : 'global';
+  const [tab, setTab] = useState<ChatTab>(initialDmUserId || initialTab === 'dm' ? 'dm' : 'global');
   const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
   const [selectedDmUserId, setSelectedDmUserId] = useState(initialDmUserId);
   const [error, setError] = useState('');

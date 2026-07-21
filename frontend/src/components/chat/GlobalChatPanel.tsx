@@ -12,6 +12,7 @@ type GlobalChatPanelProps = {
   joinGlobal: () => Promise<{ success: boolean; message?: string }>;
   sendGlobal: (message: string) => Promise<{ success: boolean; message?: unknown }>;
   onError: (message: string) => void;
+  className?: string;
 };
 
 export const GlobalChatPanel = ({
@@ -21,6 +22,7 @@ export const GlobalChatPanel = ({
   joinGlobal,
   sendGlobal,
   onError,
+  className,
 }: GlobalChatPanelProps) => {
   const historyQuery = useQuery({
     queryKey: ['chat-global'],
@@ -37,7 +39,7 @@ export const GlobalChatPanel = ({
   const messages = mergeMessages(historyQuery.data ?? [], liveMessages.filter((item) => item.channel === 'GLOBAL'));
 
   return (
-    <section className="flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4">
+    <section className={`flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4 ${className ?? ''}`}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <MessageSquare size={18} className="text-cyan-300" />

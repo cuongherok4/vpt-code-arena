@@ -2,18 +2,18 @@
 
 @layer base {
   :root {
-    --color-app-bg: #020617;
-    --color-app-surface: rgba(15, 23, 42, 0.72);
-    --color-app-surface-muted: rgba(255, 255, 255, 0.035);
+    --color-app-bg: #050816;
+    --color-app-surface: rgba(11, 18, 32, 0.78);
+    --color-app-surface-muted: rgba(255, 255, 255, 0.045);
     --color-app-border: rgba(255, 255, 255, 0.1);
     --color-app-border-strong: rgba(34, 211, 238, 0.34);
     --color-app-text: #f8fafc;
     --color-app-text-muted: #94a3b8;
     --color-app-text-subtle: #64748b;
-    --color-app-primary: #22d3ee;
-    --color-app-primary-hover: #67e8f9;
+    --color-app-primary: #2dd4bf;
+    --color-app-primary-hover: #5eead4;
     --color-app-primary-contrast: #020617;
-    --color-app-secondary: #8b5cf6;
+    --color-app-secondary: #818cf8;
     --color-app-success: #34d399;
     --color-app-warning: #f59e0b;
     --color-app-danger: #f87171;
@@ -43,6 +43,13 @@
 @layer components {
   .app-page {
     @apply mx-auto max-w-7xl space-y-5;
+  }
+
+  .app-shell {
+    background:
+      linear-gradient(180deg, rgba(45, 212, 191, 0.045) 0%, transparent 260px),
+      linear-gradient(135deg, rgba(129, 140, 248, 0.08) 0%, transparent 32%),
+      var(--color-app-bg);
   }
 
   .app-page-heading {
