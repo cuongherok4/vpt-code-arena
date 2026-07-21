@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, Loader2, Medal, Trophy } from 'lucide-react';
+import { AlertCircle, Medal, Trophy } from 'lucide-react';
 import {
   leaderboardApi,
   type GlobalLeaderboardEntry,
   type LeaderboardLanguage,
 } from '@/api/leaderboard.api';
 import { useAuthStore } from '@/stores/authStore';
+import { EmptyState } from '@/components/common/EmptyState';
+import { SkeletonTable } from '@/components/common/LoadingSkeleton';
 
 const languageTabs: Array<{ value: LeaderboardLanguage; label: string }> = [
   { value: 'all', label: 'Tất cả' },
@@ -41,7 +43,7 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      <section className="rounded-lg border border-cyan-400/20 bg-cyan-400/[0.06] p-4">
+      <section aria-label="Thống kê thứ hạng cá nhân" className="rounded-lg border border-cyan-400/20 bg-cyan-400/[0.06] p-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-cyan-100">Thống số của bạn</p>
@@ -60,19 +62,21 @@ export default function LeaderboardPage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-white/[0.03]">
+      <section aria-label="Bảng xếp hạng server" className="rounded-lg border border-white/10 bg-white/[0.03]">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
           <div className="flex items-center gap-2 text-white">
             <Medal size={18} className="text-cyan-300" />
             <h2 className="font-semibold">Top 50</h2>
           </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1" role="tablist" aria-label="Lọc ngôn ngữ lập trình">
             {languageTabs.map((item) => (
               <button
                 key={item.value}
                 type="button"
+                role="tab"
+                aria-selected={language === item.value}
                 onClick={() => setLanguage(item.value)}
-                className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none ${
                   language === item.value
                     ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-100'
                     : 'border-white/10 text-slate-400 hover:bg-white/5 hover:text-white'
@@ -85,27 +89,31 @@ export default function LeaderboardPage() {
         </div>
 
         {leaderboardQuery.isLoading && (
-          <div className="flex items-center justify-center gap-2 py-20 text-sm text-slate-400">
-            <Loader2 size={18} className="animate-spin text-cyan-300" />
-            Đang tải bảng xếp hạng...
+          <div className="p-4">
+            <SkeletonTable rows={8} cols={6} />
           </div>
         )}
 
         {leaderboardQuery.isError && (
-          <div className="m-4 flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+          <div role="alert" className="m-4 flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
             <AlertCircle size={18} />
             Không thể tải bảng xếp hạng.
           </div>
         )}
 
         {!leaderboardQuery.isLoading && !leaderboardQuery.isError && rows.length === 0 && (
-          <div className="py-20 text-center text-sm text-slate-500">Chưa có dữ liệu xếp hạng cho bộ lọc này.</div>
+          <EmptyState
+            icon={<Trophy className="h-6 w-6" />}
+            title="Chưa có dữ liệu xếp hạng"
+            description="Chưa có người chơi nào ghi điểm AC cho ngôn ngữ này."
+            className="border-0 bg-transparent py-16"
+          />
         )}
 
         {rows.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="border-b border-white/10 text-xs uppercase text-slate-500">
+            <table aria-label="Bảng xếp hạng kỳ thi" className="w-full min-w-[760px] text-left text-sm">
+              <thead className="border-b border-white/10 text-xs uppercase text-slate-400 bg-white/[0.02]">
                 <tr>
                   <th className="px-4 py-3">Hạng</th>
                   <th className="px-4 py-3">Người chơi</th>
@@ -117,15 +125,15 @@ export default function LeaderboardPage() {
               </thead>
               <tbody className="divide-y divide-white/10 text-slate-300">
                 {rows.map((row) => (
-                  <tr key={`${row.rank}-${row.userId}`} className="hover:bg-white/[0.025]">
+                  <tr key={`${row.rank}-${row.userId}`} className="hover:bg-white/[0.025] transition-colors">
                     <td className="px-4 py-3">{rankBadge(row.rank)}</td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-white">{row.userName}</div>
                     </td>
-                    <td className="px-4 py-3 text-slate-400">{row.publicId}</td>
+                    <td className="px-4 py-3 text-slate-400 font-mono text-xs">{row.publicId}</td>
                     <td className="px-4 py-3 text-right font-semibold text-cyan-200">{row.totalPoints}</td>
                     <td className="px-4 py-3 text-right">{row.totalAccepted}</td>
-                    <td className="px-4 py-3 text-slate-400">{formatDate(row.lastAcceptedAt)}</td>
+                    <td className="px-4 py-3 text-slate-400 text-xs">{formatDate(row.lastAcceptedAt)}</td>
                   </tr>
                 ))}
               </tbody>

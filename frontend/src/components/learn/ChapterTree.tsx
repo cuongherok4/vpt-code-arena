@@ -18,7 +18,7 @@ export const ChapterTree = ({ chapters, lang }: Props) => {
   const colors = langColors[lang] ?? langColors['java'];
 
   return (
-    <nav className="pb-8 px-2">
+    <nav aria-label="Danh mục bài học" className="pb-8 px-2">
       {chapters.map((chapter, chapterIdx) => {
         const completedCount = chapter.lessons.filter((l) => l.completed).length;
         const totalCount = chapter.lessons.length;
@@ -35,12 +35,12 @@ export const ChapterTree = ({ chapters, lang }: Props) => {
                     {chapter.title}
                   </h3>
                 </div>
-                <span className="text-[10px] text-slate-600 font-medium">
+                <span className="text-[10px] text-slate-400 font-medium">
                   {completedCount}/{totalCount}
                 </span>
               </div>
               {/* Mini progress */}
-              <div className="h-0.5 w-full rounded-full bg-white/[0.06]">
+              <div className="h-0.5 w-full rounded-full bg-white/[0.06]" aria-label={`Tiến độ chương ${chapter.title}: ${chapterProgress}%`}>
                 <div
                   className={`h-full rounded-full transition-all duration-700 ${colors.dot}`}
                   style={{ width: `${chapterProgress}%` }}
@@ -49,7 +49,7 @@ export const ChapterTree = ({ chapters, lang }: Props) => {
             </div>
 
             {/* Lessons */}
-            <ul className="space-y-0.5">
+            <ul className="space-y-0.5" role="group">
               {chapter.lessons.map((lesson, lessonIdx) => {
                 const href = `/learn/${lang}/lesson/${lesson.id}`;
                 const isActive = pathname === href;
@@ -59,7 +59,8 @@ export const ChapterTree = ({ chapters, lang }: Props) => {
                   <li key={lesson.id}>
                     <Link
                       to={href}
-                      className={`group flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-all duration-150 text-sm ${
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`group flex items-start gap-2.5 rounded-xl px-3 py-2.5 transition-all duration-150 text-sm focus-visible:outline-none ${
                         isActive
                           ? `${colors.activeBg} ${colors.active} ring-1`
                           : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'

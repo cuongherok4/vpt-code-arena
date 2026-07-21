@@ -34,6 +34,10 @@ public class ChatMessage {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "battle_room_id")
+    private Room battleRoom;
+
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "message_type", nullable = false)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import type { ChatMessage } from '@/api/chat.api';
+import { battleApi } from '@/api/battle.api';
 import { friendsApi, type FriendStatus } from '@/api/friends.api';
 import { UserMiniProfilePopover } from '@/components/social/UserMiniProfilePopover';
 
@@ -12,6 +14,16 @@ type MessageListProps = {
 
 export const MessageList = ({ messages, currentUserId, onError }: MessageListProps) => {
   const [selectedSenderId, setSelectedSenderId] = useState('');
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const joinBattleMutation = useMutation({
+    mutationFn: (roomId: string) => battleApi.joinRoom(roomId),
+    onSuccess: (room) => {
+      queryClient.invalidateQueries({ queryKey: ['battle-rooms'] });
+      navigate(`/battle/rooms/${room.id}`);
+    },
+    onError: (error) => onError?.(apiErrorMessage(error, 'Không thể vào phòng. Phòng có thể đã đầy hoặc đã bắt đầu.')),
+  });
   const friendsQuery = useQuery({
     queryKey: ['friends'],
     queryFn: friendsApi.friends,
@@ -56,6 +68,7 @@ export const MessageList = ({ messages, currentUserId, onError }: MessageListPro
         messages.map((item) => {
           const mine = item.senderId === currentUserId;
           const selectedUser = userById.get(item.senderId);
+          const battleInvite = parseBattleInvite(item);
           return (
             <div key={item.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[78%] rounded-lg border px-3 py-2 ${mine ? 'border-cyan-400/25 bg-cyan-500/12' : 'border-white/10 bg-white/[0.05]'}`}>
@@ -73,7 +86,26 @@ export const MessageList = ({ messages, currentUserId, onError }: MessageListPro
                   )}
                   <span>{formatTime(item.createdAt)}</span>
                 </div>
-                <p className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-100">{item.deleted ? 'Tin nhắn đã bị xóa' : item.message}</p>
+                <p className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-100">
+                  {item.deleted ? 'Tin nhắn đã bị xóa' : battleInvite ? 'Mời mọi người vào phòng thách đấu.' : item.message}
+                </p>
+                {!item.deleted && battleInvite && (
+                  <div className="mt-3 rounded-lg border border-cyan-400/25 bg-cyan-400/10 p-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Lời mời thách đấu</div>
+                    <div className="mt-1 truncate text-sm font-semibold text-white">{battleInvite.name}</div>
+                    {battleInvite.code && (
+                      <div className="mt-1 font-mono text-xs text-slate-400">Mã {battleInvite.code}</div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => joinBattleMutation.mutate(battleInvite.roomId)}
+                      disabled={joinBattleMutation.isPending}
+                      className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-cyan-400 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
+                    >
+                      {joinBattleMutation.isPending ? 'Đang vào...' : 'Vào phòng'}
+                    </button>
+                  </div>
+                )}
                 {!mine && selectedSenderId === item.senderId && selectedUser && (
                   <div className="mt-3">
                     <UserMiniProfilePopover user={selectedUser} onError={onError} />
@@ -105,4 +137,27 @@ function formatTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
   return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function parseBattleInvite(message: ChatMessage): { roomId: string; code: string; name: string } | null {
+  if (message.battleRoomId) {
+    return {
+      roomId: message.battleRoomId,
+      code: message.battleRoomCode ?? '',
+      name: message.battleRoomName ?? 'Phòng battle',
+    };
+  }
+  if (!message.message?.startsWith('__BATTLE_INVITE__|')) return null;
+  const [, roomId = '', code = '', name = 'Phòng battle'] = message.message.split('|');
+  return roomId ? { roomId, code, name } : null;
+}
+
+function apiErrorMessage(error: unknown, fallback: string): string {
+  const response = typeof error === 'object' && error !== null && 'response' in error
+    ? (error as { response?: { data?: unknown } }).response
+    : undefined;
+  const data = response?.data;
+  if (typeof data === 'object' && data !== null && 'message' in data && typeof data.message === 'string') return data.message;
+  if (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string') return data.error;
+  return fallback;
 }

@@ -62,6 +62,16 @@ export default function AdminPage() {
     return () => window.clearInterval(intervalId);
   }, [isAuthenticated, refreshOnlineUsers, user?.role]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && accountOpen) {
+        setAccountOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [accountOpen]);
+
   /* ── Access guard ── */
   if (!isAuthenticated || user?.role !== 'ADMIN') {
     return (
@@ -83,18 +93,18 @@ export default function AdminPage() {
 
   return (
     <div className="flex min-h-screen gap-0">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-slate-950/78 shadow-xl shadow-black/20 backdrop-blur lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-slate-950/78 shadow-xl shadow-black/20 backdrop-blur lg:flex" aria-label="Thanh điều hướng Admin">
         <div className="border-b border-white/10 px-4 py-4">
-          <Link to="/" className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]">
+          <Link to="/" className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]" aria-label="Trở về trang chủ">
             <img src="/logocty.png" alt="VPT" className="h-9 w-auto object-contain" />
             <div>
               <p className="text-sm font-bold text-white">VPT Code Arena</p>
-              <p className="text-[11px] text-slate-500">Admin Console</p>
+              <p className="text-[11px] text-slate-400">Admin Console</p>
             </div>
           </Link>
         </div>
 
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4" role="tablist" aria-label="Danh mục quản trị">
           {SIDEBAR_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = tab === item.id;
@@ -102,17 +112,19 @@ export default function AdminPage() {
               <button
                 key={item.id}
                 type="button"
+                role="tab"
+                aria-selected={active}
                 onClick={() => setTab(item.id)}
-                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150 ${
+                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150 focus-visible:outline-none ${
                   active
                     ? 'bg-cyan-300/10 text-cyan-100 ring-1 ring-cyan-300/15'
-                    : 'text-slate-500 hover:bg-white/[0.05] hover:text-slate-200'
+                    : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-200'
                 }`}
               >
                 <Icon size={18} className="shrink-0" />
                 <div>
                   <div className="text-sm font-semibold">{item.label}</div>
-                  <div className="text-[10px] leading-none text-slate-500">{item.desc}</div>
+                  <div className="text-[10px] leading-none text-slate-400">{item.desc}</div>
                 </div>
                 {active && (
                   <div className="ml-auto h-5 w-1 rounded-full bg-cyan-300" />
@@ -124,11 +136,15 @@ export default function AdminPage() {
 
         <div className="relative border-t border-white/10 px-3 py-3">
           {accountOpen && (
-            <div className="absolute bottom-[76px] left-3 right-3 overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-[var(--shadow-app-popover)]">
+            <div
+              role="menu"
+              aria-label="Menu tài khoản admin"
+              className="absolute bottom-[76px] left-3 right-3 overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-[var(--shadow-app-popover)]"
+            >
               <div className="border-b border-white/10 p-3">
                 <p className="truncate text-sm font-semibold text-white">{user.name}</p>
-                <p className="truncate text-xs text-slate-500">{user.email}</p>
-                {user.publicId && <p className="mt-1 text-[11px] text-cyan-200">ID {user.publicId}</p>}
+                <p className="truncate text-xs text-slate-400">{user.email}</p>
+                {user.publicId && <p className="mt-1 text-[11px] text-cyan-200 font-mono">ID {user.publicId}</p>}
               </div>
               <div className="p-1.5">
                 <button
@@ -161,17 +177,19 @@ export default function AdminPage() {
 
           <button
             type="button"
+            aria-expanded={accountOpen}
+            aria-label="Tài khoản Admin"
             onClick={() => setAccountOpen((value) => !value)}
-            className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:border-cyan-300/25 hover:bg-white/[0.06]"
+            className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:border-cyan-300/25 hover:bg-white/[0.06] focus-visible:outline-none"
           >
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
               <UserCircle size={17} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-white">{user.name}</span>
-              <span className="block truncate text-[11px] text-slate-500">{user.role}</span>
+              <span className="block truncate text-[11px] text-slate-400">{user.role}</span>
             </span>
-            <ChevronUp size={15} className={`shrink-0 text-slate-500 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
+            <ChevronUp size={15} className={`shrink-0 text-slate-400 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
       </aside>

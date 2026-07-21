@@ -19,6 +19,9 @@ public class ChatMessageDto {
     private String senderEmail;
     private UUID receiverId;
     private String receiverName;
+    private UUID battleRoomId;
+    private String battleRoomName;
+    private String battleRoomCode;
     private String message;
     private MessageType type;
     private boolean deleted;

@@ -15,7 +15,7 @@
 | 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
 | 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 9 | 18–19 | Admin Panel | Dashboard admin, quản lý user/problem/stats | 🟢 Hoàn thành | 100% |
-| 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | 🟡 Đang thực hiện | 50% |
+| 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | 🟢 Hoàn thành | 100% |
 | 11 | 22–23 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 12 | 24–25 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
 | 13 | 26 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
@@ -231,7 +231,7 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 10 — Frontend Redesign (Tuần 20–21) 🟡 80%
+### Phase 10 — Frontend Redesign (Tuần 20–21) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
@@ -239,7 +239,7 @@ git branch -d feature/<phase>-<feature-name>
 | 10.2 | `feature/p10-fe-layout-navigation` | Làm lại layout tổng thể, navbar/sidebar, page shell, responsive navigation | Điều hướng rõ ràng, bố cục nhất quán trên toàn app | 🟢 Done |
 | 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language; thêm chat dock toàn app | Core pages đã dùng chung app shell, token màu, panel/button/input/table states; ChatDock global hỗ trợ Global + DM; Exam có learning path và điều hướng bài trước/bài tiếp theo tiến độ nộp bài | 🟢 Done |
 | 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Stats | Admin dashboard dark console đồng bộ với app shell; sidebar, stats cards, users table, problem editor và admin states dễ scan, thao tác nhanh | 🟢 Done |
-| 10.5 | `feature/p10-fe-accessibility-polish` | Kiểm tra accessibility cơ bản: focus state, contrast, keyboard navigation, empty/loading/error states | Giao diện dễ dùng hơn, ít lỗi trải nghiệm, sẵn sàng polish/performance | ⚪ Chưa bắt đầu |
+| 10.5 | `feature/p10-fe-accessibility-polish` | Kiểm tra accessibility cơ bản: focus state, contrast, keyboard navigation, empty/loading/error states | Giao diện dễ dùng hơn, chuẩn WCAG AA focus & contrast, đầy đủ ErrorBoundary, EmptyState và LoadingSkeleton | 🟢 Done |
 
 **Thứ tự thực hiện:** 10.1 → 10.2 → 10.3 → 10.4 → 10.5 → merge `develop`
 

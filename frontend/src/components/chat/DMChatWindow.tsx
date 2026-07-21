@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, MessagesSquare } from 'lucide-react';
 import { chatApi, type ChatMessage } from '@/api/chat.api';
 import { ChatComposer } from '@/components/chat/ChatComposer';
@@ -31,6 +32,8 @@ export const DMChatWindow = ({
   className,
 }: DMChatWindowProps) => {
   const activeUserId = selectedUserId.trim();
+  const queryClient = useQueryClient();
+
   const historyQuery = useQuery({
     queryKey: ['chat-dm', activeUserId],
     queryFn: () => chatApi.directHistory(activeUserId),
@@ -41,6 +44,13 @@ export const DMChatWindow = ({
     historyQuery.data ?? [],
     liveMessages.filter((item) => isDirectBetween(item, currentUserId, activeUserId)),
   );
+
+  useEffect(() => {
+    if (!activeUserId) return;
+    chatApi.markAsRead(activeUserId).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+    }).catch(console.error);
+  }, [activeUserId, messages.length, queryClient]);
 
   return (
     <section className={`flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4 ${className ?? ''}`}>

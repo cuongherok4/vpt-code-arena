@@ -13,6 +13,9 @@ export type ChatMessage = {
   senderEmail: string;
   receiverId: string | null;
   receiverName: string | null;
+  battleRoomId?: string | null;
+  battleRoomName?: string | null;
+  battleRoomCode?: string | null;
   message: string;
   type: ChatMessageType;
   deleted: boolean;
@@ -26,7 +29,7 @@ export type ChatConversation = {
   userEmail: string;
   lastMessage: string;
   lastMessageAt: string;
-  unread: boolean;
+  unreadCount: number;
 };
 
 export const chatApi = {
@@ -34,4 +37,5 @@ export const chatApi = {
   roomHistory: (roomId: string) => apiClient.get<ChatMessage[]>(`/chat/rooms/${roomId}`).then((res) => res.data),
   conversations: () => apiClient.get<ChatConversation[]>('/chat/dm/conversations').then((res) => res.data),
   directHistory: (userId: string) => apiClient.get<ChatMessage[]>(`/chat/dm/${userId}`).then((res) => res.data),
+  markAsRead: (userId: string) => apiClient.post(`/chat/dm/${userId}/read`).then((res) => res.data),
 };

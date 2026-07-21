@@ -77,23 +77,26 @@ export const ExamListPage = () => {
           </Link>
 
           <div className="space-y-3">
-            <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
+            <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 focus-within:border-cyan-400/50">
               <Search size={16} className="text-slate-500" />
               <input
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
                 placeholder="Tìm chặng thi..."
+                aria-label="Tìm kiếm chặng thi"
                 className="min-w-0 flex-1 bg-transparent text-white outline-none placeholder:text-slate-500"
               />
             </label>
 
             <div className="flex items-center gap-2">
               <SlidersHorizontal size={16} className="text-slate-500" />
-              <div className="grid flex-1 grid-cols-4 gap-1">
+              <div className="grid flex-1 grid-cols-4 gap-1" role="tablist" aria-label="Lọc độ khó">
                 {difficulties.map((item) => (
                   <button
                     key={item.label}
                     type="button"
+                    role="tab"
+                    aria-selected={difficulty === item.value}
                     onClick={() => setDifficulty(item.value)}
                     className={`rounded-md border px-2 py-1.5 text-xs font-medium transition-colors ${
                       difficulty === item.value
@@ -111,20 +114,23 @@ export const ExamListPage = () => {
 
         <div className="h-[calc(100%-145px)] overflow-y-auto p-4">
           {problemsQuery.isLoading && (
-            <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-400">
-              <Loader2 size={18} className="animate-spin text-cyan-300" />
-              Đang tải lộ trình...
+            <div className="space-y-3">
+              <div className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/60 p-4 h-24" />
+              <div className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/60 p-4 h-24" />
+              <div className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/60 p-4 h-24" />
             </div>
           )}
 
           {problemsQuery.isError && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+            <div role="alert" className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
               Không thể tải danh sách đề.
             </div>
           )}
 
           {!problemsQuery.isLoading && !problemsQuery.isError && problems.length === 0 && (
-            <div className="py-16 text-center text-sm text-slate-500">Không có chặng phù hợp.</div>
+            <div className="py-12 text-center text-sm text-slate-400">
+              Không tìm thấy bài thi phù hợp với bộ lọc.
+            </div>
           )}
 
           <div className="relative space-y-4 py-2">

@@ -10,6 +10,7 @@ import com.vpt.arena.entity.Room;
 import com.vpt.arena.entity.User;
 import com.vpt.arena.entity.enums.MessageType;
 import com.vpt.arena.entity.enums.Role;
+import com.vpt.arena.entity.enums.RoomStatus;
 import com.vpt.arena.repository.ChatMessageRepository;
 import com.vpt.arena.repository.ChatMuteRepository;
 import com.vpt.arena.repository.DirectMessageRepository;
@@ -78,19 +79,26 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public List<ChatConversationDto> conversations(UUID currentUserId) {
-        Map<UUID, ChatConversationDto> conversations = new LinkedHashMap<>();
+        Map<UUID, ChatConversationDto.ChatConversationDtoBuilder> builders = new LinkedHashMap<>();
+        Map<UUID, Integer> unreadCounts = new java.util.HashMap<>();
+
         directMessageRepository.findRecentForUser(currentUserId, PageRequest.of(0, 200)).forEach(message -> {
             User other = message.getSender().getId().equals(currentUserId) ? message.getReceiver() : message.getSender();
-            conversations.putIfAbsent(other.getId(), ChatConversationDto.builder()
+            builders.putIfAbsent(other.getId(), ChatConversationDto.builder()
                 .userId(other.getId())
                 .userName(other.getName())
                 .userEmail(other.getEmail())
                 .lastMessage(message.getDeletedAt() == null ? message.getMessage() : null)
-                .lastMessageAt(message.getCreatedAt())
-                .unread(message.getReceiver().getId().equals(currentUserId) && !message.isRead())
-                .build());
+                .lastMessageAt(message.getCreatedAt()));
+                
+            if (message.getReceiver().getId().equals(currentUserId) && !message.isRead()) {
+                unreadCounts.merge(other.getId(), 1, Integer::sum);
+            }
         });
-        return List.copyOf(conversations.values());
+        
+        return builders.entrySet().stream()
+            .map(entry -> entry.getValue().unreadCount(unreadCounts.getOrDefault(entry.getKey(), 0)).build())
+            .toList();
     }
 
     @Transactional
@@ -100,6 +108,29 @@ public class ChatService {
         message.setUser(sender);
         message.setMessage(normalizeMessage(text));
         message.setType(MessageType.TEXT);
+        return toDto(chatMessageRepository.save(message));
+    }
+
+    @Transactional
+    public ChatMessageDto sendGlobalBattleInvite(UUID senderId, UUID roomId) {
+        User sender = findUser(senderId);
+        Room room = roomRepository.findDetailedById(roomId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found"));
+        if (room.getStatus() != RoomStatus.WAITING) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Room is not waiting");
+        }
+        if (room.getPasswordHash() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Locked rooms cannot be shared to global chat");
+        }
+        if (room.getMembers().stream().noneMatch(member -> member.getUser().getId().equals(senderId))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only room members can share this room");
+        }
+
+        ChatMessage message = new ChatMessage();
+        message.setUser(sender);
+        message.setBattleRoom(room);
+        message.setMessage("Mời mọi người vào phòng thách đấu: " + room.getName());
+        message.setType(MessageType.SYSTEM);
         return toDto(chatMessageRepository.save(message));
     }
 
@@ -140,6 +171,12 @@ public class ChatService {
         report.setMessageId(messageId);
         report.setReason(normalizeReason(reason));
         messageReportRepository.save(report);
+    }
+
+    @Transactional
+    public void markDirectMessagesAsRead(UUID currentUserId, UUID senderId) {
+        ensureUserExists(senderId);
+        directMessageRepository.markAsRead(currentUserId, senderId);
     }
 
     @Transactional
@@ -252,6 +289,9 @@ public class ChatService {
             .senderId(message.getUser().getId())
             .senderName(message.getUser().getName())
             .senderEmail(message.getUser().getEmail())
+            .battleRoomId(message.getBattleRoom() == null ? null : message.getBattleRoom().getId())
+            .battleRoomName(message.getBattleRoom() == null ? null : message.getBattleRoom().getName())
+            .battleRoomCode(message.getBattleRoom() == null ? null : message.getBattleRoom().getCode())
             .message(deleted ? null : message.getMessage())
             .type(message.getType())
             .deleted(deleted)
