@@ -65,7 +65,7 @@ class BattleControllerTest {
     @Test
     @DisplayName("GET /rooms trả danh sách phòng public")
     void shouldListPublicRooms() throws Exception {
-        when(battleService.listPublicWaitingRooms()).thenReturn(List.of(roomDto()));
+        when(battleService.listWaitingRooms()).thenReturn(List.of(roomDto()));
 
         mockMvc.perform(get(BASE + "/rooms"))
             .andExpect(status().isOk())
@@ -286,9 +286,11 @@ class BattleControllerTest {
     private BattleRoomDto roomDto() {
         return new BattleRoomDto(
             ROOM_ID,
+            "123456",
             "Battle Room",
             RoomStatus.WAITING,
             true,
+            false,
             4,
             2,
             30,

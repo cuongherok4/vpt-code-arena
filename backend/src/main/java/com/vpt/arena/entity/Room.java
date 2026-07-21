@@ -33,6 +33,12 @@ public class Room {
     @Column(nullable = false, length = 255)
     private String name;
 
+    @Column(nullable = false, unique = true, length = 9)
+    private String code;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "room_status", nullable = false)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)

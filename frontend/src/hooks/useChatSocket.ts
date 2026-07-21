@@ -7,6 +7,7 @@ type SocketAck<T = unknown> = {
   success: boolean;
   error?: string;
   message?: T;
+  userIds?: string[];
 };
 
 type OnlineUser = {
@@ -15,6 +16,7 @@ type OnlineUser = {
 };
 
 type ChatSocketOptions = {
+  enabled?: boolean;
   onMessage?: (message: ChatMessage) => void;
   onDirectMessage?: (message: ChatMessage) => void;
   onError?: (message: string) => void;
@@ -22,7 +24,7 @@ type ChatSocketOptions = {
 
 const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
-export function useChatSocket({ onMessage, onDirectMessage, onError }: ChatSocketOptions) {
+export function useChatSocket({ enabled = true, onMessage, onDirectMessage, onError }: ChatSocketOptions) {
   const { accessToken, user } = useAuthStore();
   const socketRef = useRef<Socket | null>(null);
   const onMessageRef = useRef(onMessage);
@@ -39,7 +41,7 @@ export function useChatSocket({ onMessage, onDirectMessage, onError }: ChatSocke
   }, [onMessage, onDirectMessage, onError]);
 
   useEffect(() => {
-    if (!accessToken || !user?.id) {
+    if (!enabled || !accessToken || !user?.id) {
       setConnected(false);
       setOnlineUserIds(new Set());
       return;
@@ -86,7 +88,7 @@ export function useChatSocket({ onMessage, onDirectMessage, onError }: ChatSocke
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [accessToken, user?.id]);
+  }, [accessToken, enabled, user?.id]);
 
   const emit = useCallback(<T = unknown,>(event: string, payload?: Record<string, unknown>) => {
     return new Promise<SocketAck<T>>((resolve) => {
@@ -103,6 +105,14 @@ export function useChatSocket({ onMessage, onDirectMessage, onError }: ChatSocke
   const leaveGlobal = useCallback(() => emit<string>('chat:leave-global'), [emit]);
   const joinRoom = useCallback((roomId: string) => emit<string>('chat:join-room', { roomId }), [emit]);
   const leaveRoom = useCallback((roomId: string) => emit<string>('chat:leave-room', { roomId }), [emit]);
+  const refreshOnlineUsers = useCallback(async () => {
+    const response = await emit<{ userIds?: string[] }>('chat:get-online-users');
+    const userIds = response.userIds ?? response.message?.userIds;
+    if (response.success && Array.isArray(userIds)) {
+      setOnlineUserIds(new Set(userIds));
+    }
+    return response;
+  }, [emit]);
   const sendGlobal = useCallback(async (message: string) => {
     const response = await emit<ChatMessage>('chat:send-global', { message });
     if (response.success && isChatMessage(response.message)) onMessageRef.current?.(response.message);
@@ -126,6 +136,7 @@ export function useChatSocket({ onMessage, onDirectMessage, onError }: ChatSocke
     leaveGlobal,
     joinRoom,
     leaveRoom,
+    refreshOnlineUsers,
     sendGlobal,
     sendRoom,
     sendDirect,

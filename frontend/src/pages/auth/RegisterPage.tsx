@@ -45,7 +45,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-stretch">
+    <div className="flex min-h-screen items-stretch">
       {/* ── Left Panel — Branding ── */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-10 lg:flex lg:w-[45%]">
         <div className="pointer-events-none absolute inset-0">

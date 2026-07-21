@@ -3,7 +3,9 @@ import { authenticateSocket, type AuthUser } from './auth.js';
 
 const ROOM_PREFIX = 'room:';
 const USER_PREFIX = 'user:';
+const LOBBY_ROOM = 'battle:lobby';
 const DEFAULT_TICK_INTERVAL_MS = 1000;
+const DEFAULT_DISCONNECT_LEAVE_DELAY_MS = 1800;
 
 export type BattleMember = {
   userId: string;
@@ -19,7 +21,8 @@ export type BattleEvent =
   | { type: 'leaderboard-update'; roomId: string; payload: Record<string, unknown> }
   | { type: 'finished'; roomId: string; payload: Record<string, unknown> }
   | { type: 'invite'; roomId: string; userId: string; payload: Record<string, unknown> }
-  | { type: 'member-kicked'; roomId: string; userId: string; payload: Record<string, unknown> };
+  | { type: 'member-kicked'; roomId: string; userId: string; payload: Record<string, unknown> }
+  | { type: 'lobby-updated'; roomId: string; payload: Record<string, unknown> };
 
 export interface BattleStore {
   getMembers(roomId: string): Promise<BattleMember[]>;
@@ -34,7 +37,9 @@ export interface BattleStore {
 export type BattleNamespaceOptions = {
   jwtSecret: string;
   authDisabled?: boolean;
+  backendUrl: string;
   tickIntervalMs?: number;
+  disconnectLeaveDelayMs?: number;
 };
 
 export type BattleNamespaceController = {
@@ -46,7 +51,9 @@ export type BattleNamespaceController = {
 export function registerBattleNamespace(io: Server, store: BattleStore, options: BattleNamespaceOptions): BattleNamespaceController {
   const battle = io.of('/battle');
   const tickers = new Map<string, NodeJS.Timeout>();
+  const pendingLeaves = new Map<string, NodeJS.Timeout>();
   const tickIntervalMs = options.tickIntervalMs ?? DEFAULT_TICK_INTERVAL_MS;
+  const disconnectLeaveDelayMs = options.disconnectLeaveDelayMs ?? DEFAULT_DISCONNECT_LEAVE_DELAY_MS;
 
   battle.use(authenticateSocket(options.jwtSecret, options.authDisabled === true));
 
@@ -55,10 +62,21 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
     const connectedUser = requireUser(socket);
     socket.join(userChannel(connectedUser.userId));
 
+    socket.on('battle:join-lobby', async (_payload, ack) => {
+      await socket.join(LOBBY_ROOM);
+      ack?.({ success: true });
+    });
+
+    socket.on('battle:leave-lobby', async (_payload, ack) => {
+      await socket.leave(LOBBY_ROOM);
+      ack?.({ success: true });
+    });
+
     socket.on('battle:join', async (payload, ack) => {
       try {
         const roomId = requireRoomId(payload);
         const user = requireUser(socket);
+        cancelPendingLeave(roomId, user.userId);
         const roomName = roomChannel(roomId);
         const member: BattleMember = {
           userId: user.userId,
@@ -117,7 +135,7 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
     socket.on('battle:leave', async (payload, ack) => {
       try {
         const roomId = requireRoomId(payload);
-        await leaveRoom(battle, store, socket, roomId);
+        await leaveRoom(battle, store, socket, roomId, options.backendUrl);
         ack?.({ success: true });
       } catch (error) {
         emitError(socket, errorCode(error), errorMessage(error));
@@ -162,9 +180,9 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
       }
     });
 
-    socket.on('disconnect', async () => {
+    socket.on('disconnect', () => {
       const rooms = Array.from(socket.data.joinedBattleRooms ?? []) as string[];
-      await Promise.all(rooms.map((roomId) => leaveRoom(battle, store, socket, roomId)));
+      rooms.forEach((roomId) => scheduleLeave(roomId, socket));
     });
   });
 
@@ -210,6 +228,14 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
       return;
     }
 
+    if (event.type === 'lobby-updated') {
+      battle.to(LOBBY_ROOM).emit('battle:lobby-updated', {
+        roomId: event.roomId,
+        ...event.payload
+      });
+      return;
+    }
+
     if (event.type === 'finished') {
       stopCountdown(event.roomId);
       store.clearRoomEndTime(event.roomId).catch(() => undefined);
@@ -241,7 +267,32 @@ export function registerBattleNamespace(io: Server, store: BattleStore, options:
 
   const stopAllCountdowns = () => {
     Array.from(tickers.keys()).forEach((roomId) => stopCountdown(roomId));
+    Array.from(pendingLeaves.values()).forEach((timer) => clearTimeout(timer));
+    pendingLeaves.clear();
   };
+
+  function pendingLeaveKey(roomId: string, userId: string): string {
+    return `${roomId}:${userId}`;
+  }
+
+  function cancelPendingLeave(roomId: string, userId: string): void {
+    const key = pendingLeaveKey(roomId, userId);
+    const timer = pendingLeaves.get(key);
+    if (!timer) return;
+    clearTimeout(timer);
+    pendingLeaves.delete(key);
+  }
+
+  function scheduleLeave(roomId: string, socket: Socket): void {
+    const user = requireUser(socket);
+    const key = pendingLeaveKey(roomId, user.userId);
+    cancelPendingLeave(roomId, user.userId);
+    const timer = setTimeout(() => {
+      pendingLeaves.delete(key);
+      leaveRoom(battle, store, socket, roomId, options.backendUrl).catch(() => undefined);
+    }, disconnectLeaveDelayMs);
+    pendingLeaves.set(key, timer);
+  }
 
   return {
     namespace: battle,
@@ -265,12 +316,13 @@ async function kickMember(namespace: Namespace, store: BattleStore, roomId: stri
   namespace.to(roomName).emit('battle:member-kicked', { roomId, userId, memberCount: members.length });
 }
 
-async function leaveRoom(namespace: Namespace, store: BattleStore, socket: Socket, roomId: string): Promise<void> {
+async function leaveRoom(namespace: Namespace, store: BattleStore, socket: Socket, roomId: string, backendUrl: string): Promise<void> {
   const user = requireUser(socket);
   const roomName = roomChannel(roomId);
   await socket.leave(roomName);
   socket.data.joinedBattleRooms?.delete(roomId);
   const removed = await store.removeMember(roomId, user.userId, socket.id);
+  await leaveBackendRoom(socket, backendUrl, roomId);
   const members = await store.getMembers(roomId);
   if (removed) {
     namespace.to(roomName).emit('battle:member-left', {
@@ -280,6 +332,17 @@ async function leaveRoom(namespace: Namespace, store: BattleStore, socket: Socke
       memberCount: members.length
     });
   }
+}
+
+async function leaveBackendRoom(socket: Socket, backendUrl: string, roomId: string): Promise<void> {
+  const user = requireUser(socket);
+  if (!user.token) return;
+  await fetch(`${backendUrl}/api/v1/battle/rooms/${roomId}/leave`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${user.token}`
+    }
+  }).catch(() => undefined);
 }
 
 function requireUser(socket: Socket): AuthUser {

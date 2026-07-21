@@ -80,6 +80,10 @@ public class BattleRealtimeNotifier {
         ));
     }
 
+    public void publishLobbyUpdated(UUID roomId) {
+        publish("lobby-updated", roomId, null, Map.of("roomId", roomId));
+    }
+
     private void publish(String type, UUID roomId, UUID userId, Map<String, Object> payload) {
         Runnable action = () -> {
             try {

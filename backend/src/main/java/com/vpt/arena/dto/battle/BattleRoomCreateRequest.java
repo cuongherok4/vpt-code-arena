@@ -4,14 +4,14 @@ import com.vpt.arena.entity.enums.Difficulty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class BattleRoomCreateRequest {
 
-    @NotBlank(message = "name is required")
     private String name;
+
+    private String password;
 
     @JsonProperty("isPublic")
     private boolean isPublic = false;

@@ -20,7 +20,7 @@ export default function VerifyEmailPage() {
   }, [token]);
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-slate-950 px-4 py-12">
+    <main className="min-h-screen bg-slate-950 px-4 py-12">
       <section className="mx-auto max-w-md text-center">
         {status === 'loading' && (
           <>

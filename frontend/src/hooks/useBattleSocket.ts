@@ -121,7 +121,6 @@ export function useBattleSocket({
     socket.on('battle:finished', (event: FinishedEvent) => onFinished?.(event.finalLeaderboard ?? []));
 
     return () => {
-      socket.emit('battle:leave', { roomId });
       socket.disconnect();
       socketRef.current = null;
     };
