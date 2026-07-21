@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Copy, Loader2, Lock, LogOut, Play, Radio, Shield, Swords, Trophy, UserMinus, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Copy, Loader2, Lock, LogOut, MessageSquare, Play, Radio, Shield, Swords, Trophy, UserMinus, UserPlus, Users } from 'lucide-react';
 import { battleApi, type BattleLeaderboardEntryDto, type BattleMemberDto, type BattleRoomDto, type BattleSubmissionDto } from '@/api/battle.api';
 import { friendsApi, type FriendStatus } from '@/api/friends.api';
 import { FriendButton } from '@/components/social/FriendButton';
@@ -26,7 +26,7 @@ export const BattleRoomPage = () => {
   const [liveLeaderboard, setLiveLeaderboard] = useState<BattleLeaderboardEntryDto[]>([]);
   const [latestSubmission, setLatestSubmission] = useState<BattleSubmissionDto | undefined>();
   const [finalLeaderboard, setFinalLeaderboard] = useState<BattleLeaderboardEntryDto[] | null>(null);
-  const { onlineUserIds } = useChatSocket({ enabled: isAuthenticated });
+  const chatSocket = useChatSocket({ enabled: isAuthenticated });
 
   const roomQuery = useQuery({
     queryKey: ['battle-room', roomId],
@@ -144,6 +144,16 @@ export const BattleRoomPage = () => {
     onFinished: handleFinished,
     onError: setSocketError,
   });
+  const [globalInviteSent, setGlobalInviteSent] = useState(false);
+  const sendGlobalBattleInvite = async () => {
+    if (!room?.id) return;
+    const response = await chatSocket.sendBattleInvite(room.id, room.name, room.code);
+    if (!response.success) {
+      setSocketError(typeof response.message === 'string' ? response.message : 'Không thể gửi lời mời vào chat thế giới.');
+      return;
+    }
+    setGlobalInviteSent(true);
+  };
 
   const joinMutation = useMutation({
     mutationFn: () => {
@@ -312,6 +322,18 @@ export const BattleRoomPage = () => {
             <Copy size={16} />
             Copy mã phòng
           </button>
+          {me && room.status === 'WAITING' && (
+            <button
+              type="button"
+              onClick={sendGlobalBattleInvite}
+              disabled={!chatSocket.connected || globalInviteSent || room.locked}
+              className="app-button app-button-primary"
+              title={room.locked ? 'Phòng có khóa không thể mời global' : 'Gửi lời mời vào chat thế giới'}
+            >
+              <MessageSquare size={16} />
+              {room.locked ? 'Phòng khóa' : globalInviteSent ? 'Đã gửi lên global' : 'Mời global'}
+            </button>
+          )}
         </div>
       </section>
 
@@ -395,7 +417,7 @@ export const BattleRoomPage = () => {
               ) : (
                 <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
                   {invitableFriends.map(friend => {
-                    const online = onlineUserIds.has(friend.id) || friend.online;
+                    const online = chatSocket.onlineUserIds.has(friend.id) || friend.online;
                     return (
                       <div
                         key={friend.id}

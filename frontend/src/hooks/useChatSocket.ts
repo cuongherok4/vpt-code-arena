@@ -118,6 +118,11 @@ export function useChatSocket({ enabled = true, onMessage, onDirectMessage, onEr
     if (response.success && isChatMessage(response.message)) onMessageRef.current?.(response.message);
     return response;
   }, [emit]);
+  const sendBattleInvite = useCallback(async (roomId: string, roomName?: string, roomCode?: string) => {
+    const response = await emit<ChatMessage>('chat:send-battle-invite', { roomId, roomName, roomCode });
+    if (response.success && isChatMessage(response.message)) onMessageRef.current?.(response.message);
+    return response;
+  }, [emit]);
   const sendRoom = useCallback(async (roomId: string, message: string) => {
     const response = await emit<ChatMessage>('chat:send-room', { roomId, message });
     if (response.success && isChatMessage(response.message)) onMessageRef.current?.(response.message);
@@ -138,6 +143,7 @@ export function useChatSocket({ enabled = true, onMessage, onDirectMessage, onEr
     leaveRoom,
     refreshOnlineUsers,
     sendGlobal,
+    sendBattleInvite,
     sendRoom,
     sendDirect,
   };

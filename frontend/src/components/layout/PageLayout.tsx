@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { ChatDock } from '@/components/chat/ChatDock';
 import { Navbar } from './Navbar';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Code2, BookOpen, Trophy, Mail, Phone, Globe } from 'lucide-react';
 
 export const PageLayout = () => {
@@ -10,9 +11,17 @@ export const PageLayout = () => {
 
   return (
     <div className="app-shell flex min-h-screen flex-col text-[var(--color-app-text)]">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-xs focus:font-bold focus:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+      >
+        Chuyển đến nội dung chính
+      </a>
       <Navbar />
-      <main className="container mx-auto flex-1 px-3 pb-24 pt-5 sm:px-4 sm:pt-7 lg:pb-8">
-        <Outlet />
+      <main id="main-content" role="main" className="container mx-auto flex-1 px-3 pb-24 pt-5 sm:px-4 sm:pt-7 lg:pb-8">
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       {showChatDock && <ChatDock />}
 

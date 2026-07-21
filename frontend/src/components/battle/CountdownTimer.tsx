@@ -42,9 +42,13 @@ export const CountdownTimer = ({ remainingSeconds, endTime, onExpire }: Countdow
   const urgent = displaySeconds <= 60;
 
   return (
-    <div className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold ${
-      urgent ? 'border-red-500/30 bg-red-500/10 text-red-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-    }`}>
+    <div
+      role="timer"
+      aria-label={`Thời gian còn lại ${minutes} phút ${seconds} giây`}
+      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-mono font-semibold ${
+        urgent ? 'border-red-500/40 bg-red-500/15 text-red-200 animate-pulse' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+      }`}
+    >
       <Clock size={16} />
       {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
     </div>

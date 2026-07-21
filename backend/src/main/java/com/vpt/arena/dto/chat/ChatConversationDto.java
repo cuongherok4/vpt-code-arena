@@ -14,5 +14,5 @@ public class ChatConversationDto {
     private String userEmail;
     private String lastMessage;
     private OffsetDateTime lastMessageAt;
-    private boolean unread;
+    private int unreadCount;
 }

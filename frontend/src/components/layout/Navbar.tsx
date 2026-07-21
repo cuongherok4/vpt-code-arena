@@ -74,8 +74,20 @@ export const Navbar = () => {
     previousPendingCount.current = pendingCount;
   }, [incomingCount, pathname, pendingCount, queryClient]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowFriendNotice(false);
+        setBattleInvite(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <nav
+      aria-label="Thanh điều hướng chính"
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'border-b border-white/10 bg-slate-950/92 shadow-lg shadow-black/25 backdrop-blur-xl'
@@ -85,7 +97,7 @@ export const Navbar = () => {
       <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-3 sm:px-4">
 
         {/* ── Logo ── */}
-        <Link to="/" className="group flex min-w-0 items-center gap-2.5">
+        <Link to="/" className="group flex min-w-0 items-center gap-2.5" aria-label="Trang chủ Code Arena">
           <img
             src="/logocty.png"
             alt="VPT Logo"
@@ -97,7 +109,7 @@ export const Navbar = () => {
         </Link>
 
         {/* ── Desktop Nav ── */}
-        <div className="hidden min-w-0 items-center gap-0.5 text-sm font-medium lg:flex">
+        <div className="hidden min-w-0 items-center gap-0.5 text-sm font-medium lg:flex" role="menubar">
           {navItems.map((item) => (
             <NavLinkItem
               key={item.to}
@@ -112,6 +124,7 @@ export const Navbar = () => {
           {isAuthenticated ? (
             <Link
               to="/profile"
+              aria-label={`Trang cá nhân của ${user?.name ?? 'tài khoản'}`}
               className="group relative flex max-w-[180px] items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-slate-300 shadow-sm transition-all duration-200 hover:border-cyan-300/35 hover:bg-white/[0.07] hover:text-white sm:max-w-[240px] sm:px-3"
             >
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
@@ -122,7 +135,10 @@ export const Navbar = () => {
                 {user?.publicId && <span className="block text-[11px] leading-4 text-slate-500">ID {user.publicId}</span>}
               </span>
               {incomingCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold leading-none text-slate-950 ring-2 ring-slate-950 shadow-md">
+                <span
+                  aria-label={`${incomingCount} lời mời kết bạn mới`}
+                  className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold leading-none text-slate-950 ring-2 ring-slate-950 shadow-md"
+                >
                   {incomingCount > 9 ? '9+' : incomingCount}
                 </span>
               )}
@@ -130,6 +146,7 @@ export const Navbar = () => {
           ) : (
             <Link
               to="/login"
+              aria-label="Đăng nhập tài khoản"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md shadow-teal-950/20 transition-all duration-200 hover:bg-teal-200 hover:shadow-teal-400/20"
             >
               <LogIn className="h-4 w-4" />
@@ -140,7 +157,7 @@ export const Navbar = () => {
       </div>
 
       {/* ── Mobile Bottom Bar ── */}
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-slate-950/95 px-2 py-2 shadow-lg shadow-black/30 backdrop-blur-xl lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-slate-950/95 px-2 py-2 shadow-lg shadow-black/30 backdrop-blur-xl lg:hidden" aria-label="Điều hướng di động">
         <div className="mx-auto grid max-w-2xl grid-flow-col auto-cols-fr gap-1">
           {navItems.map((item) => (
             <NavLinkItem
@@ -158,6 +175,7 @@ export const Navbar = () => {
         <Link
           to="/friends"
           onClick={() => setShowFriendNotice(false)}
+          aria-live="polite"
           className="fixed right-3 top-[72px] w-[calc(100vw-1.5rem)] max-w-72 rounded-lg border border-cyan-300/20 bg-slate-950 p-4 text-sm text-slate-300 shadow-xl shadow-black/30 hover:border-cyan-300/40 sm:right-4 animate-fade-in-up"
         >
           <div className="flex items-start gap-3">
@@ -174,7 +192,12 @@ export const Navbar = () => {
 
       {/* ── Battle invite toast ── */}
       {battleInvite && (
-        <div className="fixed right-3 top-[72px] w-[calc(100vw-1.5rem)] max-w-80 rounded-lg border border-amber-300/25 bg-slate-950 p-4 text-sm text-slate-300 shadow-xl shadow-black/30 sm:right-4 animate-fade-in-up">
+        <div
+          role="dialog"
+          aria-live="assertive"
+          aria-label="Thông báo lời mời thi đấu"
+          className="fixed right-3 top-[72px] w-[calc(100vw-1.5rem)] max-w-80 rounded-lg border border-amber-300/25 bg-slate-950 p-4 text-sm text-slate-300 shadow-xl shadow-black/30 sm:right-4 animate-fade-in-up"
+        >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-300/10 text-amber-200">
@@ -191,6 +214,7 @@ export const Navbar = () => {
               type="button"
               onClick={() => setBattleInvite(null)}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-white/5 hover:text-white"
+              aria-label="Từ chối lời mời"
               title="Từ chối"
             >
               <X size={14} />
@@ -234,6 +258,7 @@ function NavLinkItem({ item, active, mobile = false }: {
   return (
     <Link
       to={item.to}
+      aria-current={active ? 'page' : undefined}
       className={`relative flex items-center justify-center gap-1.5 rounded-xl transition-all duration-200 ${
         mobile ? 'min-w-14 flex-col px-2 py-1.5 text-[11px]' : 'px-3.5 py-2 text-sm'
       } ${

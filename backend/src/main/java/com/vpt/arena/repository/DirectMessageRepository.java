@@ -69,4 +69,14 @@ public interface DirectMessageRepository extends JpaRepository<DirectMessage, UU
         ORDER BY m.createdAt DESC
         """)
     List<DirectMessage> findRecentForUser(@Param("userId") UUID userId, Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("""
+        UPDATE DirectMessage m 
+        SET m.isRead = true 
+        WHERE m.receiver.id = :receiverId 
+          AND m.sender.id = :senderId 
+          AND m.isRead = false
+        """)
+    int markAsRead(@Param("receiverId") UUID receiverId, @Param("senderId") UUID senderId);
 }

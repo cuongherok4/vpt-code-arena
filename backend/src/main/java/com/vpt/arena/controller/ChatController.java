@@ -3,6 +3,7 @@ package com.vpt.arena.controller;
 import com.vpt.arena.dto.chat.ChatConversationDto;
 import com.vpt.arena.dto.chat.ChatMessageDto;
 import com.vpt.arena.dto.chat.ChatSendRequest;
+import com.vpt.arena.dto.chat.BattleInviteChatRequest;
 import com.vpt.arena.dto.chat.MuteUserRequest;
 import com.vpt.arena.dto.chat.ReportMessageRequest;
 import com.vpt.arena.security.CustomUserDetails;
@@ -53,6 +54,14 @@ public class ChatController {
         return chatService.sendGlobal(requirePrincipal(principal).getId(), request.getMessage());
     }
 
+    @PostMapping("/global/battle-invite")
+    @Operation(summary = "Share a waiting battle room to global chat")
+    public ChatMessageDto sendGlobalBattleInvite(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @Valid @RequestBody BattleInviteChatRequest request) {
+        return chatService.sendGlobalBattleInvite(requirePrincipal(principal).getId(), request.getRoomId());
+    }
+
     @GetMapping("/rooms/{roomId}")
     @Operation(summary = "Get room chat history")
     public List<ChatMessageDto> roomHistory(
@@ -95,6 +104,15 @@ public class ChatController {
             @PathVariable UUID userId,
             @Valid @RequestBody ChatSendRequest request) {
         return chatService.sendDirect(requirePrincipal(principal).getId(), userId, request.getMessage());
+    }
+
+    @PostMapping("/dm/{userId}/read")
+    @Operation(summary = "Mark direct messages from a user as read")
+    public Map<String, String> markDirectMessagesAsRead(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable UUID userId) {
+        chatService.markDirectMessagesAsRead(requirePrincipal(principal).getId(), userId);
+        return Map.of("message", "Marked as read");
     }
 
     @PostMapping("/messages/{kind}/{messageId}/report")

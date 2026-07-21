@@ -101,6 +101,26 @@ export function registerChatNamespace(
       }
     });
 
+    socket.on('chat:send-battle-invite', async (payload, ack) => {
+      try {
+        const roomId = requireUuid(payload?.roomId, 'roomId');
+        const roomName = optionalText(payload?.roomName, 120) || 'Phòng battle';
+        const roomCode = optionalText(payload?.roomCode, 20) || '';
+        const text = `__BATTLE_INVITE__|${roomId}|${roomCode}|${roomName}`;
+        const message = await persist(socket, '/api/v1/chat/global', { message: text });
+        const enrichedMessage = {
+          ...(typeof message === 'object' && message !== null ? message : {}),
+          battleRoomId: roomId,
+          battleRoomName: roomName,
+          battleRoomCode: roomCode
+        };
+        chat.emit('chat:message', enrichedMessage);
+        ack?.({ success: true, message: enrichedMessage });
+      } catch (error) {
+        fail(socket, ack, error);
+      }
+    });
+
     socket.on('chat:send-room', async (payload, ack) => {
       try {
         const roomId = requireUuid(payload?.roomId, 'roomId');
@@ -175,6 +195,11 @@ function requireMessage(value: unknown): string {
   if (!text) throw new ChatSocketError('INVALID_PAYLOAD', 'message is required');
   if (text.length > 2000) throw new ChatSocketError('INVALID_PAYLOAD', 'message is too long');
   return text;
+}
+
+function optionalText(value: unknown, maxLength: number): string {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return text.slice(0, maxLength);
 }
 
 function roomChannel(roomId: string): string {

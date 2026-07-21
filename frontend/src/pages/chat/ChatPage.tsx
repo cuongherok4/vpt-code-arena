@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, Lock, MessageSquare, RefreshCw } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { chatApi, type ChatMessage } from '@/api/chat.api';
+import { chatApi, type ChatConversation, type ChatMessage } from '@/api/chat.api';
 import { friendsApi } from '@/api/friends.api';
 import { DMChatWindow } from '@/components/chat/DMChatWindow';
 import { DMConversationList } from '@/components/chat/DMConversationList';
@@ -61,10 +61,13 @@ export const ChatPage = () => {
       const otherUserId = message.senderId === user?.id ? message.receiverId : message.senderId;
       if (otherUserId) {
         queryClient.setQueryData<ChatMessage[]>(['chat-dm', otherUserId], (current = []) => mergeMessages(current, [message]));
+        queryClient.setQueryData<ChatConversation[]>(['chat-conversations'], (current = []) =>
+          updateConversationUnread(current, message, otherUserId, user?.id, selectedDmUserId, tab)
+        );
       }
     }
-    if (message.channel === 'DM') refetchConversations();
-  }, [queryClient, refetchConversations, user?.id]);
+    if (message.channel === 'DM' && message.senderId !== user?.id) refetchConversations();
+  }, [queryClient, refetchConversations, selectedDmUserId, tab, user?.id]);
 
   const showError = useCallback((message: string) => setError(message), []);
   const chatSocket = useChatSocket({
@@ -79,12 +82,18 @@ export const ChatPage = () => {
   const selectedDmUserEmail = selectedFriend?.email ?? selectedConversation?.userEmail;
   const selectDmUser = useCallback((userId: string) => {
     setSelectedDmUserId(userId);
+    queryClient.setQueryData<ChatConversation[]>(['chat-conversations'], (current = []) =>
+      current.map((item) => item.userId === userId ? { ...item, unreadCount: 0 } : item)
+    );
+    chatApi.markAsRead(userId)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] }))
+      .catch(console.error);
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
       next.set('dm', userId);
       return next;
     });
-  }, [setSearchParams]);
+  }, [queryClient, setSearchParams]);
 
   useEffect(() => {
     if (!chatSocket.connected) return;
@@ -201,6 +210,41 @@ function mergeMessages(history: ChatMessage[], live: ChatMessage[]): ChatMessage
   const byId = new Map<string, ChatMessage>();
   [...history, ...live].forEach((item) => byId.set(item.id, item));
   return Array.from(byId.values()).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+}
+
+function updateConversationUnread(
+  conversations: ChatConversation[],
+  message: ChatMessage,
+  otherUserId: string,
+  currentUserId: string | undefined,
+  selectedDmUserId: string,
+  tab: ChatTab,
+): ChatConversation[] {
+  const isIncoming = message.senderId !== currentUserId;
+  const isViewing = tab === 'dm' && selectedDmUserId === otherUserId;
+  const unreadDelta = isIncoming && !isViewing ? 1 : 0;
+  const next = conversations.some((item) => item.userId === otherUserId)
+    ? conversations.map((item) => item.userId === otherUserId
+      ? {
+          ...item,
+          lastMessage: message.message,
+          lastMessageAt: message.createdAt,
+          unreadCount: isViewing ? 0 : (item.unreadCount ?? 0) + unreadDelta,
+        }
+      : item)
+    : [
+        {
+          userId: otherUserId,
+          userName: message.senderId === otherUserId ? message.senderName : message.receiverName ?? 'Bạn bè',
+          userEmail: message.senderId === otherUserId ? message.senderEmail : '',
+          lastMessage: message.message,
+          lastMessageAt: message.createdAt,
+          unreadCount: unreadDelta,
+        },
+        ...conversations,
+      ];
+
+  return next.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
 }
 
 function errorMessage(value: unknown, fallback: string): string {
