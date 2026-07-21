@@ -15,7 +15,7 @@
 | 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
 | 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 9 | 18–19 | Admin Panel | Dashboard admin, quản lý user/problem/stats | 🟢 Hoàn thành | 100% |
-| 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | ⚪ Chưa bắt đầu | 0% |
+| 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | 🟡 Đang thực hiện | 20% |
 | 11 | 22–23 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
 | 12 | 24–25 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
 | 13 | 26 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
@@ -231,11 +231,11 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 10 — Frontend Redesign (Tuần 20–21) ⚪ 0%
+### Phase 10 — Frontend Redesign (Tuần 20–21) 🟡 20%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 10.1 | `feature/p10-fe-design-system` | Chuẩn hóa design tokens, màu, typography, spacing, button/input/table/card/modal states | FE có hệ design thống nhất, dễ tái sử dụng, không lệch style giữa các module | ⚪ Chưa bắt đầu |
+| 10.1 | `feature/p10-fe-design-system` | Chuẩn hóa design tokens, màu, typography, spacing, button/input/table/card/modal states | FE có hệ design thống nhất, dễ tái sử dụng, không lệch style giữa các module | 🟢 Done |
 | 10.2 | `feature/p10-fe-layout-navigation` | Làm lại layout tổng thể, navbar/sidebar, page shell, responsive navigation | Điều hướng rõ ràng, bố cục nhất quán trên toàn app | ⚪ Chưa bắt đầu |
 | 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language | Các màn hình chính đồng bộ, gọn, dễ dùng, không dư UI gây nặng | ⚪ Chưa bắt đầu |
 | 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Stats | Admin dashboard chuyên nghiệp, thao tác nhanh, dữ liệu dễ scan | ⚪ Chưa bắt đầu |

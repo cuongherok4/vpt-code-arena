@@ -49,15 +49,15 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5">
+    <div className="app-page">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-cyan-300">
+          <div className="app-kicker">
             <Shield size={20} />
             <span className="text-sm font-medium">Admin</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Quản trị hệ thống</h1>
-          <p className="mt-1 text-sm text-slate-400">Quản user, ngân hàng đề và thống kê tổng quan.</p>
+          <h1 className="app-page-heading">Quản trị hệ thống</h1>
+          <p className="app-page-subtitle">Quản user, ngân hàng đề và thống kê tổng quan.</p>
         </div>
 
         <div className="flex rounded-lg border border-white/10 bg-white/[0.03] p-1">
@@ -88,21 +88,21 @@ function UsersTab() {
   });
 
   return (
-    <section className="rounded-lg border border-white/10 bg-white/[0.03]">
+    <section className="app-panel">
       <PanelHeader title="Users" description="Tìm kiếm và ban/unban tài khoản." />
       <div className="border-b border-white/10 p-4">
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Tìm theo email, tên hoặc ID..."
-          className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50"
+          className="app-field"
         />
       </div>
       <StateBox loading={usersQuery.isLoading} error={usersQuery.isError} />
       {usersQuery.data && (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="border-b border-white/10 text-xs uppercase text-slate-500">
+          <table className="app-table min-w-[860px]">
+            <thead>
               <tr>
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">ID</th>
@@ -112,9 +112,9 @@ function UsersTab() {
                 <th className="px-4 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10 text-slate-300">
+            <tbody>
               {usersQuery.data.items.map((item) => (
-                <tr key={item.id} className="hover:bg-white/[0.025]">
+                <tr key={item.id}>
                   <td className="px-4 py-3 font-semibold text-white">{item.name}</td>
                   <td className="px-4 py-3 text-slate-400">{item.publicId}</td>
                   <td className="px-4 py-3">{item.role}</td>
@@ -125,7 +125,7 @@ function UsersTab() {
                       type="button"
                       onClick={() => banMutation.mutate({ userId: item.id, banned: !item.banned })}
                       disabled={banMutation.isPending}
-                      className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-white/5 disabled:opacity-50"
+                      className="app-button app-button-secondary px-3 py-1.5 text-xs"
                     >
                       {item.banned ? 'Unban' : 'Ban'}
                     </button>
@@ -213,14 +213,14 @@ function ProblemsTab() {
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <section className="rounded-lg border border-white/10 bg-white/[0.03]">
+      <section className="app-panel">
         <PanelHeader title="Problems" description="Tìm kiếm, publish/unpublish và xóa đề." />
         <div className="border-b border-white/10 p-4">
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Tìm theo tiêu đề hoặc chủ đề..."
-            className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50"
+            className="app-field"
           />
         </div>
         <StateBox loading={problemsQuery.isLoading} error={problemsQuery.isError} />
@@ -256,7 +256,7 @@ function ProblemsTab() {
         )}
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-white/[0.03]">
+      <section className="app-panel">
         <PanelHeader title={editing ? 'Sửa đề' : 'Tạo đề'} description="Test cases nhập dạng JSON array." />
         <form onSubmit={submit} className="space-y-3 p-4">
           {formError && <InlineError message={formError} />}
@@ -284,12 +284,12 @@ function ProblemsTab() {
           <AdminTextArea label="Test cases JSON" rows={7} value={testCasesText} onChange={setTestCasesText} />
           <AdminTextArea label="Solution code" rows={4} value={form.solutionCode ?? ''} onChange={(value) => setForm({ ...form, solutionCode: value })} />
           <div className="flex gap-2">
-            <button type="submit" disabled={saveMutation.isPending} className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 disabled:opacity-50">
+            <button type="submit" disabled={saveMutation.isPending} className="app-button app-button-primary flex-1">
               {saveMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               {editing ? 'Lưu thay đổi' : 'Tạo đề'}
             </button>
             {editing && (
-              <button type="button" onClick={resetForm} className="rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 hover:bg-white/5">
+              <button type="button" onClick={resetForm} className="app-button app-button-secondary">
                 Hủy
               </button>
             )}
@@ -342,7 +342,7 @@ function TabButton({ active, onClick, icon: Icon, label }: { active: boolean; on
 
 function PanelHeader({ title, description }: { title: string; description: string }) {
   return (
-    <div className="border-b border-white/10 p-4">
+    <div className="app-panel-header">
       <h2 className="font-semibold text-white">{title}</h2>
       <p className="mt-1 text-xs text-slate-400">{description}</p>
     </div>
@@ -352,7 +352,7 @@ function PanelHeader({ title, description }: { title: string; description: strin
 function StateBox({ loading, error }: { loading: boolean; error: boolean }) {
   if (!loading && !error) return null;
   return (
-    <div className={`m-4 flex items-center gap-3 rounded-lg border p-4 text-sm ${error ? 'border-red-500/20 bg-red-500/10 text-red-300' : 'border-white/10 bg-slate-950/40 text-slate-400'}`}>
+    <div className={`app-alert m-4 ${error ? 'app-alert-error' : 'app-alert-muted'}`}>
       {error ? <AlertCircle size={18} /> : <Loader2 size={18} className="animate-spin text-cyan-300" />}
       {error ? 'Không thể tải dữ liệu admin.' : 'Đang tải...'}
     </div>
@@ -374,12 +374,12 @@ function Badge({ tone, children }: { tone: 'success' | 'warn' | 'danger'; childr
     : tone === 'warn'
       ? 'border-amber-400/30 bg-amber-400/10 text-amber-200'
       : 'border-red-400/30 bg-red-400/10 text-red-200';
-  return <span className={`inline-flex rounded-md border px-2 py-0.5 text-[11px] font-semibold ${className}`}>{children}</span>;
+  return <span className={`app-badge ${className}`}>{children}</span>;
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
+    <div className="app-card p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-medium text-slate-400">{label}</p>
         <CheckCircle2 size={18} className="text-cyan-300" />
