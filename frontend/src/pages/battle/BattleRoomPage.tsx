@@ -191,11 +191,11 @@ export const BattleRoomPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="mx-auto max-w-xl rounded-lg border border-white/10 bg-slate-950/70 p-6 text-center">
-        <Lock size={32} className="mx-auto mb-3 text-violet-300" />
+      <div className="app-panel mx-auto max-w-xl p-6 text-center">
+        <Lock size={32} className="mx-auto mb-3 text-cyan-300" />
         <h1 className="text-xl font-semibold text-white">Cần đăng nhập để vào phòng battle</h1>
         <p className="mt-2 text-sm text-slate-400">Phòng battle dùng tài khoản thật để đồng bộ thành viên, ready và submit.</p>
-        <Link to="/login" className="mt-5 inline-flex rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-400">
+        <Link to="/login" className="app-button app-button-primary mt-5">
           Đăng nhập
         </Link>
       </div>
@@ -216,7 +216,7 @@ export const BattleRoomPage = () => {
   if (roomQuery.isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-32 text-sm text-slate-400">
-        <Loader2 size={18} className="animate-spin text-violet-300" />
+        <Loader2 size={18} className="animate-spin text-cyan-300" />
         Đang tải phòng battle...
       </div>
     );
@@ -244,7 +244,7 @@ export const BattleRoomPage = () => {
             {room.status === 'IN_PROGRESS' ? 'Rời trận' : 'Rời phòng'}
           </button>
         ) : (
-          <a href="/battle" className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white">
+          <a href="/battle" className="app-button app-button-secondary">
             <ArrowLeft size={16} />
             Lobby
           </a>
@@ -257,12 +257,12 @@ export const BattleRoomPage = () => {
         </div>
       </div>
 
-      <section className="rounded-lg border border-white/10 bg-slate-950/70 p-5">
+      <section className="app-panel p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <h1 className="truncate text-2xl font-bold text-white">{room.name}</h1>
-              <span className="rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-1 text-xs font-semibold text-violet-200">{room.status}</span>
+              <span className="rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-xs font-semibold text-cyan-100">{room.status}</span>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
               <span>{room.numProblems} bài</span>
@@ -272,7 +272,7 @@ export const BattleRoomPage = () => {
             </div>
             <div className="mt-3 flex max-w-full flex-wrap items-center gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Mã phòng</span>
-              <code className="break-all rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-violet-200">
+              <code className="break-all rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-cyan-100">
                 {room.id}
               </code>
             </div>
@@ -280,7 +280,7 @@ export const BattleRoomPage = () => {
           <button
             type="button"
             onClick={() => navigator.clipboard?.writeText(room.id)}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
+            className="app-button app-button-secondary"
           >
             <Copy size={16} />
             Copy mã phòng
@@ -321,10 +321,10 @@ export const BattleRoomPage = () => {
       )}
 
       {room.status === 'WAITING' && <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="rounded-lg border border-white/10 bg-slate-950/70">
+        <section className="app-panel">
           <div className="flex items-center justify-between border-b border-white/10 p-4">
             <div className="flex items-center gap-2">
-              <Users size={18} className="text-violet-300" />
+              <Users size={18} className="text-cyan-300" />
               <h2 className="font-semibold text-white">Thành viên</h2>
             </div>
             <span className="text-sm text-slate-400">{members.length}/{room.maxMembers}</span>
@@ -349,9 +349,9 @@ export const BattleRoomPage = () => {
 
         <aside className="space-y-3">
           {isCreator && (
-            <section className="rounded-lg border border-white/10 bg-slate-950/70 p-3">
+            <section className="app-panel p-3">
               <div className="mb-3 flex items-center gap-2">
-                <UserPlus size={17} className="text-violet-300" />
+                <UserPlus size={17} className="text-cyan-300" />
                 <h3 className="text-sm font-semibold text-white">Mời bạn bè</h3>
               </div>
               {friendsQuery.isLoading ? (
@@ -375,7 +375,7 @@ export const BattleRoomPage = () => {
                         type="button"
                         onClick={() => inviteMutation.mutate(friend.id)}
                         disabled={inviteMutation.isPending}
-                        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-violet-500 px-2 py-1.5 text-xs font-semibold text-white hover:bg-violet-400 disabled:opacity-50"
+                        className="inline-flex shrink-0 items-center gap-1 rounded-md bg-cyan-500 px-2 py-1.5 text-xs font-semibold text-slate-950 hover:bg-cyan-400 disabled:opacity-50"
                       >
                         <UserPlus size={13} />
                         Mời
@@ -392,7 +392,7 @@ export const BattleRoomPage = () => {
                   type="button"
                   onClick={() => joinMutation.mutate()}
                   disabled={joinMutation.isPending}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-violet-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-400 disabled:opacity-50"
+                  className="app-button app-button-primary w-full py-2.5"
                 >
                   {joinMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Swords size={16} />}
                   Join phòng
@@ -428,7 +428,7 @@ export const BattleRoomPage = () => {
                   type="button"
                   onClick={() => startMutation.mutate()}
                   disabled={!canStart || startMutation.isPending}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-100 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="app-button app-button-secondary w-full py-2.5"
                 >
                   {startMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
                   Bắt đầu
@@ -441,7 +441,7 @@ export const BattleRoomPage = () => {
       </div>}
 
       {room.status === 'WAITING' && room.problems.length > 0 && (
-        <section className="rounded-lg border border-white/10 bg-slate-950/70">
+        <section className="app-panel">
           <div className="border-b border-white/10 p-4 font-semibold text-white">Bài trong trận</div>
           <div className="grid gap-2 p-4 md:grid-cols-2">
             {room.problems.map(problem => (
