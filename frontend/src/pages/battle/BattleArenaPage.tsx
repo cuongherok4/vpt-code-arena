@@ -5,6 +5,7 @@ import { CheckCircle2, Loader2, Send } from 'lucide-react';
 import { battleApi, type BattleLanguage, type BattleProblemDto, type BattleSubmissionDto } from '@/api/battle.api';
 import { examApi } from '@/api/exam.api';
 import ProblemStatement from '@/components/exam/ProblemStatement';
+import { useTheme } from '@/hooks/useTheme';
 
 const languageOptions: Array<{ value: BattleLanguage; label: string; monaco: string; defaultCode: string }> = [
   { value: 'python', label: 'Python', monaco: 'python', defaultCode: '# Code here\n' },
@@ -20,6 +21,7 @@ type BattleArenaPageProps = {
 };
 
 export const BattleArenaPage = ({ roomId, problems, latestSubmission, onSubmitted }: BattleArenaPageProps) => {
+  const { theme } = useTheme();
   const [activeProblemId, setActiveProblemId] = useState(problems[0]?.id ?? '');
   const [language, setLanguage] = useState<BattleLanguage>('python');
   const [codeByProblem, setCodeByProblem] = useState<Record<string, string>>({});
@@ -130,7 +132,7 @@ export const BattleArenaPage = ({ roomId, problems, latestSubmission, onSubmitte
           language={currentLanguage.monaco}
           value={code}
           onChange={value => setCodeByProblem(prev => ({ ...prev, [codeKey]: value ?? '' }))}
-          theme="vs-dark"
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false, automaticLayout: true }}
         />
 

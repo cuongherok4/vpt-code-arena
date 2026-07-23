@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import { Loader2, Send } from 'lucide-react';
 import type { ExamLanguage, SubmissionDto } from '@/api/exam.api';
+import { useTheme } from '@/hooks/useTheme';
 
 const LANGUAGE_OPTIONS: Array<{ value: ExamLanguage; label: string; monaco: string; defaultCode: string }> = [
   {
@@ -32,6 +33,7 @@ interface SubmitPanelProps {
 }
 
 export const SubmitPanel = ({ isSubmitting, latestSubmission, onLanguageChange, onSubmit }: SubmitPanelProps) => {
+  const { theme } = useTheme();
   const [language, setLanguage] = useState<ExamLanguage>('python');
   const currentLanguage = useMemo(() => LANGUAGE_OPTIONS.find(item => item.value === language) ?? LANGUAGE_OPTIONS[2], [language]);
   const [codeByLanguage, setCodeByLanguage] = useState<Record<ExamLanguage, string>>({
@@ -111,7 +113,7 @@ export const SubmitPanel = ({ isSubmitting, latestSubmission, onLanguageChange, 
         value={code}
         onChange={value => setCodeByLanguage(prev => ({ ...prev, [language]: value ?? '' }))}
         onMount={handleEditorMount}
-        theme="vs-dark"
+        theme={theme === 'dark' ? 'vs-dark' : 'light'}
         options={{
           minimap: { enabled: false },
           fontSize: 14,
