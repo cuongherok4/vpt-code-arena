@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import { Zap, Play, Send, Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { learnApi, type RunCodeResponse } from '@/api/learn.api';
+import { useTheme } from '@/hooks/useTheme';
 
 const LANG_MAP: Record<string, { id: number; defaultCode: string }> = {
   java:   { id: 62, defaultCode: 'public class Main {\n    public static void main(String[] args) {\n        // Code here\n    }\n}' },
@@ -15,6 +16,7 @@ const ChallengePage = () => {
   const { id, lang = 'java' } = useParams<{ id: string; lang: string }>();
   useOutletContext<{ lang: string }>();
   const queryClient = useQueryClient();
+  const { theme } = useTheme();
 
   const cfg = LANG_MAP[lang] ?? LANG_MAP.java;
   const [code, setCode] = useState(cfg.defaultCode);
@@ -121,7 +123,7 @@ const ChallengePage = () => {
           value={code}
           onChange={v => setCode(v ?? '')}
           onMount={handleEditorMount}
-          theme="vs-dark"
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false }}
         />
 

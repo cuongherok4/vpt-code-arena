@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Code2, Trophy, BookOpen, LogIn, User, X, Swords, Bell, Home } from 'lucide-react';
+import { Code2, Trophy, BookOpen, LogIn, User, X, Swords, Bell, Home, Moon, Sun } from 'lucide-react';
 import { battleApi } from '@/api/battle.api';
 import { friendsApi } from '@/api/friends.api';
 import { useBattleInviteSocket, type BattleInviteEvent } from '@/hooks/useBattleInviteSocket';
 import { useAuthStore } from '@/stores/authStore';
+import { useTheme } from '@/hooks/useTheme';
 
 const NAV_LINKS = [
   { to: '/learn', icon: BookOpen, label: 'Học tập' },
@@ -18,6 +19,7 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuthStore();
+  const { theme, toggleTheme } = useTheme();
   const previousIncomingCount = useRef(0);
   const previousPendingCount = useRef(0);
   const [showFriendNotice, setShowFriendNotice] = useState(false);
@@ -128,6 +130,16 @@ export const Navbar = () => {
 
         {/* ── Right side ── */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+            title={theme === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition-colors hover:border-cyan-300/35 hover:bg-white/[0.07] hover:text-white sm:h-10 sm:w-10"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
           {isAuthenticated ? (
             <Link
               to="/profile"
