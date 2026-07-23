@@ -75,6 +75,7 @@ export const ChatPage = () => {
     onDirectMessage: appendMessage,
     onError: showError,
   });
+  const { connected, joinGlobal } = chatSocket;
 
   const selectedFriend = friendsQuery.data?.find((friend) => friend.id === selectedDmUserId);
   const selectedConversation = conversationsQuery.data?.find((conversation) => conversation.userId === selectedDmUserId);
@@ -96,11 +97,11 @@ export const ChatPage = () => {
   }, [queryClient, setSearchParams]);
 
   useEffect(() => {
-    if (!chatSocket.connected) return;
-    chatSocket.joinGlobal().then((response) => {
+    if (!connected) return;
+    joinGlobal().then((response) => {
       if (!response.success) showError(errorMessage(response.message, 'Không thể vào global chat.'));
     });
-  }, [chatSocket.connected, chatSocket.joinGlobal, showError]);
+  }, [connected, joinGlobal, showError]);
 
   if (!isAuthenticated) {
     return (

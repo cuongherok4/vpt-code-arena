@@ -73,3 +73,18 @@ export const SkeletonSpinner: React.FC<{ label?: string; className?: string }> =
     <span className="text-xs font-medium">{label}</span>
   </div>
 );
+
+export const PageLoadingFallback: React.FC<{ label?: string }> = ({ label = 'Đang tải trang...' }) => (
+  <div className="app-page py-8" aria-busy="true" aria-label={label}>
+    <div className="mb-5 space-y-3">
+      <SkeletonText className="h-4 w-28" />
+      <SkeletonText className="h-8 w-56" />
+      <SkeletonText className="h-4 max-w-xl" />
+    </div>
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard className="md:col-span-2 xl:col-span-1" />
+    </div>
+  </div>
+);
