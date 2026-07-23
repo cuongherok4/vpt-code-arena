@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Code2, Trophy, BookOpen, LogIn, User, X, Swords, Bell } from 'lucide-react';
+import { Code2, Trophy, BookOpen, LogIn, User, X, Swords, Bell, Home } from 'lucide-react';
 import { battleApi } from '@/api/battle.api';
 import { friendsApi } from '@/api/friends.api';
 import { useBattleInviteSocket, type BattleInviteEvent } from '@/hooks/useBattleInviteSocket';
@@ -57,6 +57,13 @@ export const Navbar = () => {
   const outgoingCount = friendRequestsQuery.data?.outgoing.length ?? 0;
   const pendingCount = incomingCount + outgoingCount;
   const navItems = NAV_LINKS;
+  const mobileNavItems = [
+    { to: '/', icon: Home, label: 'Home' },
+    ...navItems,
+    isAuthenticated
+      ? { to: '/profile', icon: User, label: 'Cá nhân' }
+      : { to: '/login', icon: LogIn, label: 'Login' },
+  ];
 
   useEffect(() => {
     if (pendingCount !== previousPendingCount.current) {
@@ -158,8 +165,8 @@ export const Navbar = () => {
 
       {/* ── Mobile Bottom Bar ── */}
       <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-slate-950/95 px-2 py-2 shadow-lg shadow-black/30 backdrop-blur-xl lg:hidden" aria-label="Điều hướng di động">
-        <div className="mx-auto grid max-w-2xl grid-flow-col auto-cols-fr gap-1">
-          {navItems.map((item) => (
+        <div className="mx-auto grid max-w-2xl grid-cols-5 gap-1">
+          {mobileNavItems.map((item) => (
             <NavLinkItem
               key={item.to}
               item={item}
