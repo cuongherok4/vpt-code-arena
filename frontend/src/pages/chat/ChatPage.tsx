@@ -166,8 +166,8 @@ export const ChatPage = () => {
       )}
 
       {tab === 'dm' && (
-        <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <aside className="app-panel flex h-[640px] min-h-0 flex-col p-4">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="app-panel flex max-h-[360px] min-h-0 min-w-0 flex-col p-3 sm:p-4 lg:h-[min(640px,calc(100vh-9rem))] lg:max-h-none lg:min-h-[420px]">
             <div className="mb-4 flex items-center justify-between gap-2">
               <h2 className="font-semibold text-white">Hội thoại</h2>
               <button

@@ -76,7 +76,7 @@ export const BattleLobbyPage = () => {
     },
   });
 
-  const rooms = roomsQuery.data ?? [];
+  const rooms = useMemo(() => roomsQuery.data ?? [], [roomsQuery.data]);
   const filteredRooms = useMemo(() => {
     const query = searchCode.trim().toLowerCase();
     if (!query) return rooms;
@@ -128,7 +128,7 @@ export const BattleLobbyPage = () => {
   }
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="mx-auto grid min-w-0 max-w-7xl gap-5 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px]">
       <section className="min-w-0">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -153,7 +153,7 @@ export const BattleLobbyPage = () => {
           {lobbySocket.connected ? 'Lobby realtime' : 'Đang kết nối lobby'}
         </div>
 
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex min-w-0 gap-2">
           <div className="relative flex-1">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
@@ -248,7 +248,7 @@ export const BattleLobbyPage = () => {
               key={room.id}
               onClick={() => selectRoom(room)}
               disabled={joinMutation.isPending}
-              className="app-card p-4 text-left transition-colors hover:border-cyan-400/40 hover:bg-white/[0.06]"
+            className="app-card min-w-0 p-4 text-left transition-colors hover:border-cyan-400/40 hover:bg-white/[0.06]"
             >
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -278,7 +278,7 @@ export const BattleLobbyPage = () => {
         </div>
       </section>
 
-      <aside className="space-y-4">
+      <aside className="min-w-0 space-y-4">
         <form onSubmit={submitCreate} className="app-panel p-4">
           <div className="mb-4 flex items-center gap-2">
             <Plus size={18} className="text-cyan-300" />
@@ -296,7 +296,7 @@ export const BattleLobbyPage = () => {
               <NumberField label="Bài" value={form.numProblems} min={1} max={10} onChange={numProblems => setForm(prev => ({ ...prev, numProblems }))} />
               <NumberField label="Phút" value={form.timeLimitMin} min={2} max={180} onChange={timeLimitMin => setForm(prev => ({ ...prev, timeLimitMin }))} />
             </div>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
               {difficulties.map(item => (
                 <button
                   key={item.label}

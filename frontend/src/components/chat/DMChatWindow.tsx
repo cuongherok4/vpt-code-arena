@@ -53,7 +53,7 @@ export const DMChatWindow = ({
   }, [activeUserId, messages.length, queryClient]);
 
   return (
-    <section className={`flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4 ${className ?? ''}`}>
+    <section className={`flex responsive-panel-height min-h-0 min-w-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-3 sm:p-4 ${className ?? ''}`}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <MessagesSquare size={18} className="shrink-0 text-cyan-300" />

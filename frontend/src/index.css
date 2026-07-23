@@ -49,7 +49,10 @@
 
   * { box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
 
   body {
     background-color: var(--color-app-bg);
@@ -58,9 +61,17 @@
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
-  button, input, select, textarea { font: inherit; }
+  img, svg, video, canvas { max-width: 100%; }
+
+  button, input, select, textarea {
+    font: inherit;
+    max-width: 100%;
+  }
+
+  pre, code { max-width: 100%; }
 
   /* Accessibility focus ring defaults */
   *:focus-visible {
@@ -225,7 +236,7 @@
 @layer components {
   /* Layout */
   .app-page {
-    @apply mx-auto max-w-7xl space-y-6;
+    @apply mx-auto w-full max-w-7xl space-y-5 sm:space-y-6;
   }
 
   .app-shell {
@@ -237,13 +248,13 @@
 
   /* Typography */
   .app-page-heading {
-    @apply text-2xl font-bold;
+    @apply text-xl font-bold sm:text-2xl;
     color: var(--color-app-text);
   }
 
   .app-page-subtitle {
     color: var(--color-app-text-muted);
-    @apply mt-1 text-sm;
+    @apply mt-1 max-w-3xl text-sm leading-6;
   }
 
   .app-kicker {
@@ -273,7 +284,7 @@
 
   .app-panel-header {
     border-bottom: 1px solid var(--color-app-border);
-    @apply p-4;
+    @apply p-3 sm:p-4;
   }
 
   /* Form Fields */
@@ -294,7 +305,7 @@
   .app-button {
     border-radius: var(--radius-app-md);
     transition: all 0.2s ease;
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-10 items-center justify-center gap-2 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2.5;
   }
   .app-button:not(:disabled):active { transform: scale(0.97); }
 
@@ -370,6 +381,28 @@
   .app-table tr { transition: background 0.15s; }
   .app-table tr:hover { background: rgba(45, 212, 191, 0.035); }
   .app-table th, .app-table td { @apply px-4 py-3; }
+
+  .app-table-wrap {
+    @apply w-full overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .responsive-panel-height {
+    height: min(640px, calc(100vh - 9rem));
+    min-height: 420px;
+  }
+
+  @media (max-width: 640px) {
+    .responsive-panel-height {
+      height: min(560px, calc(100vh - 8rem));
+      min-height: 360px;
+    }
+
+    .app-table th,
+    .app-table td {
+      @apply px-3 py-2.5;
+    }
+  }
 
   /* Alerts */
   .app-alert {

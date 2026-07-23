@@ -41,7 +41,7 @@ export const RoomChatPanel = ({ connected, liveMessages, currentUserId, joinRoom
   );
 
   return (
-    <section className="flex h-[640px] min-h-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-4">
+    <section className="flex responsive-panel-height min-h-0 min-w-0 flex-col rounded-lg border border-white/10 bg-slate-950/70 p-3 sm:p-4">
       <div className="mb-4 flex items-center gap-2">
         <DoorOpen size={18} className="text-amber-300" />
         <h2 className="font-semibold text-white">Room Chat</h2>

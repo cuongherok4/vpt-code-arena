@@ -267,7 +267,7 @@ export const BattleRoomPage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className="mx-auto min-w-0 max-w-6xl space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {me ? (
           <button
@@ -293,11 +293,11 @@ export const BattleRoomPage = () => {
         </div>
       </div>
 
-      <section className="app-panel p-5">
+      <section className="app-panel p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h1 className="truncate text-2xl font-bold text-white">{room.name}</h1>
+              <h1 className="max-w-full truncate text-xl font-bold text-white sm:text-2xl">{room.name}</h1>
               <span className="rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-xs font-semibold text-cyan-100">{room.status}</span>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
@@ -353,7 +353,7 @@ export const BattleRoomPage = () => {
               {finishingRoom ? 'Đang tổng kết trận...' : `${room.problems.length} bài · tối đa ${maxBattlePoints} điểm`}
             </span>
           </div>
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
             <BattleArenaPage
               roomId={room.id}
               problems={room.problems}
@@ -369,7 +369,7 @@ export const BattleRoomPage = () => {
         <FinalResults entries={finalEntries} maxPoints={maxBattlePoints} loading={leaderboardQuery.isLoading} />
       )}
 
-      {room.status === 'WAITING' && <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      {room.status === 'WAITING' && <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="app-panel">
           <div className="flex items-center justify-between border-b border-white/10 p-4">
             <div className="flex items-center gap-2">
@@ -398,7 +398,7 @@ export const BattleRoomPage = () => {
           </div>
         </section>
 
-        <aside className="space-y-3">
+        <aside className="min-w-0 space-y-3">
           {isCreator && (
             <section className="app-panel p-3">
               <div className="mb-3 flex items-center gap-2">
@@ -621,14 +621,14 @@ const FinalResults = ({
         {entries.map(entry => (
           <div
             key={entry.userId}
-            className="grid grid-cols-[52px_minmax(0,1fr)_110px] items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3"
+            className="grid grid-cols-[44px_minmax(0,1fr)_88px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3 sm:grid-cols-[52px_minmax(0,1fr)_110px] sm:gap-3"
           >
-            <span className="text-lg font-bold text-amber-200">#{entry.rank}</span>
+            <span className="text-base font-bold text-amber-200 sm:text-lg">#{entry.rank}</span>
             <div className="min-w-0">
               <p className="truncate font-medium text-white">{entry.name}</p>
               <p className="text-xs text-slate-500">{entry.acceptedCount} bài Accepted</p>
             </div>
-            <span className="text-right font-semibold text-emerald-300">
+            <span className="text-right text-sm font-semibold text-emerald-300 sm:text-base">
               {entry.totalPoints}/{maxPoints}
             </span>
           </div>
@@ -655,7 +655,7 @@ const MemberRow = ({
   onFriendError?: (message: string) => void;
   onKick?: () => void;
 }) => (
-  <div className="flex items-center justify-between gap-3 p-4">
+  <div className="flex flex-wrap items-center justify-between gap-3 p-4">
     <div className="min-w-0">
       <div className="flex items-center gap-2">
         <p className="truncate font-medium text-white">{member.name || 'Người dùng VPT'}</p>
@@ -664,7 +664,7 @@ const MemberRow = ({
       </div>
       <p className="mt-1 truncate text-xs text-slate-500">ID {member.publicId ?? '----------'}</p>
     </div>
-    <div className="flex shrink-0 items-center gap-2">
+    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
       <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${
         member.ready ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-white/5 text-slate-400'
       }`}>

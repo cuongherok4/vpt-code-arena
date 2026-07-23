@@ -52,8 +52,8 @@ export const BattleArenaPage = ({ roomId, problems, latestSubmission, onSubmitte
   const running = submitMutation.isPending || displayedSubmission?.result === 'PENDING';
 
   return (
-    <section className="grid min-h-[720px] overflow-hidden rounded-lg border border-white/10 bg-slate-950/70 lg:grid-cols-[420px_minmax(0,1fr)]">
-      <aside className="max-h-[720px] overflow-y-auto border-b border-white/10 lg:border-b-0 lg:border-r">
+    <section className="grid min-w-0 overflow-hidden rounded-lg border border-white/10 bg-slate-950/70 lg:min-h-[720px] lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] xl:grid-cols-[420px_minmax(0,1fr)]">
+      <aside className="max-h-[58vh] overflow-y-auto border-b border-white/10 lg:max-h-[720px] lg:border-b-0 lg:border-r">
         <div className="border-b border-white/10 p-4 font-semibold text-white">Bài thi</div>
         <div className="space-y-2 p-3">
           {problems.map(problem => (
@@ -93,10 +93,10 @@ export const BattleArenaPage = ({ roomId, problems, latestSubmission, onSubmitte
         </div>
       </aside>
 
-      <div className="min-w-0">
+      <div className="min-w-0 overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-3">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
+            <div className="flex flex-wrap items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
               {languageOptions.map(item => (
                 <button
                   key={item.value}
@@ -126,7 +126,7 @@ export const BattleArenaPage = ({ roomId, problems, latestSubmission, onSubmitte
         </div>
 
         <Editor
-          height="520px"
+          height="min(520px, 56vh)"
           language={currentLanguage.monaco}
           value={code}
           onChange={value => setCodeByProblem(prev => ({ ...prev, [codeKey]: value ?? '' }))}

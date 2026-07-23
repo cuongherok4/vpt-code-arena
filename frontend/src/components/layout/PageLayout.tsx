@@ -18,7 +18,7 @@ export const PageLayout = () => {
         Chuyển đến nội dung chính
       </a>
       <Navbar />
-      <main id="main-content" role="main" className="container mx-auto flex-1 px-3 pb-24 pt-5 sm:px-4 sm:pt-7 lg:pb-8">
+      <main id="main-content" role="main" className="container mx-auto min-w-0 flex-1 px-3 pb-24 pt-4 sm:px-4 sm:pt-7 lg:pb-8">
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>
@@ -27,7 +27,7 @@ export const PageLayout = () => {
 
       {/* Footer */}
       <footer className="border-t border-white/10 bg-slate-950/80 shadow-[0_-1px_0_rgba(255,255,255,0.04)]">
-        <div className="container mx-auto px-4 py-10">
+        <div className="container mx-auto px-3 py-8 sm:px-4 sm:py-10">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {/* Brand */}
             <div className="lg:col-span-2">
