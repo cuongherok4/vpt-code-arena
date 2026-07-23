@@ -57,8 +57,8 @@ export const ExamListPage = () => {
   const problems = problemsQuery.data ?? [];
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#0B0F19]">
-      <aside className={`${id ? 'hidden md:block' : 'block'} w-full shrink-0 border-r border-white/10 bg-slate-950/40 md:w-[420px]`}>
+    <div className="flex min-h-[calc(100vh-64px)] min-w-0 bg-[#0B0F19] md:h-[calc(100vh-64px)] md:overflow-hidden">
+      <aside className={`${id ? 'hidden md:block' : 'block'} w-full min-w-0 shrink-0 border-r border-white/10 bg-slate-950/40 md:w-[420px]`}>
         <div className="border-b border-white/10 bg-slate-950/80 p-4">
           <div className="mb-4 flex items-center gap-2">
             <Code2 size={19} className="text-cyan-300" />
@@ -112,7 +112,7 @@ export const ExamListPage = () => {
           </div>
         </div>
 
-        <div className="h-[calc(100%-145px)] overflow-y-auto p-4">
+        <div className="max-h-[calc(100vh-240px)] overflow-y-auto p-4 md:h-[calc(100%-145px)] md:max-h-none">
           {problemsQuery.isLoading && (
             <div className="space-y-3">
               <div className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/60 p-4 h-24" />
@@ -195,8 +195,8 @@ export const ExamListPage = () => {
         </div>
       </aside>
 
-      <main className={`${id ? 'block' : 'hidden md:block'} flex-1 overflow-y-auto bg-slate-950/50`}>
-        <div className="mx-auto max-w-4xl p-8">
+      <main className={`${id ? 'block' : 'hidden md:block'} min-w-0 flex-1 overflow-y-auto bg-slate-950/50`}>
+        <div className="mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
           {id && (
             <Link
               to="/exam"

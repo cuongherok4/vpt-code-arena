@@ -92,7 +92,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex min-h-screen gap-0">
+    <div className="flex min-h-screen min-w-0 gap-0">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-slate-950/78 shadow-xl shadow-black/20 backdrop-blur lg:flex" aria-label="Thanh điều hướng Admin">
         <div className="border-b border-white/10 px-4 py-4">
           <Link to="/" className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]" aria-label="Trở về trang chủ">
@@ -194,7 +194,7 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="flex-1 lg:ml-64">
+      <main className="min-w-0 flex-1 lg:ml-64">
         <div className="border-b border-white/10 bg-slate-950/75 lg:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <button
@@ -252,7 +252,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="min-w-0 p-4 sm:p-6">
           <div className="mb-6">
             <div className="app-kicker">
               <Shield size={14} />
@@ -292,8 +292,8 @@ function OverviewTab({ onlineCount }: { onlineCount: number }) {
       {stats && (
         <>
           <section className="app-panel overflow-hidden">
-            <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <div className="p-5">
+            <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="min-w-0 p-4 sm:p-5">
                 <div className="app-kicker">
                   <LayoutDashboard size={15} />
                   System overview
@@ -321,7 +321,7 @@ function OverviewTab({ onlineCount }: { onlineCount: number }) {
                 </div>
               </div>
 
-              <div className="border-t border-white/10 bg-white/[0.025] p-5 lg:border-t-0 lg:border-l">
+              <div className="min-w-0 border-t border-white/10 bg-white/[0.025] p-4 sm:p-5 lg:border-t-0 lg:border-l">
                 <p className="text-sm font-semibold text-white">Trạng thái hệ thống</p>
                 <div className="mt-4 space-y-3">
                   <HealthRow label="Auth/User" value={`${onlineCount.toLocaleString('vi-VN')} online`} tone="success" />
@@ -361,14 +361,14 @@ function QuickStatCard({ label, value, icon: Icon, tone }: {
   }[tone];
 
   return (
-    <div className="app-card p-5">
+    <div className="app-card p-4 sm:p-5">
       <div className="flex items-start justify-between">
         <p className="text-sm font-medium text-slate-400">{label}</p>
         <div className={`flex h-9 w-9 items-center justify-center rounded-lg border ${palette}`}>
           <Icon size={18} />
         </div>
       </div>
-      <div className={`mt-3 text-3xl font-black ${valueColor}`}>{value.toLocaleString('vi-VN')}</div>
+      <div className={`mt-3 text-2xl font-black sm:text-3xl ${valueColor}`}>{value.toLocaleString('vi-VN')}</div>
     </div>
   );
 }
@@ -432,7 +432,7 @@ function UsersTab({ onlineUserIds }: { onlineUserIds: Set<string> }) {
       </div>
       <StateBox loading={usersQuery.isLoading} error={usersQuery.isError} />
       {usersQuery.data && (
-        <div className="overflow-x-auto">
+        <div className="app-table-wrap">
           <table className="app-table min-w-[720px]">
             <thead>
               <tr>
@@ -533,7 +533,7 @@ function ProblemsTab() {
   };
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
+    <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
       {/* List */}
       <section className="app-panel">
         <div className="border-b border-white/10 p-4">
@@ -589,7 +589,7 @@ function ProblemsTab() {
           {formError && <InlineError message={formError} />}
           <AdminInput label="Tiêu đề" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
           <AdminInput label="Chủ đề" value={form.topic} onChange={(v) => setForm({ ...form, topic: v })} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-xs font-medium text-slate-400">
               Độ khó
               <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value as Difficulty })} className="mt-1 admin-field">
@@ -603,14 +603,14 @@ function ProblemsTab() {
               Published
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <AdminNumber label="Time (ms)" value={form.timeLimitMs} onChange={(v) => setForm({ ...form, timeLimitMs: v })} />
             <AdminNumber label="Memory (KB)" value={form.memoryLimitKb} onChange={(v) => setForm({ ...form, memoryLimitKb: v })} />
           </div>
           <AdminTextArea label="Mô tả" rows={4} value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
           <AdminTextArea label="Test cases JSON" rows={6} value={testCasesText} onChange={setTestCasesText} />
           <AdminTextArea label="Solution code" rows={4} value={form.solutionCode ?? ''} onChange={(v) => setForm({ ...form, solutionCode: v })} />
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1">
             <button type="submit" disabled={saveMutation.isPending} className="app-button app-button-primary flex-1">
               {saveMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               {editing ? 'Lưu thay đổi' : 'Tạo bài'}

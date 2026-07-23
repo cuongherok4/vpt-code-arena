@@ -97,7 +97,7 @@ export function ChatDock() {
   };
 
   return (
-    <div className="fixed bottom-20 right-3 z-40 sm:bottom-5 sm:right-5 lg:bottom-5">
+    <div className="fixed bottom-20 right-3 z-40 max-w-[calc(100vw-1.5rem)] sm:bottom-5 sm:right-5 lg:bottom-5">
       {open && (
         <div
           role="region"
@@ -164,10 +164,10 @@ export function ChatDock() {
               joinGlobal={chatSocket.joinGlobal}
               sendGlobal={chatSocket.sendGlobal}
               onError={setError}
-              className="h-[min(70vh,520px)] rounded-none border-0 bg-transparent p-3"
+              className="h-[min(70vh,520px)] min-h-[360px] rounded-none border-0 bg-transparent p-3"
             />
           ) : (
-            <div className="grid h-[min(70vh,560px)] min-h-0 grid-rows-[170px_minmax(0,1fr)]">
+            <div className="grid h-[min(72vh,560px)] min-h-[420px] grid-rows-[150px_minmax(0,1fr)] sm:grid-rows-[170px_minmax(0,1fr)]">
               <div className="min-h-0 border-b border-white/10 p-3">
                 <DMConversationList
                   conversations={displayConversations}

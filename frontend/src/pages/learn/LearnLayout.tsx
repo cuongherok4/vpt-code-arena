@@ -35,9 +35,9 @@ const LearnLayout = () => {
   const activeLang = LANGUAGES.find((l) => l.id === lang) ?? LANGUAGES[0];
 
   return (
-    <div className="grid h-[calc(100vh-64px)] overflow-hidden bg-transparent lg:grid-cols-[280px_minmax(0,1fr)]">
+    <div className="grid min-h-[calc(100vh-64px)] min-w-0 bg-transparent lg:h-[calc(100vh-64px)] lg:overflow-hidden lg:grid-cols-[280px_minmax(0,1fr)]">
       {/* ── Sidebar ── */}
-      <aside className="flex min-h-0 flex-col overflow-hidden border-b border-white/[0.07] bg-slate-950/40 lg:border-r lg:border-b-0">
+      <aside className="flex max-h-[52vh] min-h-0 flex-col overflow-hidden border-b border-white/[0.07] bg-slate-950/40 lg:max-h-none lg:border-r lg:border-b-0">
         {/* Sidebar Header */}
         <div className="shrink-0 border-b border-white/[0.07] bg-slate-950/60 backdrop-blur-md">
           <div className="p-4">
@@ -124,8 +124,8 @@ const LearnLayout = () => {
       </aside>
 
       {/* ── Main Content ── */}
-      <main className="min-h-0 overflow-y-auto custom-scrollbar bg-slate-950/20">
-        <div className="mx-auto max-w-4xl p-6 min-h-full md:p-10">
+      <main className="min-h-0 min-w-0 overflow-y-auto custom-scrollbar bg-slate-950/20">
+        <div className="mx-auto min-h-full max-w-4xl p-4 sm:p-6 md:p-10">
           <Outlet context={{ chapters, lang }} />
         </div>
       </main>

@@ -71,7 +71,7 @@ export const MessageList = ({ messages, currentUserId, onError }: MessageListPro
           const battleInvite = parseBattleInvite(item);
           return (
             <div key={item.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[78%] rounded-lg border px-3 py-2 ${mine ? 'border-cyan-400/25 bg-cyan-500/12' : 'border-white/10 bg-white/[0.05]'}`}>
+              <div className={`max-w-[88%] rounded-lg border px-3 py-2 sm:max-w-[78%] ${mine ? 'border-cyan-400/25 bg-cyan-500/12' : 'border-white/10 bg-white/[0.05]'}`}>
                 <div className="mb-1 flex items-center gap-2 text-xs text-slate-400">
                   {mine ? (
                     <span className="max-w-[160px] truncate font-medium text-slate-200">Bạn</span>

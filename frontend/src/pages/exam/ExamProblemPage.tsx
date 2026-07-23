@@ -82,10 +82,10 @@ export const ExamProblemPage = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#0B0F19] lg:h-[calc(100vh-64px)] lg:overflow-hidden">
-      <div className="grid min-h-[calc(100vh-64px)] grid-cols-1 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(460px,46vw)]">
-        <main className="border-r border-white/10 bg-slate-950/40 lg:overflow-y-auto">
-          <div className="mx-auto max-w-4xl space-y-6 p-5 md:p-8">
+    <div className="min-h-[calc(100vh-64px)] min-w-0 bg-[#0B0F19] lg:h-[calc(100vh-64px)] lg:overflow-hidden">
+      <div className="grid min-h-[calc(100vh-64px)] min-w-0 grid-cols-1 lg:h-full lg:grid-cols-[minmax(0,1fr)_minmax(380px,46vw)] xl:grid-cols-[minmax(0,1fr)_minmax(460px,46vw)]">
+        <main className="min-w-0 border-r border-white/10 bg-slate-950/40 lg:overflow-y-auto">
+          <div className="mx-auto max-w-4xl space-y-5 p-4 sm:p-5 md:p-8">
             <Link
               to="/exam"
               className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
@@ -95,7 +95,7 @@ export const ExamProblemPage = () => {
             </Link>
             <ProblemStatement problem={problemQuery.data} />
             <div className="flex flex-col gap-3 border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border ${
                   hasAccepted
                     ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
@@ -117,7 +117,7 @@ export const ExamProblemPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {previousProblem ? (
                   <Link
                     to={`/exam/problems/${previousProblem.id}`}
@@ -161,8 +161,8 @@ export const ExamProblemPage = () => {
           </div>
         </main>
 
-        <aside className="bg-slate-950/70 lg:overflow-y-auto">
-          <div className="space-y-4 p-4">
+        <aside className="min-w-0 bg-slate-950/70 lg:overflow-y-auto">
+          <div className="space-y-4 p-3 sm:p-4">
             <SubmitPanel
               isSubmitting={submitMutation.isPending}
               latestSubmission={latestSubmission}
