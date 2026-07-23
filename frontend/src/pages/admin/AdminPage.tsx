@@ -23,6 +23,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { adminApi, type AdminProblem, type AdminProblemPayload, type AdminProblemTestCase } from '@/api/admin.api';
 import type { Difficulty } from '@/api/exam.api';
+import { LogoImage } from '@/components/common/LogoImage';
 import { useChatSocket } from '@/hooks/useChatSocket';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -96,7 +97,7 @@ export default function AdminPage() {
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-white/10 bg-slate-950/78 shadow-xl shadow-black/20 backdrop-blur lg:flex" aria-label="Thanh điều hướng Admin">
         <div className="border-b border-white/10 px-4 py-4">
           <Link to="/" className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]" aria-label="Trở về trang chủ">
-            <img src="/logocty.png" alt="VPT" className="h-9 w-auto object-contain" />
+            <LogoImage eager alt="VPT" className="h-9 w-auto object-contain" />
             <div>
               <p className="text-sm font-bold text-white">VPT Code Arena</p>
               <p className="text-[11px] text-slate-400">Admin Console</p>
@@ -206,7 +207,7 @@ export default function AdminPage() {
               <span className="truncate text-sm font-semibold text-white">{user.name}</span>
             </button>
             <Link to="/" className="flex shrink-0 items-center gap-2">
-              <img src="/logocty.png" alt="VPT" className="h-7 w-auto object-contain" />
+              <LogoImage eager alt="VPT" className="h-7 w-auto object-contain" />
               <span className="text-xs font-bold text-white">
                 VPT <span className="text-cyan-300">Arena</span>
               </span>

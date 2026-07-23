@@ -4,8 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="google" content="notranslate" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="image" href="/logocty.webp" type="image/webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="theme-color" content="#070b16" />
+    <meta name="description" content="VPT Code Arena - nền tảng học lập trình, luyện thi và thách đấu code thời gian thực." />
+    <title>VPT Code Arena</title>
+    <script>
+      (() => {
+        const saved = localStorage.getItem('vpt-theme');
+        const theme = saved === 'light' || saved === 'dark'
+          ? saved
+          : matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="root" translate="no" class="notranslate"></div>

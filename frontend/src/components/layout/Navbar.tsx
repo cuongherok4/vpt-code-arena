@@ -7,6 +7,7 @@ import { friendsApi } from '@/api/friends.api';
 import { useBattleInviteSocket, type BattleInviteEvent } from '@/hooks/useBattleInviteSocket';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/hooks/useTheme';
+import { LogoImage } from '@/components/common/LogoImage';
 
 const NAV_LINKS = [
   { to: '/learn', icon: BookOpen, label: 'Học tập' },
@@ -107,11 +108,7 @@ export const Navbar = () => {
 
         {/* ── Logo ── */}
         <Link to="/" className="group flex min-w-0 flex-1 items-center gap-2 sm:flex-none sm:gap-2.5" aria-label="Trang chủ Code Arena">
-          <img
-            src="/logocty.png"
-            alt="VPT Logo"
-            className="h-8 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-9"
-          />
+          <LogoImage eager alt="VPT Logo" className="h-8 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-9" />
           <span className="truncate text-sm font-bold text-white sm:text-base">
             Code <span className="text-cyan-300">Arena</span>
           </span>
