@@ -251,14 +251,14 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 11 — UI/UX Polish (Tuần 22–23) 🟡 75%
+### Phase 11 — UI/UX Polish (Tuần 22–23) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 11.1 | `feature/p11-responsive` | Responsive design toàn bộ pages, mobile-friendly breakpoints | Giao diện dùng được trên mobile/tablet, không bị overflow | 🟢 Done |
 | 11.2 | `feature/p11-darkmode` | Dark mode toggle (Tailwind `dark:`), persist localStorage | Chuyển dark/light mode 1 click, nhớ lựa chọn sau khi reload | 🟢 Done |
 | 11.3 | `feature/p11-ux-enhancement` | Loading skeleton, Error boundary + fallback UI, Code splitting (React.lazy + Suspense) | Không còn blank screen khi load, lỗi hiển thị thân thiện thay vì crash | 🟢 Done |
-| 11.4 | `feature/p11-performance` | Lighthouse audit, tối ưu bundle size, lazy load images, đạt score > 80 | Lighthouse Performance > 80, bundle < 500KB gzipped | ⚪ Chưa bắt đầu |
+| 11.4 | `feature/p11-performance` | Lighthouse audit, tối ưu bundle size, lazy load images, đạt score > 80 | Lighthouse Performance > 80, bundle < 500KB gzipped | 🟢 Done |
 
 **Thứ tự thực hiện:** 11.1 || 11.2 || 11.3 → 11.4 → merge `develop`
 

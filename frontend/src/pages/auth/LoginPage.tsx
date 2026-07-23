@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, Zap, Trophy, BookOpen, ArrowRight } from 'lucide-react';
 import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/stores/authStore';
+import { LogoImage } from '@/components/common/LogoImage';
 
 const perks = [
   { icon: BookOpen, text: 'Lộ trình học Java, C, Python chuyên sâu' },
@@ -43,7 +44,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <Link to="/" className="relative flex items-center gap-2.5">
-          <img src="/logocty.png" alt="VPT" className="h-10 w-auto object-contain" />
+          <LogoImage eager alt="VPT" className="h-10 w-auto object-contain" />
           <span className="text-base font-bold text-white">
             Code <span className="text-cyan-300">Arena</span>
           </span>
@@ -78,7 +79,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <img src="/logocty.png" alt="VPT" className="h-8 w-auto object-contain" />
+            <LogoImage eager alt="VPT" className="h-8 w-auto object-contain" />
             <span className="text-sm font-bold text-white">Code <span className="text-cyan-300">Arena</span></span>
           </Link>
 

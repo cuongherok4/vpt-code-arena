@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { ChatDock } from '@/components/chat/ChatDock';
 import { Navbar } from './Navbar';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Code2, BookOpen, Trophy, Mail, Phone, Globe } from 'lucide-react';
+import { LogoImage } from '@/components/common/LogoImage';
+
+const ChatDock = lazy(() => import('@/components/chat/ChatDock').then((module) => ({ default: module.ChatDock })));
 
 export const PageLayout = () => {
   const { pathname } = useLocation();
@@ -23,7 +26,11 @@ export const PageLayout = () => {
           <Outlet />
         </ErrorBoundary>
       </main>
-      {showChatDock && <ChatDock />}
+      {showChatDock && (
+        <Suspense fallback={null}>
+          <ChatDock />
+        </Suspense>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-white/10 bg-slate-950/80 shadow-[0_-1px_0_rgba(255,255,255,0.04)]">
@@ -33,7 +40,7 @@ export const PageLayout = () => {
             <div className="lg:col-span-2">
               <Link to="/" className="inline-flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.03]">
-                  <img src="/logocty.png" alt="VPT" className="h-6 w-auto object-contain" />
+                  <LogoImage className="h-6 w-auto object-contain" />
                 </span>
                 <span className="text-base font-bold text-white">
                   Code <span className="text-cyan-300">Arena</span>

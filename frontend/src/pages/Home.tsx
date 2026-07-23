@@ -5,6 +5,7 @@ import {
   Users, Star, CheckCircle, ChevronRight,
   GraduationCap, Cpu, Swords,
 } from 'lucide-react';
+import { LogoImage } from '@/components/common/LogoImage';
 
 /* ─────────────────────────────────────────────────────────
    DATA
@@ -195,11 +196,7 @@ export default function Home() {
 
         {/* Logo */}
         <div className="animate-fade-in-up delay-100 mb-7">
-          <img
-            src="/logocty.png"
-            alt="VPT Code Arena"
-            className="mx-auto h-[72px] w-auto object-contain drop-shadow-[0_0_24px_rgba(56,189,248,0.18)] sm:h-24"
-          />
+          <LogoImage eager className="mx-auto h-[72px] w-auto object-contain drop-shadow-[0_0_24px_rgba(56,189,248,0.18)] sm:h-24" />
         </div>
 
         {/* Headline */}
