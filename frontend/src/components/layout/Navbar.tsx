@@ -94,16 +94,16 @@ export const Navbar = () => {
           : 'border-b border-white/10 bg-slate-950/78 backdrop-blur-md'
       }`}
     >
-      <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-3 sm:px-4">
+      <div className="container mx-auto flex h-14 min-w-0 items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4">
 
         {/* ── Logo ── */}
-        <Link to="/" className="group flex min-w-0 items-center gap-2.5" aria-label="Trang chủ Code Arena">
+        <Link to="/" className="group flex min-w-0 flex-1 items-center gap-2 sm:flex-none sm:gap-2.5" aria-label="Trang chủ Code Arena">
           <img
             src="/logocty.png"
             alt="VPT Logo"
-            className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-8 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-105 sm:h-9"
           />
-          <span className="hidden truncate text-base font-bold text-white sm:inline-block">
+          <span className="truncate text-sm font-bold text-white sm:text-base">
             Code <span className="text-cyan-300">Arena</span>
           </span>
         </Link>
@@ -120,7 +120,7 @@ export const Navbar = () => {
         </div>
 
         {/* ── Right side ── */}
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {isAuthenticated ? (
             <Link
               to="/profile"
@@ -147,10 +147,10 @@ export const Navbar = () => {
             <Link
               to="/login"
               aria-label="Đăng nhập tài khoản"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md shadow-teal-950/20 transition-all duration-200 hover:bg-teal-200 hover:shadow-teal-400/20"
+              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-teal-300 px-3 py-1.5 text-xs font-semibold text-slate-950 shadow-md shadow-teal-950/20 transition-all duration-200 hover:bg-teal-200 hover:shadow-teal-400/20 sm:min-h-10 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm"
             >
               <LogIn className="h-4 w-4" />
-              <span className="hidden sm:inline-block">Đăng nhập</span>
+              <span>Đăng nhập</span>
             </Link>
           )}
         </div>
