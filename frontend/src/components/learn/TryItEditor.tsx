@@ -3,6 +3,7 @@ import Editor, { type OnMount } from '@monaco-editor/react';
 import { Play, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { learnApi, type RunCodeResponse } from '@/api/learn.api';
+import { useTheme } from '@/hooks/useTheme';
 
 // Judge0 language IDs
 const LANG_MAP: Record<string, { id: number; defaultCode: string }> = {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const TryItEditor = ({ lang, initialCode }: Props) => {
+  const { theme } = useTheme();
   const cfg = LANG_MAP[lang] ?? LANG_MAP.java;
   const [code, setCode] = useState(initialCode ?? cfg.defaultCode);
   const [result, setResult] = useState<RunCodeResponse | null>(null);
@@ -64,7 +66,7 @@ export const TryItEditor = ({ lang, initialCode }: Props) => {
         value={code}
         onChange={v => setCode(v ?? '')}
         onMount={handleEditorMount}
-        theme="vs-dark"
+        theme={theme === 'dark' ? 'vs-dark' : 'light'}
         options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false }}
       />
 

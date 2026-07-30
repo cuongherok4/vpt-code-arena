@@ -16,10 +16,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class BattleRoomDto {
     private UUID id;
+    private String code;
     private String name;
     private RoomStatus status;
     @JsonProperty("isPublic")
     private boolean isPublic;
+    private boolean locked;
     private int maxMembers;
     private int numProblems;
     private int timeLimitMin;

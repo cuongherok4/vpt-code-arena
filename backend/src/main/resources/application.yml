@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties],optional:file:backend/.env[.properties]
   profiles:
     active: local
   datasource:
@@ -20,6 +22,17 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
   security:
     oauth2:
       client:
@@ -36,6 +49,12 @@ spring:
 server:
   port: 8080
 
+security:
+  rate-limit:
+    login:
+      capacity: ${LOGIN_RATE_LIMIT_CAPACITY:5}
+      window-seconds: ${LOGIN_RATE_LIMIT_WINDOW_SECONDS:60}
+
 jwt:
   secret: ${JWT_SECRET:defaultSecretKeyThatIsAtLeast64CharactersLongSoThatItWorksProperlyForDevEnvironment1234567890}
   access-expiry-seconds: ${JWT_ACCESS_EXPIRY_SECONDS:900}
@@ -47,8 +66,13 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  email:
+    from: ${MAIL_FROM:no-reply@vpt-arena.local}
+
 judge0:
   url: ${JUDGE0_URL:http://localhost:2358}
   default-memory-limit-kb: ${JUDGE0_DEFAULT_MEMORY_LIMIT_KB:256000}
-  java-memory-limit-kb: ${JUDGE0_JAVA_MEMORY_LIMIT_KB:2048000}
+  java-memory-limit-kb: ${JUDGE0_JAVA_MEMORY_LIMIT_KB:524288}
   java-max-processes-and-threads: ${JUDGE0_JAVA_MAX_PROCESSES_AND_THREADS:512}

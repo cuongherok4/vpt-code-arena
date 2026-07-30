@@ -2,20 +2,23 @@
 
 ---
 
-## 1. Lộ trình 10 Phase
+## 1. Lộ trình 13 Phase
 
 | Phase | Tuần | Nội dung | Deliverable | Trạng thái | % |
 |---|---|---|---|---|---|
 | 1 | 1–2 | Setup & Infrastructure | Môi trường dev sẵn sàng, CI/CD chạy được | 🟢 Hoàn thành | 100% |
 | 2 | 3–4 | Learn Module | Learn module hoàn chỉnh | 🟢 Hoàn thành | 100% |
 | 3 | 5–6 | Exam Module | Exam module hoàn chỉnh | 🟢 Hoàn thành | 100% |
-| 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | 🟡 Đang thực hiện | 33% |
-| 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
-| 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
-| 7 | 14–15 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | ⚪ Chưa bắt đầu | 0% |
-| 8 | 16–17 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
-| 9 | 18–19 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
-| 10 | 20 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
+| 4 | 7–9 | Battle Module | Battle module hoàn chỉnh, real-time hoạt động | 🟢 Hoàn thành | 100% |
+| 5 | 10–11 | Auth & User Management | Hệ thống user hoàn chỉnh | 🟢 Hoàn thành | 100% |
+| 6 | 12–13 | Messaging | Hệ thống nhắn tin hoàn chỉnh | 🟢 Hoàn thành | 100% |
+| 7 | 14–15 | Social & Battle Invite | Bạn bè, profile nhanh, mời thi đấu realtime | 🟢 Hoàn thành | 100% |
+| 8 | 16–17 | Leaderboard & Analytics | Leaderboard & thống kê hoàn chỉnh | 🟢 Hoàn thành | 100% |
+| 9 | 18–19 | Admin Panel | Dashboard admin, quản lý user/problem/stats | 🟢 Hoàn thành | 100% |
+| 10 | 20–21 | Frontend Redesign | Làm lại toàn bộ giao diện FE thống nhất, chuyên nghiệp | 🟢 Hoàn thành | 100% |
+| 11 | 22–23 | UI/UX Polish & Optimization | UI mượt, tối ưu performance | ⚪ Chưa bắt đầu | 0% |
+| 12 | 24–25 | Testing & QA | Coverage > 80%, bug đã fix | ⚪ Chưa bắt đầu | 0% |
+| 13 | 26 | Documentation & Deployment | Deploy production, tài liệu đầy đủ | ⚪ Chưa bắt đầu | 0% |
 
 ---
 
@@ -114,16 +117,16 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 4 — Battle Module (Tuần 7–9) 🟡 33%
+### Phase 4 — Battle Module (Tuần 7–9) ✅ 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
 | 4.1 | `feature/p4-battle-backend-room` | `BattleController` (CRUD phòng), `BattleService` (createRoom, joinRoom, startRoom), edge cases (join sau start, submit hết giờ) | CRUD phòng, tạo/join/start phòng được, khóa join/start bằng DB lock, các edge case xử lý đúng | 🟢 Done |
 | 4.2 | `feature/p4-battle-backend-scoring` | `JudgeCallbackService`, scoring logic, `BattleScheduler` (@Scheduled check hết giờ → finishRoom) | Submit battle async qua Judge0, điểm cộng theo AC đầu tiên, leaderboard tính rank đúng, phòng tự kết thúc sau timeout | 🟢 Done |
-| 4.3 | `feature/p4-battle-backend-tests` | Unit tests BattleService (start, join, scoring), Integration tests battle lifecycle | Toàn bộ vòng đời battle (create → join → start → finish) test được tự động | ⚪ Chưa bắt đầu |
-| 4.4 | `feature/p4-battle-websocket` | `/battle` namespace, JWT middleware, handlers (`battle:join/ready/leave`), server events, Redis pub/sub, countdown tick | Real-time sync trạng thái phòng giữa tất cả client, countdown chạy đồng bộ | ⚪ Chưa bắt đầu |
-| 4.5 | `feature/p4-battle-frontend-lobby` | `BattleLobbyPage`, `BattleRoomPage` (member list, ready toggle, start button), `battle.api.ts` | User tạo/join phòng, thấy danh sách thành viên real-time, toggle ready | ⚪ Chưa bắt đầu |
-| 4.6 | `feature/p4-battle-frontend-arena` | `BattleArenaPage`, `useBattleSocket` hook, `CountdownTimer`, `RealTimeLeaderboard`, `FinalResultModal` | User code trong phòng thi, thấy đồng hồ đếm ngược, bảng xếp hạng live, kết quả cuối | ⚪ Chưa bắt đầu |
+| 4.3 | `feature/p4-battle-backend-tests` | Unit tests BattleService (start, join, scoring), Integration tests battle lifecycle | Unit tests scoring/scheduler/controller và integration test vòng đời battle (create → join → start → submit → finish) chạy tự động | 🟢 Done |
+| 4.4 | `feature/p4-battle-websocket` | `/battle` namespace, JWT middleware, handlers (`battle:join/ready/leave`), server events, Redis pub/sub, countdown tick | `/battle` namespace có JWT middleware, join/ready/leave sync room state, Redis pub/sub nhận event backend, countdown tick đồng bộ | 🟢 Done |
+| 4.5 | `feature/p4-battle-frontend-lobby` | `BattleLobbyPage`, `BattleRoomPage` (member list, ready toggle, start button), `battle.api.ts` | User tạo/join phòng, thấy danh sách thành viên, ready toggle sync realtime qua `/battle`, start room từ UI | 🟢 Done |
+| 4.6 | `feature/p4-battle-frontend-arena` | `BattleArenaPage`, `useBattleSocket` hook, `CountdownTimer`, `RealTimeLeaderboard`, `FinalResultModal` | User code trong phòng thi, submit qua REST, thấy đồng hồ đếm ngược, bảng xếp hạng live, kết quả chấm và modal kết quả cuối | 🟢 Done |
 
 **Thứ tự thực hiện:** 4.1 → 4.2 → 4.4 (song song) → 4.3 → 4.5 → 4.6 → merge `develop`
 
@@ -135,15 +138,15 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 5 — Auth & User Management (Tuần 10–11) ⚪ 0%
+### Phase 5 — Auth & User Management (Tuần 10–11) ✅ 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 5.1 | `feature/p5-auth-jwt` | JWT filter, `CustomUserDetails`, `AuthController` (register, login, refresh, logout), `authStore.ts` cơ bản | Đăng ký/đăng nhập bằng email+password, token tự refresh, logout revoke token | ⚪ Chưa bắt đầu |
-| 5.2 | `feature/p5-auth-oauth2` | Spring Security OAuth2 Google + GitHub, `OAuth2SuccessHandler` (upsert user, issue JWT, redirect FE), `OAuthCallbackPage` | Đăng nhập bằng Google/GitHub 1 click, tự tạo account nếu lần đầu | ⚪ Chưa bắt đầu |
-| 5.3 | `feature/p5-auth-email` | Email service: xác thực email, forgot/reset password, endpoints `verify-email`, `forgot-password`, `reset-password` | Email xác thực gửi được, flow reset password hoàn chỉnh | ⚪ Chưa bắt đầu |
-| 5.4 | `feature/p5-auth-security` | Rate limiting (Bucket4j login 5 lần/phút/IP), security hardening, Unit tests AuthService/JwtService/OAuth2Service | Login bị chặn sau 5 lần sai, không có lỗ hổng auth cơ bản | ⚪ Chưa bắt đầu |
-| 5.5 | `feature/p5-user-profile` | `UserController` (GET/PUT /users/me, history), `ProfilePage`, `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, Axios interceptor auto-refresh | User xem/sửa profile, thấy lịch sử submit, token tự refresh không cần re-login | ⚪ Chưa bắt đầu |
+| 5.1 | `feature/p5-auth-jwt` | JWT filter, `CustomUserDetails`, `AuthController` (register, login, refresh, logout), `authStore.ts` cơ bản | Đăng ký/đăng nhập bằng email+password, token tự refresh, logout revoke token | 🟢 Done |
+| 5.2 | `feature/p5-auth-oauth2` | Spring Security OAuth2 Google + GitHub, `OAuth2SuccessHandler` (upsert user, issue JWT, redirect FE), `OAuthCallbackPage` | Đăng nhập bằng Google/GitHub 1 click, tự tạo account nếu lần đầu | 🟢 Done |
+| 5.3 | `feature/p5-auth-email` | Email service: xác thực email, forgot/reset password, endpoints `verify-email`, `forgot-password`, `reset-password` | Email xác thực gửi được, flow reset password hoàn chỉnh | 🟢 Done |
+| 5.4 | `feature/p5-auth-security` | Rate limiting (Bucket4j login 5 lần/phút/IP), security hardening, Unit tests AuthService/JwtService/OAuth2Service | Login bị chặn sau 5 lần sai, không có lỗ hổng auth cơ bản | 🟢 Done |
+| 5.5 | `feature/p5-user-profile` | `UserController` (GET/PUT /users/me, history), `ProfilePage`, `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, Axios interceptor auto-refresh | User xem/sửa profile, thấy lịch sử submit, token tự refresh không cần re-login | 🟢 Done |
 
 **Thứ tự thực hiện:** 5.1 → 5.2 → 5.3 → 5.4 (song song với 5.5) → merge `develop`
 
@@ -155,13 +158,13 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 6 — Messaging (Tuần 12–13) ⚪ 0%
+### Phase 6 — Messaging (Tuần 12–13) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 6.1 | `feature/p6-chat-backend` | `ChatController` (history global/room/dm/conversations), lưu tin nhắn từ WS pub/sub, API report/delete/mute | API lấy lịch sử chat hoạt động, tin nhắn được lưu DB, có thể report/xóa | ⚪ Chưa bắt đầu |
-| 6.2 | `feature/p6-chat-websocket` | `/chat` namespace, handlers (global/room/dm send), online status Redis Set, broadcast `user:online/offline` | Nhắn tin real-time không delay, online indicator hiển thị đúng | ⚪ Chưa bắt đầu |
-| 6.3 | `feature/p6-chat-frontend` | `GlobalChatPanel`, `RoomChatPanel`, `DMChatWindow`, `DMConversationList`, `OnlineIndicator`, `useChatSocket` hook | UI chat đầy đủ: global/phòng/DM, biết ai đang online | ⚪ Chưa bắt đầu |
+| 6.1 | `feature/p6-chat-backend` | `ChatController` (history global/room/dm/conversations), lưu tin nhắn từ WS pub/sub | API lấy lịch sử chat hoạt động, tin nhắn được lưu DB | 🟢 Done |
+| 6.2 | `feature/p6-chat-websocket` | `/chat` namespace, handlers (global/room/dm send), online status Redis Set, broadcast `user:online/offline` | Nhắn tin real-time không delay, online indicator hiển thị đúng | 🟢 Done |
+| 6.3 | `feature/p6-chat-frontend` | `GlobalChatPanel`, `RoomChatPanel`, `DMChatWindow`, `DMConversationList`, `OnlineIndicator`, `useChatSocket` hook | UI chat đầy đủ: global/phòng/DM, biết ai đang online | 🟢 Done |
 
 **Thứ tự thực hiện:** 6.1 → 6.2 (song song) → 6.3 → merge `develop`
 
@@ -173,34 +176,93 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 7 — Leaderboard & Analytics (Tuần 14–15) ⚪ 0%
+### Phase 7 — Social & Battle Invite (Tuần 14–15) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 7.1 | `feature/p7-leaderboard-backend` | `LeaderboardController` (GET /leaderboard/global, filter type/language), update `UserStats` async sau AC, Redis cache TTL 5 phút | Leaderboard global trả về < 100ms, tự cập nhật sau mỗi AC submission | ⚪ Chưa bắt đầu |
-| 7.2 | `feature/p7-leaderboard-frontend` | `LeaderboardPage` với filter tabs, `StatsCard`, `ActivityCalendar` trong ProfilePage | User thấy bảng xếp hạng, filter theo ngôn ngữ/loại, thấy calendar hoạt động của bản thân | ⚪ Chưa bắt đầu |
+| 7.1 | `feature/p7-social-friends-backend` | Friend domain: tìm user theo tên/id, gửi/chấp nhận/từ chối lời mời kết bạn, danh sách bạn bè, xóa bạn | API kết bạn đầy đủ, chống request trùng, chỉ user đăng nhập mới thao tác được | 🟢 Done |
+| 7.2 | `feature/p7-social-friends-frontend` | `FriendsPage/FriendsPanel`, `UserMiniProfilePopover`, `FriendButton`, `FriendRequestsPanel` | User xem danh sách bạn bè; click bạn để xem thông tin, nhắn tin, xóa bạn | 🟢 Done |
+| 7.3 | `feature/p7-chat-social-actions` | Tích hợp kết bạn trong Global Chat và Room Chat: click tên/avatar mở popover, kết bạn trực tiếp từ tin nhắn hoặc thành viên phòng | Kết bạn qua khung chat thế giới, mở profile nhanh và nhắn tin từ tin nhắn chat | 🟢 Done |
+| 7.4 | `feature/p7-battle-friend-invite` | Mời bạn bè vào phòng battle, popup invite realtime cho người được mời, host kick người trong hàng chờ trước khi start | Chủ phòng mời bạn bè thi đấu; người được mời thấy ô mời trên màn hình với nút tham gia/từ chối; chủ phòng kick được member ở WAITING | 🟢 Done |
 
-**Thứ tự thực hiện:** 7.1 → 7.2 → merge `develop`
+**Thứ tự thực hiện:** 7.1 → 7.2 → 7.3 → 7.4 → merge `develop`
 
 **🎯 Phase 7 hoàn thành — Hệ thống có thể:**
-- Hiển thị bảng xếp hạng toàn server, filter được theo ngôn ngữ/loại bài
+- Kết bạn bằng tên/id hoặc trực tiếp từ chat/phòng battle
+- Xem danh sách bạn bè, profile nhanh, nhắn tin hoặc xóa bạn
+- Mời bạn bè vào phòng battle bằng thông báo realtime
+- Chủ phòng quản lý hàng chờ trước khi bắt đầu trận
+
+---
+
+### Phase 8 — Leaderboard & Analytics (Tuần 16–17) 🟢 100%
+
+| # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
+|---|---|---|---|---|
+| 8.1 | `feature/p8-leaderboard-backend` | `LeaderboardController` (GET /leaderboard/global, filter type/language), update `UserStats` async sau AC, Redis cache TTL 5 phút | Leaderboard kỳ thi cache 5 phút, filter ngôn ngữ, evict cache và refresh stats sau AC | 🟢 Done |
+| 8.2 | `feature/p8-leaderboard-frontend` | `LeaderboardPage` với filter tabs, `StatsCard`, `ActivityCalendar` trong ProfilePage | User thấy bảng xếp hạng kỳ thi, filter theo ngôn ngữ, thấy calendar hoạt động của bản thân | 🟢 Done |
+
+**Thứ tự thực hiện:** 8.1 → 8.2 → merge `develop`
+
+**🎯 Phase 8 hoàn thành — Hệ thống có thể:**
+- Hiển thị bảng xếp hạng kỳ thi toàn server, filter được theo ngôn ngữ
 - Tự cập nhật thống kê sau mỗi submission AC
 - Hiển thị activity calendar (GitHub-style) trên trang profile
 
 ---
 
-### Phase 8 — UI/UX Polish (Tuần 16–17) ⚪ 0%
+### Phase 9 — Admin Panel (Tuần 18–19) 🟢 100%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 8.1 | `feature/p8-responsive` | Responsive design toàn bộ pages, mobile-friendly breakpoints | Giao diện dùng được trên mobile/tablet, không bị overflow | ⚪ Chưa bắt đầu |
-| 8.2 | `feature/p8-darkmode` | Dark mode toggle (Tailwind `dark:`), persist localStorage | Chuyển dark/light mode 1 click, nhớ lựa chọn sau khi reload | ⚪ Chưa bắt đầu |
-| 8.3 | `feature/p8-ux-enhancement` | Loading skeleton, Error boundary + fallback UI, Code splitting (React.lazy + Suspense) | Không còn blank screen khi load, lỗi hiển thị thân thiện thay vì crash | ⚪ Chưa bắt đầu |
-| 8.4 | `feature/p8-performance` | Lighthouse audit, tối ưu bundle size, lazy load images, đạt score > 80 | Lighthouse Performance > 80, bundle < 500KB gzipped | ⚪ Chưa bắt đầu |
+| 9.1 | `feature/p9-admin-backend-users` | `AdminController`, API `GET /admin/users`, `PUT /admin/users/{id}/ban`, xóa account nếu cần, chỉ role ADMIN | Admin xem danh sách user, tìm kiếm, ban/unban user, endpoint được bảo vệ theo role | 🟢 Done |
+| 9.2 | `feature/p9-admin-backend-problems` | API CRUD đề bài: tạo/sửa/xóa/publish problem, quản lý test cases, độ khó, chủ đề | Admin quản lý ngân hàng đề thi trực tiếp từ backend | 🟢 Done |
+| 9.3 | `feature/p9-admin-no-chat-moderation` | Bỏ phạm vi admin moderation cho chat; không xây API xóa message/mute/report review | Chat được giữ tự do, admin panel không mang thêm luồng kiểm duyệt gây nặng hệ thống | 🟢 Done |
+| 9.4 | `feature/p9-admin-backend-stats` | API `GET /admin/stats`: total users, active users, total problems, submissions, battle rooms | Admin xem thống kê hệ thống tổng quan | 🟢 Done |
+| 9.5 | `feature/p9-admin-frontend` | `/admin`, `AdminPage` tabs Users/Problems/Stats, `UserManagementTable`, `ProblemForm`, `SystemStatsCards` | Admin có dashboard gọn, tập trung quản user/problem/stats, chỉ role ADMIN truy cập được | 🟢 Done |
 
-**Thứ tự thực hiện:** 8.1 || 8.2 || 8.3 → 8.4 → merge `develop`
+**Thứ tự thực hiện:** 9.1 → 9.2 → 9.3 → 9.4 → 9.5 → merge `develop`
 
-**🎯 Phase 8 hoàn thành — Hệ thống có thể:**
+**🎯 Phase 9 hoàn thành — Hệ thống có thể:**
+- Quản lý user: xem danh sách, tìm kiếm, ban/unban, xóa account nếu cần
+- Quản lý đề bài và test cases từ giao diện admin
+- Không có admin moderation cho chat; giữ chat tự do, tránh thêm luồng kiểm duyệt không cần thiết
+- Xem thống kê hệ thống: users, submissions, problems, active users, battle rooms
+
+---
+
+### Phase 10 — Frontend Redesign (Tuần 20–21) 🟢 100%
+
+| # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
+|---|---|---|---|---|
+| 10.1 | `feature/p10-fe-design-system` | Chuẩn hóa design tokens, màu, typography, spacing, button/input/table/card/modal states | FE có hệ design thống nhất, dễ tái sử dụng, không lệch style giữa các module | 🟢 Done |
+| 10.2 | `feature/p10-fe-layout-navigation` | Làm lại layout tổng thể, navbar/sidebar, page shell, responsive navigation | Điều hướng rõ ràng, bố cục nhất quán trên toàn app | 🟢 Done |
+| 10.3 | `feature/p10-fe-core-pages-redesign` | Redesign Learn, Exam, Battle, Chat, Friends, Leaderboard, Profile theo cùng visual language; thêm chat dock toàn app | Core pages đã dùng chung app shell, token màu, panel/button/input/table states; ChatDock global hỗ trợ Global + DM; Exam có learning path và điều hướng bài trước/bài tiếp theo tiến độ nộp bài | 🟢 Done |
+| 10.4 | `feature/p10-fe-admin-redesign` | Thiết kế UI Admin Panel sau khi Phase 9 hoàn thành: Users/Problems/Stats | Admin dashboard dark console đồng bộ với app shell; sidebar, stats cards, users table, problem editor và admin states dễ scan, thao tác nhanh | 🟢 Done |
+| 10.5 | `feature/p10-fe-accessibility-polish` | Kiểm tra accessibility cơ bản: focus state, contrast, keyboard navigation, empty/loading/error states | Giao diện dễ dùng hơn, chuẩn WCAG AA focus & contrast, đầy đủ ErrorBoundary, EmptyState và LoadingSkeleton | 🟢 Done |
+
+**Thứ tự thực hiện:** 10.1 → 10.2 → 10.3 → 10.4 → 10.5 → merge `develop`
+
+**🎯 Phase 10 hoàn thành — Hệ thống có thể:**
+- Có giao diện FE mới thống nhất trên toàn bộ app
+- Các module Learn/Exam/Battle/Chat/Social/Leaderboard/Profile dùng chung design system
+- Admin Panel có giao diện quản trị rõ ràng, phù hợp thao tác lặp lại
+- FE sẵn sàng bước polish responsive/performance ở phase sau
+
+---
+
+### Phase 11 — UI/UX Polish (Tuần 22–23) 🟢 100%
+
+| # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
+|---|---|---|---|---|
+| 11.1 | `feature/p11-responsive` | Responsive design toàn bộ pages, mobile-friendly breakpoints | Giao diện dùng được trên mobile/tablet, không bị overflow | 🟢 Done |
+| 11.2 | `feature/p11-darkmode` | Dark mode toggle (Tailwind `dark:`), persist localStorage | Chuyển dark/light mode 1 click, nhớ lựa chọn sau khi reload | 🟢 Done |
+| 11.3 | `feature/p11-ux-enhancement` | Loading skeleton, Error boundary + fallback UI, Code splitting (React.lazy + Suspense) | Không còn blank screen khi load, lỗi hiển thị thân thiện thay vì crash | 🟢 Done |
+| 11.4 | `feature/p11-performance` | Lighthouse audit, tối ưu bundle size, lazy load images, đạt score > 80 | Lighthouse Performance > 80, bundle < 500KB gzipped | 🟢 Done |
+
+**Thứ tự thực hiện:** 11.1 || 11.2 || 11.3 → 11.4 → merge `develop`
+
+**🎯 Phase 11 hoàn thành — Hệ thống có thể:**
 - Dùng tốt trên mọi thiết bị (desktop/tablet/mobile)
 - Chuyển dark/light mode
 - Tải nhanh, Lighthouse score > 80
@@ -208,18 +270,18 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 9 — Testing & QA (Tuần 18–19) ⚪ 0%
+### Phase 12 — Testing & QA (Tuần 24–25) ⚪ 0%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 9.1 | `feature/p9-backend-coverage` | Bổ sung unit/integration tests để đạt JaCoCo > 80%, fix các gap | JaCoCo report ≥ 80% line coverage, không còn uncovered critical path | ⚪ Chưa bắt đầu |
-| 9.2 | `feature/p9-e2e-playwright` | E2E Playwright: happy paths cho 4 module (Learn, Exam, Battle, Auth) | 4 happy path test chạy xanh hoàn toàn trên CI | ⚪ Chưa bắt đầu |
-| 9.3 | `feature/p9-load-test` | Load test k6/Artillery: 20 users cùng vào 1 phòng Battle, 100 concurrent users | P95 latency < 500ms, không crash dưới 100 concurrent users | ⚪ Chưa bắt đầu |
-| 9.4 | `feature/p9-security-audit` | OWASP Top 10 checklist, fix tất cả bugs từ QA, security hardening | Không còn lỗ hổng CRITICAL/HIGH theo OWASP checklist | ⚪ Chưa bắt đầu |
+| 12.1 | `feature/p12-backend-coverage` | Bổ sung unit/integration tests để đạt JaCoCo > 80%, fix các gap | JaCoCo report ≥ 80% line coverage, không còn uncovered critical path | ⚪ Chưa bắt đầu |
+| 12.2 | `feature/p12-e2e-playwright` | E2E Playwright: happy paths cho 4 module (Learn, Exam, Battle, Auth, Chat) | 5 happy path test chạy xanh hoàn toàn trên CI | ⚪ Chưa bắt đầu |
+| 12.3 | `feature/p12-load-test` | Load test k6/Artillery: 20 users cùng vào 1 phòng Battle, 100 concurrent users | P95 latency < 500ms, không crash dưới 100 concurrent users | ⚪ Chưa bắt đầu |
+| 12.4 | `feature/p12-security-audit` | OWASP Top 10 checklist, fix các bugs từ QA, security hardening | Không còn lỗ hổng CRITICAL/HIGH theo OWASP checklist | ⚪ Chưa bắt đầu |
 
-**Thứ tự thực hiện:** 9.1 || 9.2 || 9.3 → 9.4 → merge `develop`
+**Thứ tự thực hiện:** 12.1 || 12.2 || 12.3 → 12.4 → merge `develop`
 
-**🎯 Phase 9 hoàn thành — Hệ thống có thể:**
+**🎯 Phase 12 hoàn thành — Hệ thống có thể:**
 - Vượt 80% test coverage backend
 - E2E test tự động chạy xanh trên CI
 - Chịu tải 100 concurrent users không crash
@@ -227,18 +289,18 @@ git branch -d feature/<phase>-<feature-name>
 
 ---
 
-### Phase 10 — Deploy & Documentation (Tuần 20) ⚪ 0%
+### Phase 13 — Deploy & Documentation (Tuần 26) ⚪ 0%
 
 | # | Feature Branch | Nội dung | Kết quả đạt được | Trạng thái |
 |---|---|---|---|---|
-| 10.1 | `feature/p10-docker-prod` | `docker-compose.prod.yml`, Nginx config (`infrastructure/nginx/nginx.conf`) | Stack production chạy được bằng 1 lệnh, Nginx reverse proxy đúng | ⚪ Chưa bắt đầu |
-| 10.2 | `feature/p10-ci-cd-deploy` | GitHub Actions deploy to AWS/DigitalOcean, domain + HTTPS (Let's Encrypt) | Push lên `main` → tự động deploy, HTTPS bật, không có HTTP exposed | ⚪ Chưa bắt đầu |
-| 10.3 | `feature/p10-monitoring` | Spring Actuator + Prometheus + Grafana dashboard, alerting | Dashboard Grafana hiển thị CPU/RAM/request rate, alert khi có sự cố | ⚪ Chưa bắt đầu |
-| 10.4 | `feature/p10-docs-final` | README.md hoàn chỉnh, API docs public (Swagger), go-live checklist | README đủ để người mới setup được, Swagger public truy cập được | ⚪ Chưa bắt đầu |
+| 13.1 | `feature/p13-docker-prod` | `docker-compose.prod.yml`, Nginx config (`infrastructure/nginx/nginx.conf`) | Stack production chạy được bằng 1 lệnh, Nginx reverse proxy đúng | ⚪ Chưa bắt đầu |
+| 13.2 | `feature/p13-ci-cd-deploy` | GitHub Actions deploy to AWS/DigitalOcean, domain + HTTPS (Let's Encrypt) | Push lên `main` → tự động deploy, HTTPS bật, không có HTTP exposed | ⚪ Chưa bắt đầu |
+| 13.3 | `feature/p13-monitoring` | Spring Actuator + Prometheus + Grafana dashboard, alerting | Dashboard Grafana hiển thị CPU/RAM/request rate, alert khi có sự cố | ⚪ Chưa bắt đầu |
+| 13.4 | `feature/p13-docs-final` | README.md hoàn chỉnh, API docs public (Swagger), go-live checklist | README đủ để người mới setup được, Swagger public truy cập được | ⚪ Chưa bắt đầu |
 
-**Thứ tự thực hiện:** 10.1 → 10.2 → 10.3 → 10.4 → merge `develop` → merge `main` + tag `v1.0.0`
+**Thứ tự thực hiện:** 13.1 → 13.2 → 13.3 → 13.4 → merge `develop` → merge `main` + tag `v1.0.0`
 
-**🎯 Phase 10 hoàn thành — Hệ thống có thể:**
+**🎯 Phase 13 hoàn thành — Hệ thống có thể:**
 - Deploy production tự động qua CI/CD khi push lên `main`
 - Truy cập qua domain thật với HTTPS
 - Theo dõi health/performance qua Grafana
@@ -268,7 +330,7 @@ git branch -d feature/<phase>-<feature-name>
 
 ## 6. Checklist trước khi launch
 
-- [ ] Cả 10 phase hoàn thành
+- [ ] Cả 13 phase hoàn thành
 - [ ] Test coverage > 80% (backend) + E2E pass
 - [ ] Load test: 100 concurrent users không crash
 - [ ] Security audit: không có lỗ hổng CRITICAL/HIGH

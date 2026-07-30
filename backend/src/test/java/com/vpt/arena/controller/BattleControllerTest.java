@@ -3,14 +3,18 @@ package com.vpt.arena.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vpt.arena.config.AppConfig;
 import com.vpt.arena.config.SecurityConfig;
+import com.vpt.arena.dto.battle.BattleInviteDto;
 import com.vpt.arena.dto.battle.BattleLeaderboardEntryDto;
 import com.vpt.arena.dto.battle.BattleRoomCreateRequest;
 import com.vpt.arena.dto.battle.BattleRoomDto;
 import com.vpt.arena.dto.battle.BattleSubmissionDto;
 import com.vpt.arena.dto.battle.BattleSubmitRequest;
+import com.vpt.arena.entity.User;
 import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.entity.enums.JudgeResult;
+import com.vpt.arena.entity.enums.Role;
 import com.vpt.arena.entity.enums.RoomStatus;
+import com.vpt.arena.security.CustomUserDetails;
 import com.vpt.arena.service.BattleJudgeService;
 import com.vpt.arena.service.BattleJudgeWorker;
 import com.vpt.arena.service.BattleService;
@@ -26,12 +30,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -59,7 +65,7 @@ class BattleControllerTest {
     @Test
     @DisplayName("GET /rooms trả danh sách phòng public")
     void shouldListPublicRooms() throws Exception {
-        when(battleService.listPublicWaitingRooms()).thenReturn(List.of(roomDto()));
+        when(battleService.listWaitingRooms()).thenReturn(List.of(roomDto()));
 
         mockMvc.perform(get(BASE + "/rooms"))
             .andExpect(status().isOk())
@@ -68,7 +74,7 @@ class BattleControllerTest {
     }
 
     @Test
-    @DisplayName("POST /rooms cần X-User-Id")
+    @DisplayName("POST /rooms cần principal xác thực")
     void shouldRequireUserIdToCreateRoom() throws Exception {
         mockMvc.perform(post(BASE + "/rooms")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -83,7 +89,7 @@ class BattleControllerTest {
         when(battleService.createRoom(eq(USER_ID), any())).thenReturn(roomDto());
 
         mockMvc.perform(post(BASE + "/rooms")
-                .header("X-User-Id", USER_ID.toString())
+                .with(authenticatedUser())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -93,13 +99,13 @@ class BattleControllerTest {
     }
 
     @Test
-    @DisplayName("POST /rooms validate timeLimitMin tối thiểu 10 phút")
+    @DisplayName("POST /rooms validate timeLimitMin tối thiểu 2 phút")
     void shouldRejectTooShortTimeLimit() throws Exception {
         BattleRoomCreateRequest request = createRequest();
-        request.setTimeLimitMin(5);
+        request.setTimeLimitMin(1);
 
         mockMvc.perform(post(BASE + "/rooms")
-                .header("X-User-Id", USER_ID.toString())
+                .with(authenticatedUser())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest());
@@ -111,11 +117,23 @@ class BattleControllerTest {
         when(battleService.joinRoom(ROOM_ID, USER_ID)).thenReturn(roomDto());
 
         mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/join")
-                .header("X-User-Id", USER_ID.toString()))
+                .with(authenticatedUser()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(ROOM_ID.toString()));
 
         verify(battleService).joinRoom(ROOM_ID, USER_ID);
+    }
+
+    @Test
+    @DisplayName("POST /rooms/{id}/leave trả 204 khi phòng rỗng và bị xóa")
+    void shouldLeaveAndDeleteEmptyRoom() throws Exception {
+        when(battleService.leaveRoom(ROOM_ID, USER_ID)).thenReturn(Optional.empty());
+
+        mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/leave")
+                .with(authenticatedUser()))
+            .andExpect(status().isNoContent());
+
+        verify(battleService).leaveRoom(ROOM_ID, USER_ID);
     }
 
     @Test
@@ -126,11 +144,41 @@ class BattleControllerTest {
         when(battleService.startRoom(ROOM_ID, USER_ID)).thenReturn(dto);
 
         mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/start")
-                .header("X-User-Id", USER_ID.toString()))
+                .with(authenticatedUser()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
 
         verify(battleService).startRoom(ROOM_ID, USER_ID);
+    }
+
+    @Test
+    @DisplayName("POST /rooms/{id}/invites/{userId} mời bạn vào phòng")
+    void shouldInviteFriendToBattleRoom() throws Exception {
+        UUID friendId = UUID.randomUUID();
+        when(battleService.inviteFriend(ROOM_ID, USER_ID, friendId))
+            .thenReturn(new BattleInviteDto(ROOM_ID, "Battle Room", USER_ID, "Alice", friendId));
+
+        mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/invites/" + friendId)
+                .with(authenticatedUser()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.roomId").value(ROOM_ID.toString()))
+            .andExpect(jsonPath("$.inviteeId").value(friendId.toString()));
+
+        verify(battleService).inviteFriend(ROOM_ID, USER_ID, friendId);
+    }
+
+    @Test
+    @DisplayName("DELETE /rooms/{id}/members/{userId} kick member khỏi phòng")
+    void shouldKickBattleMember() throws Exception {
+        UUID memberId = UUID.randomUUID();
+        when(battleService.kickMember(ROOM_ID, USER_ID, memberId)).thenReturn(roomDto());
+
+        mockMvc.perform(delete(BASE + "/rooms/" + ROOM_ID + "/members/" + memberId)
+                .with(authenticatedUser()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(ROOM_ID.toString()));
+
+        verify(battleService).kickMember(ROOM_ID, USER_ID, memberId);
     }
 
     @Test
@@ -139,7 +187,7 @@ class BattleControllerTest {
         when(battleService.updateRoom(eq(ROOM_ID), eq(USER_ID), any())).thenReturn(roomDto());
 
         mockMvc.perform(put(BASE + "/rooms/" + ROOM_ID)
-                .header("X-User-Id", USER_ID.toString())
+                .with(authenticatedUser())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRequest())))
             .andExpect(status().isOk())
@@ -152,7 +200,7 @@ class BattleControllerTest {
     @DisplayName("DELETE /rooms/{id} xóa phòng")
     void shouldDeleteRoom() throws Exception {
         mockMvc.perform(delete(BASE + "/rooms/" + ROOM_ID)
-                .header("X-User-Id", USER_ID.toString()))
+                .with(authenticatedUser()))
             .andExpect(status().isNoContent());
 
         verify(battleService).deleteRoom(ROOM_ID, USER_ID);
@@ -176,7 +224,7 @@ class BattleControllerTest {
         when(battleJudgeService.submit(eq(ROOM_ID), eq(USER_ID), any())).thenReturn(submission);
 
         mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/submit")
-                .header("X-User-Id", USER_ID.toString())
+                .with(authenticatedUser())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -216,7 +264,7 @@ class BattleControllerTest {
         ));
 
         mockMvc.perform(post(BASE + "/rooms/" + ROOM_ID + "/finish")
-                .header("X-User-Id", USER_ID.toString()))
+                .with(authenticatedUser()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].userId").value(USER_ID.toString()));
 
@@ -238,9 +286,11 @@ class BattleControllerTest {
     private BattleRoomDto roomDto() {
         return new BattleRoomDto(
             ROOM_ID,
+            "123456",
             "Battle Room",
             RoomStatus.WAITING,
             true,
+            false,
             4,
             2,
             30,
@@ -254,5 +304,19 @@ class BattleControllerTest {
             List.of(),
             List.of()
         );
+    }
+
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor authenticatedUser() {
+        User user = new User();
+        user.setId(USER_ID);
+        user.setEmail("alice@example.com");
+        user.setName("Alice");
+        user.setRole(Role.USER);
+        CustomUserDetails principal = new CustomUserDetails(user);
+        return authentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+            principal,
+            null,
+            principal.getAuthorities()
+        ));
     }
 }

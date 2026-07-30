@@ -28,7 +28,10 @@ Hệ thống auto-generate đề bài theo cấu hình này.
 ### Trạng thái 1 — WAITING (Chờ bắt đầu)
 - **Bất kỳ ai cũng có thể JOIN** khi phòng ở trạng thái này.
 - Chủ phòng: nút [🟢 Bắt đầu], [⚙️ Cấu hình], [❌ Hủy phòng].
+- Chủ phòng: có quyền mời bạn bè vào phòng và kick thành viên khỏi hàng chờ trước khi trận bắt đầu.
+- Người được mời đang online sẽ thấy popup/ô mời realtime trên màn hình, có nút [Tham gia] và [Từ chối].
 - Thành viên khác: nút [✓ Sẵn sàng] / [Hủy].
+- Thành viên trong hàng chờ có thể gửi lời mời kết bạn cho nhau.
 - Hiển thị số người sẵn sàng, ví dụ: "3/5 sẵn sàng".
 
 ```
@@ -107,6 +110,9 @@ Mỗi lần submit lưu: `(user_id, problem_id, result, submission_time, points,
 | Thành viên disconnect giữa chừng | Chọn 1 trong 2 chính sách: (A) cho quay lại trong 5 phút, hoặc (B) ghi nhận kết quả đến lúc disconnect và loại khỏi bảng xếp hạng cuối |
 | **Chủ phòng** disconnect | ✅ Phòng vẫn tiếp tục chạy bình thường, countdown không dừng, người khác vẫn code/submit; chỉ kết thúc khi hết giờ |
 | Chủ phòng quên bấm [Bắt đầu] | Popup nhắc sau 5 phút chờ; auto-start nếu chờ > 10 phút và có ≥ 1 người sẵn sàng |
+| Chủ phòng kick member ở WAITING | Xóa member khỏi phòng, broadcast realtime `battle:member-kicked`, member bị kick quay về lobby với thông báo |
+| Mời bạn vào phòng nhưng phòng đã start/full | Invite hết hiệu lực, hiển thị lỗi rõ ràng khi bạn bấm tham gia |
+| Người được mời đang ở trang khác | Vẫn hiện popup invite toàn cục; nếu bỏ qua thì invite nằm trong notification/friends panel |
 
 > Quyết định chọn chính sách (A) hay (B) cho disconnect cần chốt trước khi implement Phase 4 (xem roadmap.md).
 
@@ -118,3 +124,4 @@ Mỗi lần submit lưu: `(user_id, problem_id, result, submission_time, points,
 - Cơ chế khóa phòng ngay khi `start_time` được ghi (tránh race condition khi nhiều người submit "Sẵn sàng"/"Join" cùng lúc trước khi khóa).
 - Job scheduler (node-cron/Bull) để tự động đóng phòng khi `end_time` đến, kể cả khi không có client nào đang kết nối để trigger.
 - Logic tính điểm + tie-breaker chạy phía server, không tin dữ liệu từ client.
+- API mở rộng sau Phase 6: invite friend vào phòng, host kick member ở trạng thái WAITING, realtime notification/popup cho invite/kick.

@@ -1,0 +1,9 @@
+ALTER TABLE rooms ADD COLUMN code VARCHAR(9);
+
+UPDATE rooms
+SET code = LPAD(((ABS(HASHTEXT(id::TEXT)) % 900000) + 100000)::TEXT, 6, '0')
+WHERE code IS NULL;
+
+ALTER TABLE rooms ALTER COLUMN code SET NOT NULL;
+
+CREATE UNIQUE INDEX ux_rooms_code ON rooms(code);

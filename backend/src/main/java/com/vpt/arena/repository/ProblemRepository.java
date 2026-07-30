@@ -11,4 +11,6 @@ import java.util.UUID;
 @Repository
 public interface ProblemRepository extends JpaRepository<Problem, UUID>, JpaSpecificationExecutor<Problem> {
     List<Problem> findByIsPublishedTrueOrderByDifficultyAscTitleAsc();
+
+    long countByIsPublishedTrue();
 }

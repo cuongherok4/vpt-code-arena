@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +27,9 @@ public class User {
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
+
+    @Column(name = "public_id", nullable = false, unique = true, length = 10)
+    private String publicId;
 
     @Column(name = "password_hash")
     private String passwordHash;
@@ -57,4 +61,11 @@ public class User {
     @Column(name = "updated_at")
     @LastModifiedDate
     private OffsetDateTime updatedAt;
+
+    @PrePersist
+    void ensurePublicId() {
+        if (publicId == null || publicId.isBlank()) {
+            publicId = String.format("%010d", Math.abs(ThreadLocalRandom.current().nextLong(10_000_000_000L)));
+        }
+    }
 }

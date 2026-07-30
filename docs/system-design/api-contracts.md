@@ -388,6 +388,28 @@ Rời phòng.
 { "left": true }
 ```
 
+### POST /battle/rooms/:id/invites/:userId *(auth required — chủ phòng)*
+Validate lời mời bạn bè vào phòng battle đang WAITING. Chỉ chủ phòng được mời, người được mời phải là bạn bè và chưa ở trong phòng.
+```json
+// Response 200
+{
+  "roomId": "uuid",
+  "roomName": "Battle nhanh",
+  "inviterId": "uuid",
+  "inviterName": "alice@example.com",
+  "inviteeId": "uuid"
+}
+```
+
+Sau khi API validate thành công, FE gửi socket event `battle:invite`; người được mời đang online nhận `battle:invite-received` và thấy popup tham gia/từ chối.
+
+### DELETE /battle/rooms/:id/members/:userId *(auth required — chủ phòng)*
+Kick một thành viên khỏi hàng chờ trước khi phòng start.
+```json
+// Response 200
+{ "id": "uuid", "status": "WAITING", "members": [] }
+```
+
 ### POST /battle/rooms/:id/ready *(auth required)*
 Toggle trạng thái sẵn sàng.
 ```json
@@ -473,7 +495,10 @@ Lấy tin nhắn Global Chat (pagination ngược thời gian).
 Lấy lịch sử chat phòng Battle.
 
 ### GET /chat/dm/:userId?page=0&size=50 *(auth required)*
-Lấy lịch sử Private Message với 1 user.
+Lấy lịch sử Private Message với 1 user. Chỉ cho phép khi hai user đã là bạn bè.
+
+### POST /chat/dm/:userId *(auth required)*
+Gửi tin nhắn riêng cho bạn bè. Nếu chưa kết bạn, trả về `403 FORBIDDEN`.
 
 ### GET /chat/dm/conversations *(auth required)*
 Danh sách các cuộc hội thoại DM.
@@ -491,21 +516,86 @@ Danh sách các cuộc hội thoại DM.
 
 ---
 
-## Leaderboard
+## Friends & Social
 
-### GET /leaderboard/global
-Bảng xếp hạng toàn hệ thống.
+### GET /users/search?q=<name_or_id> *(auth required)*
+Tìm user để kết bạn bằng tên hoặc UUID.
+```json
+// Response 200
+[
+  { "id": "uuid", "name": "User A", "email": "masked@example.com", "friendStatus": "NONE" }
+]
 ```
-Query params: type=EXAM|BATTLE, lang=java, page=0, size=50
+
+### GET /friends *(auth required)*
+Danh sách bạn bè của user hiện tại.
+```json
+// Response 200
+[
+  { "id": "uuid", "name": "User A", "avatar": null, "online": true, "friendsSince": "..." }
+]
 ```
+
+### GET /friends/requests *(auth required)*
+Lời mời kết bạn đến/đi.
 ```json
 // Response 200
 {
-  "content": [
-    { "rank": 1, "userId": "uuid", "name": "...", "avatar": "...", "totalPoints": 5000 }
-  ],
-  "myRank": 15
+  "incoming": [ { "requestId": "uuid", "user": { "id": "uuid", "name": "..." }, "createdAt": "..." } ],
+  "outgoing": [ { "requestId": "uuid", "user": { "id": "uuid", "name": "..." }, "createdAt": "..." } ]
 }
+```
+
+### POST /friends/requests/:userId *(auth required)*
+Gửi lời mời kết bạn.
+```json
+// Response 201
+{ "requestId": "uuid", "status": "PENDING" }
+```
+
+### POST /friends/requests/:requestId/accept *(auth required)*
+Chấp nhận lời mời kết bạn.
+```json
+// Response 200
+{ "status": "ACCEPTED", "friendId": "uuid" }
+```
+
+### POST /friends/requests/:requestId/reject *(auth required)*
+Từ chối lời mời kết bạn.
+```json
+// Response 200
+{ "status": "REJECTED" }
+```
+
+### DELETE /friends/:userId *(auth required)*
+Xóa bạn.
+```json
+// Response 200
+{ "removed": true }
+```
+
+---
+
+## Leaderboard
+
+### GET /leaderboard/global
+Bảng xếp hạng kỳ thi toàn hệ thống, cache Redis 5 phút.
+```
+Query params: type=all|exam, language=all|java|python|c, limit=50
+```
+```json
+// Response 200
+[
+  {
+    "rank": 1,
+    "userId": "uuid",
+    "publicId": "1000000001",
+    "userName": "alice@example.com",
+    "totalPoints": 500,
+    "totalAccepted": 3,
+    "lastAcceptedAt": "2026-07-20T02:30:00Z"
+  }
+]
 ```
 
 ---
@@ -514,6 +604,29 @@ Query params: type=EXAM|BATTLE, lang=java, page=0, size=50
 
 ### GET /admin/users?page=0&size=20&search=email
 Danh sách users.
+```json
+// Response 200
+{
+  "items": [
+    {
+      "id": "uuid",
+      "publicId": "1000000001",
+      "email": "alice@example.com",
+      "name": "Alice",
+      "role": "USER",
+      "emailVerified": true,
+      "banned": false,
+      "oauthProvider": null,
+      "createdAt": "2026-07-20T03:30:00Z",
+      "updatedAt": "2026-07-20T03:30:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 1,
+  "totalPages": 1
+}
+```
 
 ### PUT /admin/users/:id/ban
 Ban/unban user.
@@ -522,7 +635,39 @@ Ban/unban user.
 { "banned": true, "reason": "Spam" }
 ```
 
-### GET /admin/problems
+### GET /admin/problems?page=0&size=20&search=sum&difficulty=EASY&published=true
+Danh sách problem cho admin, bao gồm cả bài chưa publish.
+```json
+// Response 200
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Two Sum",
+      "description": "# Markdown...",
+      "difficulty": "EASY",
+      "topic": "Array",
+      "timeLimitMs": 2000,
+      "memoryLimitKb": 256000,
+      "testCases": [
+        { "input": "1 2", "expectedOutput": "3", "isHidden": false }
+      ],
+      "solutionCode": "print(3)",
+      "published": true,
+      "createdAt": "2026-07-20T03:30:00Z",
+      "updatedAt": "2026-07-20T03:30:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 1,
+  "totalPages": 1
+}
+```
+
+### GET /admin/problems/:id
+Chi tiết problem cho admin.
+
 ### POST /admin/problems
 Tạo bài tập mới.
 ```json
@@ -535,13 +680,18 @@ Tạo bài tập mới.
   "testCases": [
     { "input": "1 2", "expectedOutput": "3", "isHidden": false }
   ],
-  "timeLimit": 2000,
-  "memoryLimit": 256
+  "timeLimitMs": 2000,
+  "memoryLimitKb": 256000,
+  "solutionCode": "print(3)",
+  "published": true
 }
 ```
 
 ### PUT /admin/problems/:id
+Sửa toàn bộ thông tin problem theo request giống `POST /admin/problems`.
+
 ### DELETE /admin/problems/:id
+Xóa problem. Nếu problem đã có dữ liệu liên quan như submissions/battle thì trả `409 Conflict`.
 
 ### GET /admin/stats
 Thống kê hệ thống.
@@ -551,13 +701,10 @@ Thống kê hệ thống.
   "totalUsers": 1500,
   "activeUsersToday": 120,
   "totalProblems": 200,
+  "publishedProblems": 180,
   "totalSubmissions": 50000,
   "totalBattleRooms": 300
 }
 ```
 
-### DELETE /admin/chat/:messageId
-Xóa tin nhắn chat.
-
-### PUT /admin/users/:id/mute
-Mute user trong Global Chat.
+> Chat không có admin moderation endpoint. Admin panel chỉ quản Users, Problems và Stats theo phạm vi Phase 9.

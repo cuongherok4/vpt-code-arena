@@ -20,6 +20,25 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
 
     List<Submission> findTop20ByUserIdAndProblemIdOrderBySubmittedAtDesc(UUID userId, UUID problemId);
 
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM (
+            SELECT user_id FROM submissions WHERE submitted_at >= :start AND submitted_at < :end
+            UNION
+            SELECT user_id FROM battle_submissions WHERE submitted_at >= :start AND submitted_at < :end
+        ) active_users
+        """, nativeQuery = true)
+    long countActiveUsersBetween(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
+
+    @Query("""
+        SELECT s
+        FROM Submission s
+        JOIN FETCH s.problem
+        WHERE s.user.id = :userId
+        ORDER BY s.submittedAt DESC
+        """)
+    List<Submission> findRecentByUserId(@Param("userId") UUID userId, Pageable pageable);
+
     @Query("""
         SELECT
             s.user.id AS userId,
@@ -68,6 +87,41 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         Pageable pageable
     );
 
+    @Query("""
+        SELECT
+            s.user.id AS userId,
+            s.user.publicId AS publicId,
+            s.user.name AS userName,
+            SUM(s.points) AS totalPoints,
+            COUNT(s.problem.id) AS totalAccepted,
+            MAX(s.submittedAt) AS lastAcceptedAt
+        FROM Submission s
+        WHERE s.result = :result
+          AND (:language IS NULL OR s.language = :language)
+          AND NOT EXISTS (
+              SELECT better.id
+              FROM Submission better
+              WHERE better.user.id = s.user.id
+                AND better.problem.id = s.problem.id
+                AND better.result = :result
+                AND (:language IS NULL OR better.language = :language)
+                AND (
+                    better.points > s.points
+                    OR (
+                        better.points = s.points
+                        AND better.submittedAt < s.submittedAt
+                    )
+                )
+          )
+        GROUP BY s.user.id, s.user.publicId, s.user.name
+        ORDER BY SUM(s.points) DESC, COUNT(s.problem.id) DESC, MAX(s.submittedAt) ASC
+        """)
+    List<GlobalLeaderboardRow> findGlobalExamLeaderboardRows(
+        @Param("result") JudgeResult result,
+        @Param("language") String language,
+        Pageable pageable
+    );
+
     interface ExamLeaderboardRow {
         UUID getUserId();
         String getUserName();
@@ -76,5 +130,14 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         Integer getMemoryUsed();
         OffsetDateTime getSubmittedAt();
         Long getAcceptedCount();
+    }
+
+    interface GlobalLeaderboardRow {
+        UUID getUserId();
+        String getPublicId();
+        String getUserName();
+        Number getTotalPoints();
+        Long getTotalAccepted();
+        OffsetDateTime getLastAcceptedAt();
     }
 }

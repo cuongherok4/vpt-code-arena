@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import { Loader2, Send } from 'lucide-react';
 import type { ExamLanguage, SubmissionDto } from '@/api/exam.api';
+import { useTheme } from '@/hooks/useTheme';
 
 const LANGUAGE_OPTIONS: Array<{ value: ExamLanguage; label: string; monaco: string; defaultCode: string }> = [
   {
@@ -32,6 +33,7 @@ interface SubmitPanelProps {
 }
 
 export const SubmitPanel = ({ isSubmitting, latestSubmission, onLanguageChange, onSubmit }: SubmitPanelProps) => {
+  const { theme } = useTheme();
   const [language, setLanguage] = useState<ExamLanguage>('python');
   const currentLanguage = useMemo(() => LANGUAGE_OPTIONS.find(item => item.value === language) ?? LANGUAGE_OPTIONS[2], [language]);
   const [codeByLanguage, setCodeByLanguage] = useState<Record<ExamLanguage, string>>({
@@ -77,9 +79,9 @@ export const SubmitPanel = ({ isSubmitting, latestSubmission, onLanguageChange, 
   }, [latestSubmission]);
 
   return (
-    <section className="overflow-hidden border border-white/10 bg-slate-950/80">
+    <section className="min-w-0 overflow-hidden border border-white/10 bg-slate-950/80">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
-        <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-1">
           {LANGUAGE_OPTIONS.map(item => (
             <button
               key={item.value}
@@ -106,12 +108,12 @@ export const SubmitPanel = ({ isSubmitting, latestSubmission, onLanguageChange, 
       </div>
 
       <Editor
-        height="440px"
+        height="min(440px, 58vh)"
         language={currentLanguage.monaco}
         value={code}
         onChange={value => setCodeByLanguage(prev => ({ ...prev, [language]: value ?? '' }))}
         onMount={handleEditorMount}
-        theme="vs-dark"
+        theme={theme === 'dark' ? 'vs-dark' : 'light'}
         options={{
           minimap: { enabled: false },
           fontSize: 14,

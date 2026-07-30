@@ -3,6 +3,7 @@ package com.vpt.arena.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vpt.arena.entity.Problem;
 import com.vpt.arena.entity.Submission;
+import com.vpt.arena.entity.User;
 import com.vpt.arena.entity.enums.Difficulty;
 import com.vpt.arena.entity.enums.JudgeResult;
 import com.vpt.arena.repository.ProblemRepository;
@@ -40,6 +41,7 @@ class SubmissionJudgeFlowTest {
     @Mock private ProblemRepository problemRepository;
     @Mock private UserRepository userRepository;
     @Mock private LeaderboardService leaderboardService;
+    @Mock private UserStatsService userStatsService;
 
     private SubmissionService submissionService;
     private MockRestServiceServer judge0;
@@ -54,13 +56,14 @@ class SubmissionJudgeFlowTest {
             userRepository,
             restTemplate,
             new ObjectMapper(),
-            leaderboardService
+            leaderboardService,
+            userStatsService
         );
         ReflectionTestUtils.setField(submissionService, "judge0Url", "http://judge0.test");
         ReflectionTestUtils.setField(submissionService, "judge0PollIntervalMs", 1L);
         ReflectionTestUtils.setField(submissionService, "judge0TimeoutMs", 1000L);
         ReflectionTestUtils.setField(submissionService, "judge0DefaultMemoryLimitKb", 256000);
-        ReflectionTestUtils.setField(submissionService, "judge0JavaMemoryLimitKb", 2048000);
+        ReflectionTestUtils.setField(submissionService, "judge0JavaMemoryLimitKb", 524288);
         ReflectionTestUtils.setField(submissionService, "judge0JavaMaxProcessesAndThreads", 512);
     }
 
@@ -106,11 +109,20 @@ class SubmissionJudgeFlowTest {
     private Submission submission(UUID id, Problem problem) {
         Submission submission = new Submission();
         submission.setId(id);
+        submission.setUser(user());
         submission.setProblem(problem);
         submission.setCode("print(input())");
         submission.setLanguage("python");
         submission.setResult(JudgeResult.PENDING);
         return submission;
+    }
+
+    private User user() {
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail("tester@example.com");
+        user.setName("Tester");
+        return user;
     }
 
     private Problem problem(UUID id) {

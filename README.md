@@ -1,209 +1,166 @@
 # VPT Code Arena
 
-> **Modern Online Judge Platform for Learning, Practicing and Competitive Programming**
+**VPT Code Arena** là nền tảng học lập trình, luyện đề và thi đấu code trực tuyến. Hệ thống hỗ trợ học theo lộ trình, chạy thử code, submit bài tự động qua Judge0, chat realtime, kết bạn, mời bạn vào phòng đấu và quản trị nội dung qua trang admin.
 
-**Ngày khởi tạo dự án:** 11/07/2026  
-
-
----
-
-# 📖 Tổng Quan
-
-**VPT Code Arena** là nền tảng học tập, luyện giải thuật và thi đấu lập trình trực tuyến (Online Judge) được xây dựng nhằm mang đến trải nghiệm gần giống các hệ thống như Codeforces, LeetCode hay AtCoder.
-
-Người dùng có thể học theo lộ trình, luyện tập các bài toán thuật toán, tham gia các phòng thi đấu thời gian thực với bạn bè và nhận kết quả chấm bài hoàn toàn tự động.
-
-Hệ thống được thiết kế theo kiến trúc microservices, tập trung vào khả năng mở rộng, hiệu năng và trải nghiệm người dùng.
-
-### Điểm nổi bật
-
-- 💻 Monaco Editor (VS Code Editor)
-- ⚡ Chấm bài tự động qua Judge0
-- 🔥 Battle Realtime bằng WebSocket
-- 👥 Chat và Friend System
-- 📈 Leaderboard & Activity Tracking
-- 🔒 JWT + OAuth2 Authentication
-- 🚀 Kiến trúc Microservices
-- 🐳 Docker Development Environment
+**Ngày khởi tạo:** 20/05/2026  
+**Cập nhật README:** 30/07/2026
 
 ---
 
-# 🚀 Chức Năng Chính
+## Hình Ảnh Giao Diện
 
-## 👤 Authentication
+### Trang Chủ
 
-- Đăng ký tài khoản
-- Đăng nhập Email/Password
-- Đăng nhập Google & GitHub OAuth2
-- Xác thực Email
-- Quên mật khẩu / Đặt lại mật khẩu
-- JWT Authentication
-- Refresh Token
+![Trang chủ](img/home.png)
 
----
+### Đăng Nhập Và Đăng Ký
 
-## 📚 Learning
+![Đăng nhập](img/login.png)
 
-- Học theo chương và bài học
-- Theo dõi tiến độ học tập
-- Chạy thử code trực tiếp
-- Submit challenge
-- Nhận kết quả chấm tự động
+![Đăng ký](img/register.png)
 
----
+### Học Tập
 
-## 💯 Online Judge
+![Học tập](img/study.png)
 
-- Danh sách bài tập
-- Lọc theo độ khó
-- Lọc theo chủ đề
-- Tìm kiếm bài
-- Đọc đề bài
-- Sample Test
-- Submit code
-- Xem lịch sử submit
+### Kỳ Thi Và Chấm Code
 
-Kết quả chấm bài hỗ trợ:
+![Danh sách đề thi](img/examps.png)
 
-- Accepted (AC)
-- Wrong Answer (WA)
-- Runtime Error (RE)
-- Time Limit Exceeded (TLE)
-- Compilation Error (CE)
+![Màn hình code](img/code.png)
+
+### Thách Đấu
+
+![Tạo phòng](img/Create_room.png)
+
+![Phòng chờ](img/waiting%20room.png)
+
+![Gửi lời mời vào chat](img/send_to_chat.png)
+
+![Lời mời thi đấu](img/invitation.png)
+
+### Chat Và Bạn Bè
+
+![Nhắn tin bạn bè](img/texting%20friends.png)
+
+### Bảng Xếp Hạng
+
+![Bảng xếp hạng](img/leadeboard.png)
 
 ---
 
-## ⚔️ Battle Arena
+## Chức Năng Chính
 
-- Tạo phòng đấu
-- Tham gia phòng
-- Ready trước trận
-- Đồng hồ đếm ngược
-- Submit realtime
-- Leaderboard realtime
-- Kết quả cuối trận
-- Mời bạn bè
-- Kick người chơi chờ
+### Xác Thực Người Dùng
 
----
+- Đăng ký và đăng nhập bằng email/mật khẩu.
+- Đăng nhập bằng Google/GitHub OAuth2.
+- JWT authentication và refresh token.
+- Xác thực email.
+- Quên mật khẩu và đặt lại mật khẩu.
+- Phân quyền `USER` và `ADMIN`.
 
-## 💬 Social
+### Học Tập
 
-- Chat Global
-- Chat Battle Room
-- Chat cá nhân
-- Friend Request
-- Online Status
-- Tìm bạn bằng:
-  - Email
-  - Username
-  - Public ID
-- Hồ sơ cá nhân
-- Activity Calendar
+- Học theo chương và bài học.
+- Theo dõi tiến độ học tập.
+- Chạy thử code trực tiếp trong trình duyệt.
+- Submit challenge và nhận kết quả chấm tự động.
 
----
+### Kỳ Thi / Online Judge
 
-## 🏆 Leaderboard
+- Danh sách bài lập trình.
+- Tìm kiếm, lọc theo độ khó/chủ đề/ngôn ngữ.
+- Đọc đề, sample test và giới hạn thời gian/bộ nhớ.
+- Submit code và xem lịch sử submit.
+- Kết quả chấm gồm `AC`, `WA`, `TLE`, `RE`, `CE`.
 
-- Xếp hạng toàn hệ thống
-- Xếp hạng theo ngôn ngữ
-- Thống kê cá nhân
-- Redis Cache tăng hiệu năng
+### Thách Đấu Realtime
 
----
+- Tạo phòng đấu công khai hoặc có mật khẩu.
+- Mã phòng random để tìm/join nhanh.
+- Join/leave phòng realtime.
+- Chủ phòng có quyền mời bạn bè và kick người trong hàng chờ.
+- Ready/start trận.
+- Đồng hồ đếm ngược, submit bài và bảng xếp hạng realtime.
+- Gửi lời mời vào chat thế giới để người khác click vào phòng.
 
-## 🛠️ Admin Panel
+### Chat Và Bạn Bè
 
-- Dashboard thống kê
-- Quản lý User
-- Ban / Unban User
-- Quản lý Problem
-- Publish / Unpublish Problem
-- Quản lý Test Cases
-- Quản lý Difficulty
-- Quản lý Topic
+- Chat global realtime.
+- Nhắn tin riêng với bạn bè.
+- Hiển thị số tin nhắn mới.
+- Danh sách bạn bè, trạng thái online/offline.
+- Gửi/chấp nhận/từ chối lời mời kết bạn.
+- Kết bạn qua tìm kiếm, chat thế giới hoặc phòng thách đấu.
 
----
+### Bảng Xếp Hạng Và Thống Kê
 
-# 🏗️ Kiến Trúc Hệ Thống
+- Bảng xếp hạng kỳ thi.
+- Thống kê cá nhân.
+- Activity calendar.
+- Cache Redis để tăng tốc truy vấn leaderboard.
 
-```
-                    React + Vite
-                         │
-              REST API / WebSocket
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
- Spring Boot API                 WebSocket Service
-        │                                 │
-        └──────────────┬──────────────────┘
-                       │
-                    Redis Pub/Sub
-                       │
-                 Judge Service
-                       │
-                    Judge0 API
-                       │
-                  PostgreSQL
-```
+### Admin
+
+- Dashboard thống kê hệ thống.
+- Quản lý người dùng.
+- Ban/unban tài khoản.
+- Quản lý đề bài.
+- Tạo/sửa/xóa/publish problem.
+- Quản lý test cases, độ khó và chủ đề.
 
 ---
 
-# 💻 Tech Stack
+## Công Nghệ Sử Dụng
 
-## Frontend
+### Frontend
 
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS 4
-- React Router
-- TanStack React Query
-- Zustand
+- Node.js 20
+- React 19.2.7
+- TypeScript 6.0.2
+- Vite 8.1.1
+- Tailwind CSS 4.3.2
+- React Router DOM 7.18.1
+- TanStack React Query 5.101.2
+- Zustand 5.0.14
+- Axios 1.18.1
+- Socket.IO Client 4.8.3
 - Monaco Editor
-- Socket.IO Client
 - Lucide React
 
----
-
-## Backend
+### Backend
 
 - Java 21
-- Spring Boot 3
+- Spring Boot 4.1.0
 - Spring Security
-- JWT Authentication
-- OAuth2 Client
-- Spring Data JPA
-- Hibernate
-- PostgreSQL
+- Spring Data JPA / Hibernate
+- PostgreSQL 16
+- Redis 7
 - Flyway
-- Redis
+- JWT `jjwt 0.12.5`
+- OAuth2 Client
 - Bucket4j
 - SpringDoc OpenAPI
-- JUnit
-- Mockito
-- MockMvc
+- JUnit, Mockito, MockMvc
 
----
+### Realtime Service
 
-## Realtime
-
-- Node.js
+- Node.js 20
 - TypeScript
-- Socket.IO
+- Express 5.2.1
+- Socket.IO 4.8.3
 - Redis Pub/Sub
 
----
+### Judge Service
 
-## Judge
-
-- Node.js
+- Node.js 20
+- TypeScript
 - Bull Queue
-- Judge0
+- Axios
+- Judge0 1.13.1
 
----
-
-## DevOps
+### DevOps
 
 - Docker
 - Docker Compose
@@ -212,81 +169,97 @@ Kết quả chấm bài hỗ trợ:
 
 ---
 
-# 📂 Cấu Trúc Dự Án
+## Kiến Trúc Hệ Thống
+
+```text
+Frontend React + Vite
+        |
+        | REST API / WebSocket
+        |
+Backend Spring Boot  <------ Redis Pub/Sub ------>  WebSocket Service
+        |
+        | REST / Queue
+        |
+Judge Service  ------>  Judge0
+        |
+PostgreSQL + Redis
+```
+
+Backend Java Spring Boot xử lý nghiệp vụ chính như auth, học tập, kỳ thi, battle, bạn bè, leaderboard và admin. Node.js được dùng cho realtime service và judge queue để hệ thống nhẹ, dễ tách luồng realtime khỏi nghiệp vụ chính.
+
+---
+
+## Cấu Trúc Dự Án
 
 ```text
 vpt-code-arena/
 ├── backend/                # Spring Boot REST API
 ├── frontend/               # React + Vite
-├── websocket-service/      # Socket.IO Service
-├── judge-service/          # Judge Queue Worker
-├── infrastructure/         # Docker Compose
-├── docs/                   # Documentation
-└── .github/workflows/      # CI/CD
+├── websocket-service/      # Socket.IO realtime service
+├── judge-service/          # Judge queue worker
+├── infrastructure/         # Docker Compose, Judge0 config
+├── docs/                   # Tài liệu thiết kế/triển khai
+├── img/                    # Ảnh minh họa giao diện README
+└── .github/workflows/      # CI
 ```
 
 ---
 
-# ⚙️ Yêu Cầu
+## Yêu Cầu Cài Đặt
 
 - Java JDK 21
-- Node.js 18+
+- Node.js 20
 - Docker Desktop
 - PostgreSQL
 - Redis
 
-Khuyến nghị sử dụng Docker Compose để khởi động PostgreSQL, Redis và Judge0.
+Khuyến nghị dùng Docker Compose để chạy PostgreSQL, Redis và Judge0.
 
 ---
 
-# 🚀 Chạy Dự Án
+## Chạy Dự Án
 
-## 1. Clone Repository
+### 1. Clone repository
 
 ```bash
 git clone https://github.com/cuongherok4/vpt-code-arena.git
 cd vpt-code-arena
 ```
 
----
-
-## 2. Khởi động hạ tầng
+### 2. Khởi động hạ tầng
 
 ```bash
 cd infrastructure
 docker compose up -d
 ```
 
----
-
-## 3. Backend
+### 3. Chạy Backend
 
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
-Windows
+Trên Windows:
 
 ```powershell
+cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-Backend
+Backend chạy tại:
 
-```
+```text
 http://localhost:8080
 ```
 
-Swagger
+Swagger:
 
-```
+```text
 http://localhost:8080/swagger-ui.html
 ```
 
----
-
-## 4. Frontend
+### 4. Chạy Frontend
 
 ```bash
 cd frontend
@@ -294,13 +267,13 @@ npm install
 npm run dev
 ```
 
-```
+Frontend chạy tại:
+
+```text
 http://localhost:5173
 ```
 
----
-
-## 5. WebSocket Service
+### 5. Chạy WebSocket Service
 
 ```bash
 cd websocket-service
@@ -308,9 +281,7 @@ npm install
 npm run dev
 ```
 
----
-
-## 6. Judge Service
+### 6. Chạy Judge Service
 
 ```bash
 cd judge-service
@@ -320,16 +291,16 @@ npm run dev
 
 ---
 
-# ✅ Testing
+## Kiểm Tra
 
-## Backend
+### Backend
 
 ```bash
 cd backend
 ./mvnw test
 ```
 
-## Frontend
+### Frontend
 
 ```bash
 cd frontend
@@ -337,17 +308,38 @@ npm run build
 npm run lint
 ```
 
+### WebSocket Service
+
+```bash
+cd websocket-service
+npm run build
+```
+
+### Judge Service
+
+```bash
+cd judge-service
+npm run build
+```
+
 ---
 
-# 📌 Lưu Ý
+## Lưu Ý
 
 - Không commit file `.env`.
-- Không commit JWT Secret, OAuth Secret, Mail Password.
-- Tài khoản Admin cần được cấp role `ADMIN` trong database.
-- Sau khi đổi role, người dùng cần đăng nhập lại để JWT được cập nhật.
+- Không commit JWT secret, OAuth secret hoặc mail password.
+- Tài khoản admin cần được cấp role `ADMIN` trong database.
+- Sau khi đổi role, người dùng cần đăng nhập lại để JWT chứa role mới.
+- Nếu reset volume Judge0, cần áp dụng lại cấu hình Java runtime trong `infrastructure/judge0-java-runtime.sql`.
 
 ---
 
-# 📄 License
+## Trạng Thái Hiện Tại
 
-Distributed under the **MIT License**.
+Hệ thống đã hoàn thiện ở mức MVP/demo với các module chính: auth, học tập, kỳ thi, thách đấu realtime, chat, bạn bè, leaderboard và admin. Các bước còn nên hoàn thiện thêm trước production gồm E2E test, load test, security audit, monitoring và deployment production.
+
+---
+
+## License
+
+MIT License.

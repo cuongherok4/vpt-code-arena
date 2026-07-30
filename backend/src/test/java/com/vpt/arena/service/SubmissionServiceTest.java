@@ -43,6 +43,7 @@ class SubmissionServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private RestTemplate restTemplate;
     @Mock private LeaderboardService leaderboardService;
+    @Mock private UserStatsService userStatsService;
 
     @InjectMocks
     private SubmissionService submissionService;
@@ -54,7 +55,7 @@ class SubmissionServiceTest {
         ReflectionTestUtils.setField(submissionService, "judge0PollIntervalMs", 1L);
         ReflectionTestUtils.setField(submissionService, "judge0TimeoutMs", 1000L);
         ReflectionTestUtils.setField(submissionService, "judge0DefaultMemoryLimitKb", 256000);
-        ReflectionTestUtils.setField(submissionService, "judge0JavaMemoryLimitKb", 2048000);
+        ReflectionTestUtils.setField(submissionService, "judge0JavaMemoryLimitKb", 524288);
         ReflectionTestUtils.setField(submissionService, "judge0JavaMaxProcessesAndThreads", 512);
     }
 
@@ -138,6 +139,7 @@ class SubmissionServiceTest {
         UUID submissionId = UUID.randomUUID();
         Submission submission = new Submission();
         submission.setId(submissionId);
+        submission.setUser(user(UUID.randomUUID()));
         submission.setProblem(problem(UUID.randomUUID(), true));
         submission.setLanguage("python");
         submission.setResult(JudgeResult.PENDING);
@@ -160,5 +162,7 @@ class SubmissionServiceTest {
         assertThat(dto.getMemoryUsed()).isEqualTo(2048);
         assertThat(dto.getOutput()).isEqualTo("ok\n");
         verify(leaderboardService).evictExamLeaderboard(submission.getProblem().getId(), "python");
+        verify(leaderboardService).evictGlobalLeaderboard("python");
+        verify(userStatsService).refreshAfterAccepted(submission.getUser().getId());
     }
 }
