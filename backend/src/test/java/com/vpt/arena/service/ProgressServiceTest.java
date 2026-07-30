@@ -55,7 +55,7 @@ class ProgressServiceTest {
         ReflectionTestUtils.setField(progressService, "judge0PollIntervalMs", 1L);
         ReflectionTestUtils.setField(progressService, "judge0TimeoutMs", 1000L);
         ReflectionTestUtils.setField(progressService, "judge0DefaultMemoryLimitKb", 256000);
-        ReflectionTestUtils.setField(progressService, "judge0JavaMemoryLimitKb", 2048000);
+        ReflectionTestUtils.setField(progressService, "judge0JavaMemoryLimitKb", 524288);
         ReflectionTestUtils.setField(progressService, "judge0JavaMaxProcessesAndThreads", 512);
     }
 
@@ -257,7 +257,7 @@ class ProgressServiceTest {
             verify(restTemplate).postForEntity(anyString(), captor.capture(), eq(String.class));
 
             var root = objectMapper.readTree(captor.getValue().getBody());
-            assertThat(root.get("memory_limit").asInt()).isEqualTo(2048000);
+            assertThat(root.get("memory_limit").asInt()).isEqualTo(524288);
         }
 
         @Test
@@ -276,8 +276,10 @@ class ProgressServiceTest {
             var root = objectMapper.readTree(captor.getValue().getBody());
             assertThat(root.get("max_processes_and_or_threads").asInt()).isEqualTo(512);
             assertThat(root.get("compiler_options").asText())
-                .contains("-J-Xmx256m")
-                .contains("-J-XX:MaxMetaspaceSize=256m");
+                .contains("-J-Xmx192m")
+                .contains("-J-Xss256k")
+                .contains("-J-XX:MaxMetaspaceSize=96m")
+                .contains("-J-XX:-UsePerfData");
         }
 
         @Test
