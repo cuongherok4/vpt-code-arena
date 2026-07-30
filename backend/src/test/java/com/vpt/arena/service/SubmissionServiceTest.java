@@ -55,7 +55,7 @@ class SubmissionServiceTest {
         ReflectionTestUtils.setField(submissionService, "judge0PollIntervalMs", 1L);
         ReflectionTestUtils.setField(submissionService, "judge0TimeoutMs", 1000L);
         ReflectionTestUtils.setField(submissionService, "judge0DefaultMemoryLimitKb", 256000);
-        ReflectionTestUtils.setField(submissionService, "judge0JavaMemoryLimitKb", 2048000);
+        ReflectionTestUtils.setField(submissionService, "judge0JavaMemoryLimitKb", 524288);
         ReflectionTestUtils.setField(submissionService, "judge0JavaMaxProcessesAndThreads", 512);
     }
 

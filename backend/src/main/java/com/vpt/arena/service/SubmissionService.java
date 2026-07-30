@@ -61,7 +61,7 @@ public class SubmissionService {
     private long judge0TimeoutMs;
     @Value("${judge0.default-memory-limit-kb:256000}")
     private int judge0DefaultMemoryLimitKb;
-    @Value("${judge0.java-memory-limit-kb:2048000}")
+    @Value("${judge0.java-memory-limit-kb:524288}")
     private int judge0JavaMemoryLimitKb;
     @Value("${judge0.java-max-processes-and-threads:512}")
     private int judge0JavaMaxProcessesAndThreads;
@@ -196,7 +196,7 @@ public class SubmissionService {
         body.put("enable_per_process_and_thread_memory_limit", true);
         if (isJava(languageId)) {
             body.put("max_processes_and_or_threads", judge0JavaMaxProcessesAndThreads);
-            body.put("compiler_options", "-J-Xmx256m -J-XX:MaxMetaspaceSize=256m -J-XX:+UseSerialGC -J-XX:ActiveProcessorCount=1");
+            body.put("compiler_options", "-J-Xmx192m -J-Xss256k -J-XX:MaxMetaspaceSize=96m -J-XX:CompressedClassSpaceSize=32m -J-XX:+UseSerialGC -J-XX:ActiveProcessorCount=1 -J-XX:-UsePerfData");
         }
 
         HttpHeaders headers = new HttpHeaders();

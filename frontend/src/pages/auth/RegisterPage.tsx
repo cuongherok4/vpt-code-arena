@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, UserPlus, Code2, Zap, Trophy, BookOpen, ArrowRight, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Zap, Trophy, BookOpen, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { LogoImage } from '@/components/common/LogoImage';
 
 const perks = [
   { icon: BookOpen, text: 'Lộ trình học Java, C, Python chuyên sâu' },
@@ -47,20 +48,17 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-stretch">
       {/* ── Left Panel — Branding ── */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-10 lg:flex lg:w-[45%]">
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-white/10 bg-slate-950/70 p-10 lg:flex lg:w-[45%]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-0 top-0 h-[400px] w-[400px] -translate-x-1/3 -translate-y-1/3 rounded-full bg-indigo-500/10 blur-[100px]" />
-          <div className="absolute bottom-0 right-0 h-[300px] w-[300px] translate-x-1/3 translate-y-1/3 rounded-full bg-teal-500/10 blur-[80px]" />
+          <div className="absolute left-0 top-0 h-[400px] w-[400px] -translate-x-1/3 -translate-y-1/3 rounded-full bg-cyan-300/10 blur-[100px]" />
+          <div className="absolute bottom-0 right-0 h-[300px] w-[300px] translate-x-1/3 translate-y-1/3 rounded-full bg-amber-300/10 blur-[80px]" />
         </div>
-        <div className="hero-grid pointer-events-none absolute inset-0 opacity-30" />
+        <div className="hero-grid pointer-events-none absolute inset-0 opacity-40" />
 
         <Link to="/" className="relative flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-teal-400/25 bg-teal-400/10 text-teal-300">
-            <Code2 className="h-5 w-5" />
-          </span>
-          <span className="text-lg font-bold">
-            <span className="gradient-text">VPT</span>
-            <span className="text-white"> Arena</span>
+          <LogoImage eager alt="VPT" className="h-10 w-auto object-contain" />
+          <span className="text-base font-bold text-white">
+            Code <span className="text-cyan-300">Arena</span>
           </span>
         </Link>
 
@@ -74,7 +72,7 @@ export default function RegisterPage() {
           <ul className="space-y-4">
             {perks.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-3 text-sm text-slate-300">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-400/10 text-indigo-400">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
                   <Icon className="h-4 w-4" />
                 </span>
                 {text}
@@ -83,7 +81,7 @@ export default function RegisterPage() {
           </ul>
         </div>
 
-        <p className="relative text-xs text-slate-600">© 2026 VPT Code Arena. All rights reserved.</p>
+        <p className="relative text-xs text-slate-500">© 2026 VPT Code Arena. All rights reserved.</p>
       </div>
 
       {/* ── Right Panel — Form ── */}
@@ -91,10 +89,8 @@ export default function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-teal-400/25 bg-teal-400/10 text-teal-300">
-              <Code2 className="h-4 w-4" />
-            </span>
-            <span className="font-bold"><span className="gradient-text">VPT</span><span className="text-white"> Arena</span></span>
+            <LogoImage eager alt="VPT" className="h-8 w-auto object-contain" />
+            <span className="text-sm font-bold text-white">Code <span className="text-cyan-300">Arena</span></span>
           </Link>
 
           <h1 className="mb-1 text-2xl font-black text-white">Tạo tài khoản</h1>
@@ -135,7 +131,7 @@ export default function RegisterPage() {
             {/* Password */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-300">Mật khẩu</label>
-              <div className="flex items-center rounded-[10px] border border-white/[0.09] bg-[rgba(2,6,23,0.7)] transition-all duration-200 focus-within:border-teal-400/40 focus-within:shadow-[0_0_0_3px_rgba(45,212,191,0.1)]">
+              <div className="flex items-center rounded-lg border border-white/10 bg-slate-950/75 shadow-sm transition-all duration-200 focus-within:border-cyan-300/45 focus-within:shadow-[0_0_0_3px_rgba(45,212,191,0.12)]">
                 <input
                   id="register-password"
                   className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500"
@@ -151,7 +147,7 @@ export default function RegisterPage() {
                   type="button"
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center text-slate-500 hover:text-slate-200 transition-colors"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center text-slate-500 transition-colors hover:text-white"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -186,10 +182,10 @@ export default function RegisterPage() {
             )}
 
             {/* Terms */}
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs leading-relaxed text-slate-500">
               Bằng cách đăng ký, bạn đồng ý với{' '}
-              <span className="text-teal-500">Điều khoản dịch vụ</span> và{' '}
-              <span className="text-teal-500">Chính sách bảo mật</span> của chúng tôi.
+              <span className="text-cyan-300">Điều khoản dịch vụ</span> và{' '}
+              <span className="text-cyan-300">Chính sách bảo mật</span> của chúng tôi.
             </p>
 
             {/* Submit */}
@@ -197,7 +193,7 @@ export default function RegisterPage() {
               id="register-submit"
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-900/25 transition-all duration-200 hover:shadow-indigo-500/30 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+              className="app-button app-button-primary mt-2 w-full py-3"
             >
               <UserPlus className="h-4 w-4" />
               {loading ? 'Đang xử lý...' : 'Đăng ký miễn phí'}
@@ -207,16 +203,16 @@ export default function RegisterPage() {
           {/* Benefits pills */}
           <div className="mt-5 flex flex-wrap gap-2">
             {['Miễn phí 100%', 'Không cần thẻ tín dụng', 'Bắt đầu ngay'].map((b) => (
-              <span key={b} className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[11px] text-slate-500">
-                <CheckCircle className="h-2.5 w-2.5 text-teal-500" />
+              <span key={b} className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-slate-400">
+                <CheckCircle className="h-2.5 w-2.5 text-cyan-300" />
                 {b}
               </span>
             ))}
           </div>
 
-          <p className="mt-6 text-sm text-slate-500">
+          <p className="mt-6 text-sm text-slate-400">
             Đã có tài khoản?{' '}
-            <Link className="font-semibold text-teal-400 hover:text-teal-300 transition-colors inline-flex items-center gap-1" to="/login">
+            <Link className="inline-flex items-center gap-1 font-semibold text-cyan-300 transition-colors hover:text-cyan-100" to="/login">
               Đăng nhập <ArrowRight className="h-3 w-3" />
             </Link>
           </p>
